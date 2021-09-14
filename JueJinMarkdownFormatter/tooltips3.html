@@ -1,0 +1,56 @@
+<!--
+ * @Descripttion: 
+ * @version: 
+ * @Author: LiarCoder
+ * @Date: 2021-09-02 23:28:39
+ * @LastEditors: LiarCoder
+ * @LastEditTime: 2021-09-03 13:24:11
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>tooltip3</title>
+  <style>
+    #desc1 {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <ul role="group">
+    <li role="checkbox" aria-checked="mixed" tabindex="0">所有姑娘</li>
+    <li role="checkbox" aria-checked="false" aria-describedby="desc1" tabindex="0">晴川</li>
+  </ul>
+  <p id="desc1">杨幂饰演的穿越女王</p>
+  <script type="text/javascript">
+    const target = document.querySelector('[aria-describedby="desc1"]');
+    const tip = document.getElementById('desc1');
+    target.onmouseover = function () {
+      tip.style.display = 'block';
+    }
+    target.onmouseleave = function () {
+      tip.style.display = 'none';
+    }
+  </script> -->
+  
+  <ul>
+    <li aria-describedby="desc1">按钮</li>
+  </ul>
+  <p id="desc1">提示</p>
+  <script type="text/javascript">
+    const target = document.querySelector('[aria-describedby="desc1"]');
+    const tip = document.getElementById('desc1');
+    target.onmouseover = function () {
+      tip.style.display = 'block';
+    }
+    target.onmouseleave = function () {
+      tip.style.display = 'none';
+    }
+  </script>
+</body>
+
+</html>

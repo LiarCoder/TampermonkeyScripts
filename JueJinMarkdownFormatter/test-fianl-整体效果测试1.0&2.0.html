@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>整体效果测试1.0&2.0</title>
+
+</head>
+
+<body>
+  <div id="importcase"></div>
+  <div>
+    <p id="showcase">文件内容</p>
+  </div>
+  <script>
+    // 该函数用于创建一个<eleName k="attrs[k]">text</eleName>样式的页面元素
+    function createEle(eleName, text, attrs) {
+      let ele = document.createElement(eleName);
+      // innerText 也就是 <p>text会被添加到这里</p>
+      ele.innerText = text;
+      // attrs 的类型是一个 map
+      for (let k in attrs) {
+        // 遍历 attrs, 给节点 ele 添加我们想要的属性
+        ele.setAttribute(k, attrs[k]);
+      }
+      // 返回节点
+      return ele;
+    }
+
+    const importTag = createEle('input', '', {
+      id: 'juejin-enhancer-import-md-file',
+      accept: '.md',
+      type: 'file',
+      style: 'display: none'
+    });
+
+    const importLabel = createEle('label', '', {
+      for: 'juejin-enhancer-import-md-file',
+      style: `display: inline-block;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        margin: 0 6px;
+        background-image: url(https://i.loli.net/2021/08/30/SH5kMUjyAFqDn2V.png);
+        background-size: 24px 24px;
+        background-color: white !important;
+        border-radius: 4px;`
+    });
+
+    setTimeout(() => {
+      let importcase = document.getElementById('importcase');
+      importcase.appendChild(importLabel);
+      importcase.appendChild(importTag);
+
+      const showcase = document.getElementById('showcase');
+
+      if (window.FileList && window.File && window.FileReader) {
+        document.getElementById('juejin-enhancer-import-md-file').addEventListener('change', event => {
+          showcase.innerText = '';
+          const file = event.target.files[0];
+          //#region 
+          // if (!file.type) {
+          //   status.textContent = 'Error: The File.type property does not appear to be supported on this browser.';
+          //   return;
+          // }
+          // if (!file.type.match('image.*')) {
+          // if (!file.type.match('.txt')) {
+          //   status.textContent = 'Error: The selected file does not appear to be an image.'
+          //   return;
+          // }
+          //#endregion
+          const reader = new FileReader();
+          reader.addEventListener('load', event => {
+            let content = event.target.result;
+            console.log(typeof event.target.result);
+
+            //#region 
+            // 替换高亮处，将 == 包裹的文本改为用 < mark ></mark > 标签包裹
+            let reg = new RegExp('==[^==]*==', 'g');  // 这个正则表达式也是可以实现功能的，但下面的更通用
+            let highLightReplace = content.match(/==(?:(?!(==)).)*==/g);
+            // console.log(highLightReplace, `共有${highLightReplace.length}处高亮`);
+            for (let i = 0; i < highLightReplace.length; i++) {
+              highLightReplace[i] = '<mark>' + highLightReplace[i].substr(highLightReplace[i].indexOf('==') + 2, highLightReplace[i].lastIndexOf('==') - 2) + '</mark>';
+            }
+            for (let i = 0; i < highLightReplace.length; i++) {
+              content = content.replace(/==(?:(?!(==)).)*==/, highLightReplace[i]);
+            }
+
+            // 替换图片链接格式，将 ![]() 包裹的图片改为用 <div align="center"><img src=""></div> 标签包裹 
+            let imgReplace = content.match(/!\[.*\]\(.*\)/g);
+            for (let i = 0; i < imgReplace.length; i++) {
+              let imgLink = imgReplace[i].slice(imgReplace[i].indexOf('(') + 1, imgReplace[i].lastIndexOf(')'));
+              imgReplace[i] = `<div align="center"><img src="${imgLink}"></div>`;
+            }
+            for (let i = 0; i < imgReplace.length; i++) {
+              content = content.replace(/!\[.*\]\(.*\)/, imgReplace[i]);
+            }
+
+            // 替换居中格式，将 <center></center> 包裹的内容改为用 <div align="center"></div> 标签包裹
+            let centerReplace = content.match(/<center>.*<\/center>/g);
+            for (let i = 0; i < centerReplace.length; i++) {
+              let centerContent = centerReplace[i].slice(centerReplace[i].indexOf('>') + 1, centerReplace[i].lastIndexOf('<'));
+              centerReplace[i] = `<div align="center">${centerContent}</div>`;
+            }
+            for (let i = 0; i < centerReplace.length; i++) {
+              content = content.replace(/<center>.*<\/center>/, centerReplace[i]);
+            }
+            // console.log(content);
+            //#endregion
+
+            showcase.innerText = content;
+          });
+
+          // reader.readAsDataURL(file);
+          reader.readAsText(file);
+          // 2021年8月30日01:05:44成功实现读取文件并修改的操作。
+          // let inputCase = document.querySelector('#juejin-web-editor > div.edit-draft > div > div > div > div.bytemd-body > div.bytemd-editor > div > div.CodeMirror-scroll > div.CodeMirror-sizer > div > div > div > div.CodeMirror-code > pre');
+        });
+      }
+    }, 1000);
+  </script>
+</body>
+
+</html>

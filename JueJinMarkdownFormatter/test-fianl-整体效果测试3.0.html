@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>整体效果测试3.0</title>
+
+</head>
+
+<body>
+  <div id="importcase"></div>
+  <div>
+    <p id="showcase">文件内容</p>
+  </div>
+  <script>
+    /**
+   * @description: 该函数用于创建一个<eleName k="attrs[k]">text</eleName>样式的页面元素
+   * @param {string} eleName DOM元素标签类型
+   * @param {string} text  DOM元素内部文本
+   * @param {object} attrs DOM元素属性配置
+   * @return {HTMLElement} 返回一个DOM节点
+   */
+    function createEle(eleName, text, attrs) {
+      let ele = document.createElement(eleName);
+      // innerText 也就是 <p>text会被添加到这里</p>
+      ele.innerText = text;
+      // attrs 的类型是一个 map
+      for (let k in attrs) {
+        // 遍历 attrs, 给节点 ele 添加我们想要的属性
+        ele.setAttribute(k, attrs[k]);
+      }
+      // 返回节点
+      return ele;
+    }
+
+    /**
+     * @description: 该函数用于截取目标字符串 target 中在指定的开始子串 startStr 和 结束子串 endStr 之间的字符串
+     * @param {string} target  目标字符串
+     * @param {string} startStr  开始子串
+     * @param {string} endStr 结束子串
+     * @return {string} 所截取的子串
+     */
+    function getSubStr(target, startStr, endStr) {
+      let startPos = target.indexOf(startStr) + startStr.length;
+      let endPos;
+      if (startStr === endStr) {
+        endPos = target.lastIndexOf(endStr);
+      } else {
+        endPos = target.indexOf(endStr);
+      }
+      return target.substring(startPos, endPos);
+    }
+
+    /**
+     * @description: 该函数封装了替换原Markdown文档中相关文本的功能
+     * @param {string} target  待处理的目标文本内容
+     * @param {string} reg 正则表达式
+     * @param {string} wrapperHead 预期的包装头
+     * @param {string} wrapperTail 预期的包装尾
+     * @param {string} startStr  截取内容时的开始子串
+     * @param {string} endStr  截取内容时的结束子串
+     * @return {undefined} 没有特别指定返回值
+     */
+    function replaceText(target, reg, wrapperHead, wrapperTail, startStr, endStr) {
+      let replacement = target.match(new RegExp(reg, 'g'));
+      if (!replacement) {
+        return target;
+      }
+      for (let i = 0; i < replacement.length; i++) {
+          let content = getSubStr(replacement[i], startStr, endStr);
+          let imgDescription = '';
+          // 判断当前匹配的是否为Markdown中的图片
+          if (reg === '!\\[.*\\]\\(.*\\)') {
+            imgDescription = `<div align="center">${getSubStr(replacement[i], '[', ']')}</div><br>`;
+          }
+          replacement[i] = wrapperHead + content + wrapperTail + imgDescription;
+        }
+        for (let i = 0; i < replacement.length; i++) {
+          target = target.replace(new RegExp(reg), replacement[i]);
+        }
+      // console.log(target);
+      return target;
+    }
+
+    const inputTag = createEle('input', '', {
+      id: 'juejin-enhancer-import-md-file',
+      accept: '.md',
+      type: 'file',
+      style: 'display: none'
+    });
+
+    const importLabel = createEle('label', '', {
+      for: 'juejin-enhancer-import-md-file',
+      class: 'bytemd-toolbar-icon',
+      'data-title': '导入Markdown文档'
+    });
+
+    let tooltipStyle = `label[for="juejin-enhancer-import-md-file"] {
+      vertical-align: middle;
+      cursor: pointer;
+    }
+
+    [data-title] {
+      position: relative;
+      overflow: visible;
+    }
+
+    label[for="juejin-enhancer-import-md-file"]:before,
+    label[for="juejin-enhancer-import-md-file"]:after {
+      display: block;
+      position: fixed;
+      opacity: 0;
+      transition: .15s .15s;
+      visibility: hidden;
+    }
+
+    label[for="juejin-enhancer-import-md-file"]:before {
+      content: attr(data-title);
+      z-index: 2;
+      transform: translate(-53px, -36px);
+      border-radius: 5px;
+      padding: 5px 10px;
+      line-height: 16px;
+      text-align:center;
+      background-color: #333333;
+      color: #fff;
+      font-size: 12px;
+      font-style: normal;
+      white-space: nowrap;
+    }
+
+    label[for="juejin-enhancer-import-md-file"]:after {
+      content: '';
+      z-index: 1;
+      transform: translate(2px, -38px);
+      width: 0;
+      height: 0;
+      margin-bottom: -12px;
+      overflow: hidden;
+      border: 10px solid transparent;
+      border-top-color: #333333;
+    }
+
+    label[for="juejin-enhancer-import-md-file"]:hover:before,
+    label[for="juejin-enhancer-import-md-file"]:hover:after {
+      visibility: visible;
+      opacity: 1;
+    }`;
+
+    const tooltipStyleTag = createEle('style', tooltipStyle, {
+      type: "text/css"
+    });
+
+    // 把原本的图片换成了 svg ，这样就能和原本的其他图标一样适应白天模式和暗黑模式
+    importLabel.innerHTML = `<?xml version="1.0" encoding="UTF-8"?>
+    <svg width="12" height="12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="48" height="48" fill="white" fill-opacity="0.01"></rect>
+      <path d="M6 24.0083V42H42V24" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M33 23L24 32L15 23" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M23.9917 6V32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>`;
+
+    // 设置定时器是为了防止文档中还未加载出相关的元素
+    setTimeout(() => {
+      let importcase = document.getElementById('importcase');
+      importcase.appendChild(importLabel);
+      importcase.appendChild(inputTag);
+      importcase.appendChild(tooltipStyleTag);
+
+      // 本来是想直接把处理好的文本内容放到编辑器中对应的节点的，虽然确实可以把文本塞进去，但是似乎没法达到预期的效果
+      // const inputCase = document.querySelector('#juejin-web-editor > div.edit-draft > div > div > div > div.bytemd-body > div.bytemd-editor > div > div.CodeMirror-scroll > div.CodeMirror-sizer > div > div > div > div.CodeMirror-code > pre');
+      if (window.FileList && window.File && window.FileReader) {
+        document.getElementById('juejin-enhancer-import-md-file').addEventListener('change', event => {
+          const file = event.target.files[0];
+          const reader = new FileReader();
+          reader.addEventListener('load', event => {
+            let content = event.target.result;
+
+            // 替换高亮处，将 == 包裹的文本改为用 <mark></mark> 标签包裹
+            // 更新：2021年9月1日17:08:05，用 ==.*?== 这个正则表达式也能达到相同的效果
+            // let reg = new RegExp('==[^==]*==','g');  // 这个正则表达式也是可以实现功能的，但下面的更通用
+            //#region 
+            // let highLightReplace = content.match(/==(?:(?!(==)).)*==/g);
+            // // console.log(highLightReplace, `共有${highLightReplace.length}处高亮`);
+            // for (let i = 0; i < highLightReplace.length; i++) {
+            //   let highLightContent = highLightReplace[i].substr(highLightReplace[i].indexOf('==') + 2, highLightReplace[i].lastIndexOf('==') - 2);
+            //   highLightReplace[i] = `<mark>${highLightContent}</mark>`;
+            // }
+            // for (let i = 0; i < highLightReplace.length; i++) {
+            //   content = content.replace(/==(?:(?!(==)).)*==/, highLightReplace[i]);
+            // }
+            //#endregion
+
+            content = replaceText(content, '==.*?==', '<mark>', '</mark>', '==', '==');
+
+            // 替换图片链接格式，将 ![]() 包裹的图片改为用 <div align="center"><img src=""></div> 标签包裹 
+            //#region 
+            // let imgReplace = content.match(/!\[.*\]\(.*\)/g);
+            // for (let i = 0; i < imgReplace.length; i++) {
+            //   let imgLink = imgReplace[i].slice(imgReplace[i].indexOf('(') + 1, imgReplace[i].lastIndexOf(')'));
+            //   imgReplace[i] = `<div align="center"><img src="${imgLink}"></div>`;
+            // }
+            // for (let i = 0; i < imgReplace.length; i++) {
+            //   content = content.replace(/!\[.*\]\(.*\)/, imgReplace[i]);
+            // }
+            //#endregion
+
+            content = replaceText(content, '!\\[.*\\]\\(.*\\)', '<div align="center"><img src="', '"></div>', '(', ')');
+
+            // 替换居中格式，将 <center></center> 包裹的内容改为用 <div align="center"></div> 标签包裹
+            //#region 
+            // let centerReplace = content.match(/<center>.*<\/center>/g);
+            // for (let i = 0; i < centerReplace.length; i++) {
+            //   let centerContent = centerReplace[i].slice(centerReplace[i].indexOf('>') + 1, centerReplace[i].lastIndexOf('<'));
+            //   centerReplace[i] = `<div align="center">${centerContent}</div>`;
+            // }
+            // for (let i = 0; i < centerReplace.length; i++) {
+            //   content = content.replace(/<center>.*<\/center>/, centerReplace[i]);
+            // }
+            //#endregion
+
+            content = replaceText(content, '<center>.*<\\/center>', '<div align="center">', '</div>', '<center>', '</center>');
+
+            // inputCase.innerText = content;
+            // 因为直接往上面的 inputCase 里放文本内容的话，掘金的Markdown编辑器没法儿按预期效果解析，所以直接把处理好的内容放到剪切板里
+            // navigator.clipboard.writeText(content);
+            showcase.innerText = content;
+            // 【更新：2021年9月2日02:42:29】没想到这个正则表达式搞了我这么久……
+            let contentTitle = content.match(/#\s.*/g);
+            console.log(contentTitle);
+            console.log(contentTitle[0].substr(2));
+            alert('文档处理完毕，请在编辑区按下 Ctrl + V 粘贴内容');
+          });
+          // reader.readAsDataURL(file);
+          reader.readAsText(file);
+          // 2021年8月30日01:05:44成功实现读取文件并修改的操作。
+        });
+      }
+    }, 1000);
+  </script>
+</body>
+
+</html>

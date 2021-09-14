@@ -1,0 +1,82 @@
+<!--
+ * @Descripttion: 测试封装函数的功能
+ * @version: 1.0
+ * @Author: LiarCoder
+ * @Date: 2021-09-01 18:47:23
+ * @LastEditors: LiarCoder
+ * @LastEditTime: 2021-09-01 23:49:32
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试封装函数的功能</title>
+</head>
+
+<body>
+  <script type="text/javascript">
+    /**
+     * @name: 
+     * @description: 该函数用于截取目标字符串 target 中在指定的开始子串 startStr 和 结束子串 endStr 之间的字符串
+     * @param {string} target  目标字符串
+     * @param {string} startStr  开始子串
+     * @param {string} endStr 结束子串
+     * @return {string} 所截取的子串
+     */
+    function getSubStr(target, startStr, endStr) {
+      let startPos = target.indexOf(startStr) + startStr.length;
+      let endPos;
+      if (startStr === endStr) {
+        endPos = target.lastIndexOf(endStr);
+      } else {
+        endPos = target.indexOf(endStr);
+      }
+      return target.substring(startPos, endPos);
+    }
+    console.log(getSubStr('==高亮文本==', '==', '==')); // 通过
+    console.log(getSubStr('![图片描述](图片链接)', '[', ']')); // 通过
+    console.log(getSubStr('![图片描述](图片链接)', '(', ')')); // 通过
+    console.log(getSubStr('<center>居中文本</center>', '<center>', '</center>')); // 通过
+
+    /**
+     * @name: 
+     * @msg: 该函数封装了替换原Markdown文档中相关文本的功能
+     * @param {string} target  待处理的目标文本内容
+     * @param {string} reg 正则表达式
+     * @param {string} wrapperHead 预期的包装头
+     * @param {string} wrapperTail 预期的包装尾
+     * @param {string} startStr  截取内容时的开始子串
+     * @param {string} endStr  截取内容时的结束子串
+     * @return {undefined} 没有特别指定返回值
+     */
+    function replaceText(target, reg, wrapperHead, wrapperTail, startStr, endStr) {
+      let replacement = target.match(new RegExp(reg, 'g'));
+      if (!replacement) {
+        return;
+      }
+      for (let i = 0; i < replacement.length; i++) {
+        let content = getSubStr(replacement[i], startStr, endStr);
+        let imgDescription = '';
+        // 判断当前匹配的是否为Markdown中的图片
+        if (reg === '!\\[.*\\]\\(.*\\)') {
+          imgDescription = `<div align="center">${getSubStr(replacement[i], '[', ']')}</div><br>`;
+        }
+        replacement[i] = wrapperHead + content + wrapperTail + imgDescription;
+      }
+      for (let i = 0; i < replacement.length; i++) {
+        target = target.replace(new RegExp(reg), replacement[i]);
+      }
+      console.log(target);
+    }
+
+    replaceText('==高亮文本==', '==.*?==', '<mark>', '</mark>', '==', '=='); // 通过
+    // replaceText('![图片描述](图片链接)', '!\\[.*\\]\\(.*\\)', '<div align="center">', '</div>', '[', ']'); // 通过
+    // 注意这里对 \ 的转义！！！！！
+    replaceText('![图片描述](图片链接)', '!\\[.*\\]\\(.*\\)', '<div align="center"><img src="', '"></div>', '(', ')'); // 通过
+    replaceText('<center>居中文本</center>', '<center>.*<\\/center>', '<div align="center">', '</div>', '<center>', '</center>'); // 通过
+  </script>
+</body>
+
+</html>

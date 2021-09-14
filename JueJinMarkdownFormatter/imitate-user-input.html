@@ -1,0 +1,87 @@
+<!--
+ * @Descripttion: 
+ * @version: 
+ * @Author: LiarCoder
+ * @Date: 2021-09-03 13:06:41
+ * @LastEditors: LiarCoder
+ * @LastEditTime: 2021-09-03 14:17:02
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>imitate-user-input</title>
+</head>
+
+<body>
+  <!-- 更新：2021年9月3日13:29:26
+       > 参考：[模拟用户输入_Areom个人博客-CSDN博客](https://blog.csdn.net/zhanjianjiu/article/details/78001608)
+  -->
+  <h1>CSDN</h1>
+  <input type="text" id="myTextField" value="Text field.">
+  <input type="text" id="myTextField2" value="Text field.">
+  <p></p>
+  <button id="pubBtn" type="button" onclick="focusMethod()">Click me to focus on the text field!</button>
+  <script type="text/javascript">
+    focusMethod = function getFocus() {
+      document.getElementById("myTextField").focus();
+    }
+  </script>
+
+  <script type="text/javascript">
+    //value1,valus2 为传入值（想要给输入框的值）
+    setTimeout(function () {
+      let value1 = 'biaoti';
+      let value2 = 'BIAOTI';
+      let input1 = document.getElementById("myTextField");//输入框a
+      let input2 = document.getElementById("myTextField2");//输入框b
+      input1.addEventListener('input', function () {
+        console.log('The value is now ' + input1.value);
+      });
+      input2.addEventListener('input', function () {
+        console.log('The value is now ' + input2.value);
+      });
+      let sub = document.getElementById("pubBtn");//提交按钮
+      sub.onclick = function () {
+        console.log(this.innerText);
+      }
+      let even = document.createEvent("HTMLEvents");
+      even.initEvent("input", !1, !0);
+      value1 && (input1.value = value1, input1.dispatchEvent(even));
+      value1 && value2 && (input2.value = value2, input2.dispatchEvent(even));
+      setTimeout(function () {
+        input1.value === value1 && input2.value === value2 ? sub.click() : check(value1, value2)
+      }, 200)
+    }, 1000)
+  </script>
+
+  <!-- 更新：2021年9月3日13:28:01
+       > 参考：[javascript - How do I programmatically trigger an “input” event without jQuery? - Stack Overflow](https://stackoverflow.com/questions/35659430/how-do-i-programmatically-trigger-an-input-event-without-jquery)
+  -->
+  <h1>Stack overflow</h1>
+  <input id="some-input">
+  <br /><br />
+
+  <button id="test">Click to trigger "input"</button>
+  <script type="text/javascript">
+    var element = document.getElementById('some-input');
+    element.addEventListener('input', function () {
+      console.log('The value is now ' + element.value);
+    });
+
+    function triggerInput() {
+      var event = new Event('input', {
+        'bubbles': true,
+        'cancelable': true
+      });
+
+      element.dispatchEvent(event);
+    }
+
+    document.getElementById('test').addEventListener('click', triggerInput, false);
+  </script>
+</body>
+
+</html>
