@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-21 00:11:42
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-21 17:10:00
+ * @LastEditTime: 2021-09-21 18:02:43
  */
 // ==UserScript==
 // @name         改变网页代码块的字体样式
@@ -23,7 +23,7 @@
   let CSDNCodeBlockOriginalFont = 'Source Code Pro,DejaVu Sans Mono,Ubuntu Mono,Anonymous Pro,Droid Sans Mono,Menlo,Monaco,Consolas,Inconsolata,Courier,monospace,PingFang SC,Microsoft YaHei,sans-serif';
   let CSDNCodeBlockSelector = 'span.token, .prism-atom-one-dark .prism *';
   let cnblogCodeBlockSelector = '.syntaxhighlighter a, .syntaxhighlighter div, .syntaxhighlighter code, .syntaxhighlighter table, .syntaxhighlighter table td, .syntaxhighlighter table tr, .syntaxhighlighter table tbody, .syntaxhighlighter table thead, .syntaxhighlighter table caption, .syntaxhighlighter textarea';
-  codeBlockStyle.innerText = `${CSDNCodeBlockSelector}, ${cnblogCodeBlockSelector}, p, code{
+  codeBlockStyle.innerText = `${CSDNCodeBlockSelector}, ${cnblogCodeBlockSelector}, blockquote, code{
     font-family: 'Cascadia Code', 'YaHei Consolas Hybrid', 'Lucida Console', ${CSDNCodeBlockOriginalFont} !important;
   }
   div.view-lines.monaco-mouse-cursor-text{
