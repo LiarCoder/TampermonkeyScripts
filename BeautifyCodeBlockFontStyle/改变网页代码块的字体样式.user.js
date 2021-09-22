@@ -4,12 +4,12 @@
  * @Author: LiarCoder
  * @Date: 2021-09-21 00:11:42
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-21 20:15:12
+ * @LastEditTime: 2021-09-23 01:10:23
  */
 // ==UserScript==
 // @name         改变网页代码块的字体样式
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  改变网页代码块的字体样式，LeetCode、CSDN、掘金、博客园的代码块字体全被设置为Cascadia Code这款字体，后面还有YaHei Consolas Hybrid和Lucida Console这两款字体做候选，最后由CSDN代码块的字体样式兜底
 // @author       LiarCoder
 // @match        *://*/*
@@ -28,6 +28,9 @@
   }
   div.view-lines.monaco-mouse-cursor-text{
     font-family: 'YaHei Consolas Hybrid', ${CSDNCodeBlockOriginalFont} !important;
+  }
+  span.mtkw{
+    font-family: 'Consolas', ${CSDNCodeBlockOriginalFont} !important;
   }`;
   document.body.appendChild(codeBlockStyle);
 
