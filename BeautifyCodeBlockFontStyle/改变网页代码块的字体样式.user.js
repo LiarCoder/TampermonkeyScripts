@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-21 00:11:42
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-24 00:39:35
+ * @LastEditTime: 2021-09-24 02:07:51
  */
 // ==UserScript==
 // @name         改变网页代码块的字体样式
@@ -26,7 +26,7 @@
   codeBlockStyle.innerText = `${CSDNCodeBlockSelector}, ${cnblogCodeBlockSelector}, blockquote, code{
     font-family: 'Cascadia Code', 'YaHei Consolas Hybrid', 'Lucida Console', ${CSDNCodeBlockOriginalFont} !important;
   }
-  div.view-line>span>span:not(.mtkw){
+  div.view-line>span>span.mtk3{
     font-family: 'YaHei Consolas Hybrid', ${CSDNCodeBlockOriginalFont} !important;
   }`;
   document.body.appendChild(codeBlockStyle);
