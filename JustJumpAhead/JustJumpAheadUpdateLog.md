@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:17:01
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-29 19:17:02
+ * @LastEditTime: 2021-09-30 00:33:38
 -->
 
 # 自动继续访问页面
@@ -33,3 +33,4 @@
 
 1、增加对PC端QQ的跳转拦截页面的适配。
 
+2、增加对百度贴吧跳转拦截页面的适配。
