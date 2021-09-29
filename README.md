@@ -41,3 +41,11 @@
 >
 > 相关博客地址：[【油猴脚本】改变网页代码块的字体样式/美化LeetCode代码文字显示（CSS；设置@font-face和font-family）_赖念安的博客-CSDN博客](https://blog.csdn.net/qq_44879358/article/details/120412081)
 
+## ④号脚本：
+
+JustJumpAhead.user.js（自动继续跳转页面）
+
+更新：2021年9月29日19:38:17
+
+> 脚本安装地址：[JustJumpAhead](https://greasyfork.org/zh-CN/scripts/433155-justjumpahead)
+
