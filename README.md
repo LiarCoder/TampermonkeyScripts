@@ -45,7 +45,9 @@
 
 JustJumpAhead.user.js（自动继续跳转页面）
 
-更新：2021年9月29日19:38:17
+更新：2021年9月29日23:59:20
 
 > 脚本安装地址：[JustJumpAhead](https://greasyfork.org/zh-CN/scripts/433155-justjumpahead)
+>
+> 相关博客地址：[【油猴脚本】自动继续访问页面JustJumpAhead（location；正则）_赖念安的博客-CSDN博客](https://blog.csdn.net/qq_44879358/article/details/120558187)
 
