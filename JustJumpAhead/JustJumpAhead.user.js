@@ -4,13 +4,13 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:12:14
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-30 00:31:01
+ * @LastEditTime: 2021-09-30 15:56:56
  */
 // ==UserScript==
 // @name         JustJumpAhead
 // @namespace    http://tampermonkey.net/
-// @version      0.2
-// @description  自动完成掘金、简书、知乎的跳转询问界面的点击工作
+// @version      0.3
+// @description  自动完成掘金、简书、知乎、百度贴吧、PC端QQ的跳转询问界面的点击工作，实现自动跳转
 // @author       LiarCoder
 // @match        https://link.juejin.cn/*
 // @match        https://link.zhihu.com/*
@@ -24,32 +24,45 @@
 (function () {
   'use strict';
   setTimeout(() => {
+    // jumpBtn 是各个跳转页面中的类似于【继续访问】的按钮，用户可以点击按钮以继续访问被拦截的链接
     let jumpBtn = null;
+    // targetAddress 是针对像在PC端QQ中的拦截页面中需要用户手动复制的目标链接
+    let targetAddress = '';
+    // currentAddress 是当前拦截页面的完整网址
+    let currentAddress = location.toString();
+    // buttonMap 存储了相应拦截页面与其中的【继续访问】按钮的CSS选择器映射关系
+    let buttonMap = new Map();
+    // addressMap 存储了相应拦截界面与其中的需要用户手动复制的网址的CSS选择器的映射关系
+    let addressMap = new Map();
+
     // 匹配掘金的跳转拦截页面网址
-    let juejinReg = /https:\/\/link.juejin.cn\//;
+    buttonMap.set('https://link.juejin.cn/', '#app > div > div > button');
     // 匹配简书的跳转拦截页面网址
-    let jianshuReg = /https:\/\/www.jianshu.com\/go-wild/;
+    buttonMap.set('https://www.jianshu.com/go-wild', '._3OuyzjzFBDdQwRGk08HXHz_0');
     // 匹配知乎的跳转拦截页面网址
-    let zhihuReg = /https:\/\/link.zhihu.com\//;
+    buttonMap.set('https://link.zhihu.com/', 'a.button');
     // 匹配百度贴吧的跳转拦截页面网址
-    let tiebaReg = /http:\/\/jump.bdimg.com\/safecheck/;
+    buttonMap.set('http://jump.bdimg.com/safecheck', 'div.warning_info.fl > a:nth-child(2)');
+
     // 匹配PC端QQ的跳转拦截页面网址
-    let qqPCReg = /https:\/\/c.pc.qq.com\/middlem.html/;
-    if (juejinReg.test(location.toString())) {
-      jumpBtn = document.querySelector('#app > div > div > button');
-    } else if (jianshuReg.test(location.toString())) {
-      jumpBtn = document.querySelector('._3OuyzjzFBDdQwRGk08HXHz_0');
-    } else if (zhihuReg.test(location.toString())) {
-      jumpBtn = document.querySelector('a.button');
-    } else if (tiebaReg.test(location.toString())) {
-      jumpBtn = document.querySelector('div.warning_info.fl > a:nth-child(2)');
-    } else if (qqPCReg.test(location.toString())) {
-      let targetAddress = document.querySelector('#url').innerText;
-      location = targetAddress;
-      return;
-    } else {
-      return;
+    addressMap.set('https://c.pc.qq.com/middlem.html', '#url');
+
+    // 开始逐个遍历 buttonMap 中的 key 值，若有匹配上的，则获取相应按钮元素并自动点击完成跳转
+    for (let address of buttonMap.keys()) {
+      if (currentAddress.indexOf(address) >= 0) {
+        jumpBtn = document.querySelector(buttonMap.get(address));
+        jumpBtn.click();
+        return;
+      }
     }
-    jumpBtn.click();
-  }, 100);
+
+    // 开始逐个遍历 addressMap 中的 key 值，若有匹配上的，则自动将浏览器的location指向目标网站完成跳转
+    for (let address of addressMap.keys()) {
+      if (currentAddress.indexOf(address) >= 0) {
+        targetAddress = document.querySelector(addressMap.get(address)).innerText;
+        location = targetAddress;
+        return;
+      }
+    }
+  }, 200);
 })();
