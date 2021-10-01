@@ -51,3 +51,16 @@
 1、增加对GitHub代码块字体的改变。
 
 2、增加对LeetCode运行结果区的文字样式改变。
+
+V0.4.1
+
+更新时间：2021年10月1日17:43:14
+
+更新功能：
+
+1、增加了对CSDN部分网页的代码块元素的选择器。
+
+![image-20211001174656928](https://i.loli.net/2021/10/01/5igyaz1lm8cnsvS.png)
+
+> 适配目标网址：[【JavaScript】数组的sort方法排序原理详解_汪小穆的博客-CSDN博客_数组sort排序原理](https://wangxiaomu.blog.csdn.net/article/details/79540263)
+
