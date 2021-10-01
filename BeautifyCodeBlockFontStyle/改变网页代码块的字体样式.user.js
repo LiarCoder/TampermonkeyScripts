@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-21 00:11:42
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-28 18:42:57
+ * @LastEditTime: 2021-10-01 17:41:53
  */
 // ==UserScript==
 // @name         改变网页代码块的字体样式
@@ -21,7 +21,7 @@
   'use strict';
   let codeBlockStyle = document.createElement('style');
   let CSDNCodeBlockOriginalFont = 'Source Code Pro,DejaVu Sans Mono,Ubuntu Mono,Anonymous Pro,Droid Sans Mono,Menlo,Monaco,Consolas,Inconsolata,Courier,monospace,PingFang SC,Microsoft YaHei,sans-serif';
-  let CSDNCodeBlockSelector = 'span.token, .prism-atom-one-dark .prism *';
+  let CSDNCodeBlockSelector = 'span.token, .prism-atom-one-dark .prism *, .htmledit_views code ol li div.hljs-ln-code, .htmledit_views code ol li div.hljs-ln-numbers, .htmledit_views pre code, .htmledit_views pre code div, .htmledit_views pre code span';
   let cnblogCodeBlockSelector = '.syntaxhighlighter a, .syntaxhighlighter div, .syntaxhighlighter code, .syntaxhighlighter table, .syntaxhighlighter table td, .syntaxhighlighter table tr, .syntaxhighlighter table tbody, .syntaxhighlighter table thead, .syntaxhighlighter table caption, .syntaxhighlighter textarea';
   let leetcodeDescriptionAndResultBlockSelector = '.notranslate, pre, .inner-wrapper__1TvQ';
   let githubCodeBlockSelector = '.blob-code-inner, .blob-code-inner > *, .CodeMirror pre > span, .CodeMirror-linenumber';
