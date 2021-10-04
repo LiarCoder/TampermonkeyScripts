@@ -48,6 +48,14 @@
 
 1、未增加额外功能，只是对代码结构进行了调整。
 
+### V0.3.1
+
+更新时间：2021年10月4日14:12:36
+
+更新功能：
+
+1、增加对CSDN跳转拦截页面的适配（终于蹲到它了，本来最开始就想着把它加进适配名单的，但是苦于没找到测试网址）。
+
 ## 有关参考
 > 更新：2021年9月30日15:27:05
 > 参考：[Map - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map)
