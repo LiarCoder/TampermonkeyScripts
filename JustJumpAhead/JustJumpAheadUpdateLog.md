@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:17:01
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-30 00:33:38
+ * @LastEditTime: 2021-10-04 17:17:34
 -->
 
 # 自动继续访问页面
@@ -56,8 +56,18 @@
 
 1、增加对CSDN跳转拦截页面的适配（终于蹲到它了，本来最开始就想着把它加进适配名单的，但是苦于没找到测试网址）。
 
+### V0.3.2
+
+更新时间：2021年10月4日17:16:09
+
+更新功能：
+
+1、对网页的适配正则进行了一点小小的修改，用来应对有些拦截页面的协议可以是http也可能是https协议的情况。
+
 ## 有关参考
 > 更新：2021年9月30日15:27:05
+
 > 参考：[Map - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map)
+
 > 参考：[String.prototype.indexOf() - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
 
