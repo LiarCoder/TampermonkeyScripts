@@ -2,7 +2,7 @@
 // 脚本名称
 // @name         复制标题和地址（myFirstScript）
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.3.1
 // @description  一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）
 // @author       LiarCoder
 // 在哪些页面生效, 支持通配符
@@ -37,17 +37,17 @@
       id: 'alert-box-iVBORw0KGg',
       style: `position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
         border-radius: 4px; padding: 20px 20px; width: 450px; height: 160px;
-        background: #292A2D; color: #ffffff; line-height: 20px; zIndex: 300;
-        fontSize: 12px; fontFamily: Microsoft YaHei;
+        background: #292A2D; color: #ffffff; line-height: 20px; z-index: 300;
+        font-size: 12px; font-family: Microsoft YaHei;
     `});
 
     let msgBox = createEle('textarea', '', {
-      style: `width: 445px; height: 80px; font-size: 12px !important; margin: 15px 0; resize: none;
+      style: `width: 445px; height: 80px; font-size: 12px !important; margin: 15px 0; resize: none; background: #292A2D; color: #ffffff; border: #292A2D; outline: none;
     `});
     msgBox.innerHTML = msg;
 
     let closeBtn = createEle('button', '关闭', {
-      style: `width: 64px; height: 32px; float: right; border: #799dd7; border-radius: 4px; background: #799dd7;
+      style: `width: 64px; height: 32px; float: right; border: #799dd7; border-radius: 4px; background: #799dd7; outline: none; 
     `});
 
     closeBtn.onclick = function () {
@@ -60,24 +60,23 @@
 
   let btnStyle = `
   #copy-title-and-location {
-    position: fixed; top: 100px; left: -100px; opacity: 0.5; z-index: 2147483647; 
+    position: fixed; top: 100px; left: -95px; opacity: 0.5; z-index: 2147483647; 
     background-image: none; cursor:pointer; color: #fff; background-color: #0084ff !important; 
-    margin: 5px 0px; width: auto; border-radius: 3px; border: 1px solid; padding: 3px 6px; height: 26px;
-    font-family: Arial, sans-serif; font-size: 12px; line-height: 17px; transition: left, 0.5s;
+    margin: 5px 0px; width: auto; border-radius: 3px; border: #0084ff; outline: none; padding: 3px 6px; height: 26px;
+    font-family: Arial, sans-serif; font-size: 12px; transition: left, 0.5s;
     }
   #copy-title-and-location:hover {
     left: 0px; opacity: 1;
+  }
+  #copy-title-and-location svg {
+    width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block !important;margin-bottom: 2px;
   }`;
   let styleTag = createEle('style', btnStyle, { type: "text/css" });
 
-  // let icon = 'https://i.loli.net/2021/07/27/duC5UMTYJeDILv2.png';
-  let icon = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABTklEQVQ4jY3TO0tcURQF4G/ixFdhCIg2qWysZPwDsUkXSJk2Qso0IpLOTtLERkGwEjQhXV5d0gkGK6v7E/IHgg9EHR0nHLLvzGHujGbB5pzLOXvttfc6twaNRiMta1g1GG28xJfyRlEU6rF/FskpjvA4o7nABD7gM17hY3lYEjzHOd4NqP8QW3gURA+wJzYJI2hV0rq4xtfsexdPcwW3EQmLaSw4wVCQr+M1DtDEJt7iVz1jLRUsB0GOn9iPymWRJ7mChOFY5ysNVFHrHaKwKWEGUyG1HZcnMY4/0UarH0Ez1u+Yq9T8h5tw5BTTg1p4EYfNnuR6WC3srCgo+/odcRdK+7ubrGIRvfeLq7hz3KsgESXPE97HDFKfOUazxLFegst4MAmf7pGfkP6NNNAOwTesYAM/YkgdrzOcYRYLeJMTHMbTTE926T8U7GAb/gI+kkP5n3CsvwAAAABJRU5ErkJggg==';
-  let imgTag = createEle('img', '', {
-    src: icon,
-    style: "width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block;margin-bottom: 2px"
-  });
-  let btn = createEle('button', '复制标题和地址', { id: "copy-title-and-location" });
-  btn.appendChild(imgTag);
+  // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
+  let iconSVG = '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let btn = createEle('button', '', { id: "copy-title-and-location" });
+  btn.innerHTML = '复制标题和地址' + iconSVG;
 
   btn.addEventListener('click', () => {
     let date = new Date();
