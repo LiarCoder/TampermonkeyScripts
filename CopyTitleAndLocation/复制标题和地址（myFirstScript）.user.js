@@ -37,8 +37,8 @@
       id: 'alert-box-iVBORw0KGg',
       style: `position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
         border-radius: 4px; padding: 20px 20px; width: 450px; height: 160px;
-        background: #292A2D; color: #ffffff; line-height: 20px; zIndex: 300;
-        fontSize: 12px; fontFamily: Microsoft YaHei;
+        background: #292A2D; color: #ffffff; line-height: 20px; z-index: 300;
+        font-size: 12px; font-family: Microsoft YaHei;
     `});
 
     let msgBox = createEle('textarea', '', {
