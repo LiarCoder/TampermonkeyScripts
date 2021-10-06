@@ -36,19 +36,19 @@
     let alertBox = createEle('div', '本网页不支持操作剪切板，请手动复制下方内容：', {
       id: 'alert-box-iVBORw0KGg',
       style: `position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-        border-radius: 4px; padding: 20px 20px; width: 450px; height: 160px;
+        border-radius: 4px; padding: 20px 20px; width: 450px;
         background: #292A2D; color: #ffffff; line-height: 20px; z-index: 300;
-        font-size: 12px; font-family: Microsoft YaHei;
-    `});
+        font-size: 12px; font-family: Microsoft YaHei;`
+    });
 
     let msgBox = createEle('textarea', '', {
-      style: `width: 445px; height: 80px; font-size: 12px !important; margin: 15px 0; resize: none; background: #292A2D; color: #ffffff; border: #292A2D; outline: none;
-    `});
+      style: `width: 100%; height: 80px; font-size: 12px !important; margin-top: 15px; resize: none; background: #292A2D; color: #ffffff; border: #292A2D; padding: 0px; outline: none;`
+    });
     msgBox.innerHTML = msg;
 
     let closeBtn = createEle('button', '关闭', {
-      style: `width: 64px; height: 32px; float: right; border: #799dd7; border-radius: 4px; background: #799dd7; outline: none; 
-    `});
+      style: `width: 64px; height: 32px; float: right; margin-top: 15px; border: #799dd7; border-radius: 4px; background: #799dd7; outline: none;`
+    });
 
     closeBtn.onclick = function () {
       alertBox.parentNode.removeChild(alertBox);
