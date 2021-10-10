@@ -2,7 +2,7 @@
 // 脚本名称
 // @name         复制标题和地址（myFirstScript）
 // @namespace    http://tampermonkey.net/
-// @version      0.3.1
+// @version      0.4
 // @description  一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）
 // @author       LiarCoder
 // 在哪些页面生效, 支持通配符
@@ -29,48 +29,49 @@
   }
 
   // 【更新：2021年9月13日00:04:08】因为原生的alert弹框里的文本不能复制，所以我决定自己实现一个弹框以便我们手动复制结果
-  function myAlert(msg) {
-    if (document.getElementById('alert-box-iVBORw0KGg')) {
+  function myAlert(timeStamp, address) {
+    let bgElement = document.getElementById('bg-iVBORw0KGg');
+    if (bgElement) {
+      document.querySelector('#alert-box-iVBORw0KGg textarea').innerHTML = timeStamp + address;
+      bgElement.style.display = 'block';
       return;
     }
+    let bg = createEle('div', '', {
+      id: 'bg-iVBORw0KGg',
+      style: `width: 100%; height: 100%; background: rgba(243,242,238,0.8) !important; position: fixed; top: 0; left: 0; z-index: 299;`
+    });
     let alertBox = createEle('div', '本网页不支持操作剪切板，请手动复制下方内容：', {
       id: 'alert-box-iVBORw0KGg',
-      style: `position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-        border-radius: 4px; padding: 20px 20px; width: 450px;
-        background: #292A2D; color: #ffffff; line-height: 20px; z-index: 300;
-        font-size: 12px; font-family: Microsoft YaHei;`
+      style: `position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 4px; padding: 20px 20px; width: 450px; background: #292A2D; color: #ffffff; line-height: 20px; z-index: 300; font-size: 12px; font-family: Microsoft YaHei;`
     });
 
     let msgBox = createEle('textarea', '', {
       style: `width: 100%; height: 80px; font-size: 12px !important; margin-top: 15px; resize: none; background: #292A2D; color: #ffffff; border: #292A2D; padding: 0px; outline: none;`
     });
-    msgBox.innerHTML = msg;
+    msgBox.innerHTML = timeStamp + address;
 
     let closeBtn = createEle('button', '关闭', {
       style: `width: 64px; height: 32px; float: right; margin-top: 15px; border: #799dd7; border-radius: 4px; background: #799dd7; outline: none;`
     });
 
     closeBtn.onclick = function () {
-      alertBox.parentNode.removeChild(alertBox);
+      bg.style.display = 'none';
     }
     alertBox.appendChild(msgBox);
     alertBox.appendChild(closeBtn);
-    document.body.appendChild(alertBox);
+    bg.appendChild(alertBox);
+    document.body.appendChild(bg);
   }
 
   let btnStyle = `
   #copy-title-and-location {
-    position: fixed; top: 100px; left: -95px; opacity: 0.5; z-index: 2147483647; 
+    position: fixed; top: 100px; left: -95px; opacity: 0.3; z-index: 2147483647; 
     background-image: none; cursor:pointer; color: #fff; background-color: #0084ff !important; 
     margin: 5px 0px; width: auto; border-radius: 3px; border: #0084ff; outline: none; padding: 3px 6px; height: 26px;
     font-family: Arial, sans-serif; font-size: 12px; transition: left, 0.5s;
     }
-  #copy-title-and-location:hover {
-    left: 0px; opacity: 1;
-  }
-  #copy-title-and-location svg {
-    width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block !important;margin-bottom: 2px;
-  }`;
+  #copy-title-and-location:hover {left: 0px; opacity: 1;}
+  #copy-title-and-location svg {width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block !important;margin-bottom: 2px;}`;
   let styleTag = createEle('style', btnStyle, { type: "text/css" });
 
   // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
@@ -80,23 +81,23 @@
 
   btn.addEventListener('click', () => {
     let date = new Date();
-    let timeStamp = date.toLocaleDateString().replace('\/', '年').replace('\/', '月') + '日' + date.toLocaleTimeString('chinese', { hour12: false });
-    let titleTag = document.querySelector('title');
-    let result = '更新：' + timeStamp + '\n> 参考：[' + titleTag.innerText + ']' + '(' + location + ')';
+    let timeStamp = '更新：' + date.toLocaleDateString().replace('\/', '年').replace('\/', '月') + '日' + date.toLocaleTimeString('chinese', { hour12: false });
+    let titleInfo = document.querySelector('title').innerText;
+    let address = '\n> 参考：[' + titleInfo + ']' + '(' + location + ')';
     // 匹配微信公众号的文章地址
     let regWeChat = /https:\/\/mp.weixin.qq.com\//;
     if (regWeChat.test(location.toString())) {
       let officialAccount = document.getElementById('js_name');
       let publishDate = document.getElementById('publish_time');
       publishDate.click();
-      result = '更新：' + timeStamp + '\n> 参考：[【微信公众号：' + officialAccount.innerText + ' ' + publishDate.innerText + '】' + titleTag.innerText + ']' + '(' + location + ')';
+      address = '\n> 参考：[【微信公众号：' + officialAccount.innerText + ' ' + publishDate.innerText + '】' + titleInfo + ']' + '(' + location + ')';
     }
     // 【更新：2021年9月12日22:48:36】添加了一个try catch来应对当前页面不能访问 navigator.clipboard 对象的问题
     try {
-      navigator.clipboard.writeText(result);
+      navigator.clipboard.writeText(timeStamp + address);
     } catch (err) {
       console.log('当前页面不支持访问 navigator.clipboard 对象：' + err);
-      myAlert(result);
+      myAlert(timeStamp, address);
     }
   });
 
