@@ -28,6 +28,8 @@
     return ele;
   }
 
+  let bgImgBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAACrCAYAAACnkvYBAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAFHGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIxLTEwLTE1VDIwOjI3OjI3KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMS0xMC0xNVQyMDozMzoxOCswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMS0xMC0xNVQyMDozMzoxOCswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoyZDcwNDNhYi0xMTI5LTZiNGEtOGE0YS1iMjlmOGUzYWFjNWMiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MmQ3MDQzYWItMTEyOS02YjRhLThhNGEtYjI5ZjhlM2FhYzVjIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MmQ3MDQzYWItMTEyOS02YjRhLThhNGEtYjI5ZjhlM2FhYzVjIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDoyZDcwNDNhYi0xMTI5LTZiNGEtOGE0YS1iMjlmOGUzYWFjNWMiIHN0RXZ0OndoZW49IjIwMjEtMTAtMTVUMjA6Mjc6MjcrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4YNvjXAAAAFklEQVQoz2P4////aYZRYpQYJahIAAA5jYa39ndGVgAAAABJRU5ErkJggg==';
+
   // 【更新：2021年9月13日00:04:08】因为原生的alert弹框里的文本不能复制，所以我决定自己实现一个弹框以便我们手动复制结果
   function myAlert(timeStamp, address) {
     let bgElement = document.getElementById('bg-iVBORw0KGg');
@@ -38,7 +40,7 @@
     }
     let bg = createEle('div', '', {
       id: 'bg-iVBORw0KGg',
-      style: `width: 100%; height: 100%; background: rgba(243,242,238,0.8) !important; position: fixed; top: 0; left: 0; z-index: 299;`
+      style: `width: 100%; height: 100%; background-image: url(${bgImgBase64}); position: fixed; top: 0; left: 0; z-index: 299;`
     });
     let alertBox = createEle('div', '本网页不支持操作剪切板，请手动复制下方内容：', {
       id: 'alert-box-iVBORw0KGg',
