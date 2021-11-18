@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:17:01
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-10-04 17:17:34
+ * @LastEditTime: 2021-11-18 13:22:34
 -->
 
 # 自动继续访问页面
@@ -71,3 +71,10 @@
 
 > 参考：[String.prototype.indexOf() - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/String/indexOf)
 
+### V0.3.3
+
+更新时间：2021年11月18日13:20:42
+
+更新功能：
+
+1、将原来放在setTimeout定时器中的逻辑改为了window.onload回调函数内容。逻辑显得更加清晰。

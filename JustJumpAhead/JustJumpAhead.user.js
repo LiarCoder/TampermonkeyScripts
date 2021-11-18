@@ -4,7 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:12:14
  * @LastEditors: LiarCoder
- * @LastEditTime: 2021-10-04 17:12:11
+ * @LastEditTime: 2021-11-18 13:19:24
  */
 // ==UserScript==
 // @name         JustJumpAhead
@@ -24,7 +24,7 @@
 
 (function () {
   'use strict';
-  setTimeout(() => {
+  window.onload = function () {
     // jumpBtn 是各个跳转页面中的类似于【继续访问】的按钮，用户可以点击按钮以继续访问被拦截的链接
     let jumpBtn = null;
     // targetAddress 是针对像在PC端QQ中的拦截页面中需要用户手动复制的目标链接
@@ -67,5 +67,5 @@
         return;
       }
     }
-  }, 200);
+  }
 })();
