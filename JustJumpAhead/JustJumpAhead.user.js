@@ -4,11 +4,7 @@
  * @Author: LiarCoder
  * @Date: 2021-09-29 19:12:14
  * @LastEditors: LiarCoder
-<<<<<<< Updated upstream
- * @LastEditTime: 2021-11-18 13:19:24
-=======
- * @LastEditTime: 2021-12-11 23:38:15
->>>>>>> Stashed changes
+ * @LastEditTime: 2021-12-11 23:43:48
  */
 // ==UserScript==
 // @name         JustJumpAhead
@@ -28,11 +24,7 @@
 // ==/UserScript==
 
 (function () {
-<<<<<<< Updated upstream
-  'use strict';
-=======
   "use strict";
->>>>>>> Stashed changes
   window.onload = function () {
     // jumpBtn 是各个跳转页面中的类似于【继续访问】的按钮，用户可以点击按钮以继续访问被拦截的链接
     let jumpBtn = null;
@@ -76,9 +68,5 @@
         return;
       }
     }
-<<<<<<< Updated upstream
-  }
-=======
   };
->>>>>>> Stashed changes
 })();
