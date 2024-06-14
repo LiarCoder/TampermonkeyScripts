@@ -5,7 +5,7 @@
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=fineres.com
+// @icon         https://code.fineres.com/projects/FX/avatar.png?s=64&v=1452596397000
 // @grant        GM_addStyle
 // @grant        unsafeWindow
 // @run-at       document-end
