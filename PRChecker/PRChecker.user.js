@@ -99,9 +99,11 @@
   `;
   GM_addStyle(prCheckerStyle);
 
+  // 最大寻找次数，脚本加载后，即在页面中寻找创建按钮，查找次数超过50次后即认为当前页面没有创建按钮
   const MAX_FIND_COUNT = 50;
   const USERNAME =
     document.querySelector("[data-username]")?.dataset.username || "";
+  // 自定义check项的本地缓存
   const CUSTOM_CHECK_ITEMS_KEY = `bitbucket.pr.checker.${USERNAME}`;
 
   // 创建元素函数
@@ -122,7 +124,11 @@
     return element;
   };
 
-  // 初始化PR检查器
+  /**
+   * 初始化PR检查器
+   * 脚本支持在浏览器控制台，通过 window.PrChecker.add('xxx') 的方式添加自定义check项
+   * 也支持通过 window.PrChecker.clear() 的方式清除所有自定义check项
+   */
   const initPrChecker = () => {
     const addCustomCheckItems = (...checkItems) => {
       const cachedItems =
@@ -137,6 +143,11 @@
     const clearCustomCheckItems = () => {
       window.localStorage.removeItem(CUSTOM_CHECK_ITEMS_KEY);
     };
+    /**
+     * 注意这里必须用 unsafeWindow，否则无法在浏览器控制台访问 PrChecker
+     * @see https://www.tampermonkey.net/documentation.php#api:unsafeWindow
+     * @see https://bbs.tampermonkey.net.cn/thread-249-1-1.html#%E7%BB%99%E8%AE%BA%E5%9D%9B%E6%B7%BB%E5%8A%A0%E9%BB%91%E5%A4%9C%E6%A8%A1%E5%BC%8F
+     */
     unsafeWindow.PrChecker = {};
     unsafeWindow.PrChecker.add = addCustomCheckItems;
     unsafeWindow.PrChecker.clear = clearCustomCheckItems;
