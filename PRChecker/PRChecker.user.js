@@ -10,8 +10,7 @@
 // @grant        GM_getResourceText
 // @grant        unsafeWindow
 // @run-at       document-end
-// @require file:///F:/Prac_Web/TampermonkeyScripts/PRChecker/PRChecker.user.js
-// @resource pr-checker-css file:///F:/Prac_Web/TampermonkeyScripts/PRChecker/PRChecker.user.css
+// @resource pr-checker-css https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/PRChecker/PRChecker.user.css
 // ==/UserScript==
 
 (function () {
