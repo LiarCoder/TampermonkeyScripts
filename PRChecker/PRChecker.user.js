@@ -268,7 +268,6 @@
   findCreatePrBtn()
     .then(({createBtnWrapper, createPrBtn}) => {
       initPrChecker();
-      createBtnWrapper.style.position = "relative";
       const maskBtn = createElement({
         parent: createBtnWrapper,
         attributes: { class: "pr-checker-mask-btn" },
