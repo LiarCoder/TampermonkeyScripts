@@ -24,6 +24,18 @@
     --fd-color-primary-hover: #4dcdb8;
   }
 
+  .pr-checker-create-btn {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-right: 9px;
+  }
+
+  .pr-checker-create-btn:hover #submit-form {
+    --aui-btn-bg: var(--aui-button-primary-hover-bg-color);
+    --aui-btn-text: var(--aui-button-primary-active-text-color);
+  }
+
   #bitbucket-pr-checker {
     font-size: 14px;
     color: var(--fd-color-text);
@@ -230,10 +242,20 @@
     let findCount = 0;
     return new Promise((resolve, reject) => {
       const interval = setInterval(() => {
-        const createPrBtn = document.getElementById("cancel-button");
+        const createPrBtn = document.getElementById("submit-form");
         if (createPrBtn) {
           clearInterval(interval);
-          resolve(createPrBtn);
+          // 因为创建PR的按钮是一个input标签，无法插入子元素，所以需要一个包装元素
+          const createBtnWrapper = createElement({
+            parent: null,
+            attributes: {
+              class: 'pr-checker-create-btn'
+            }
+          });
+          createPrBtn.parentNode.insertBefore(createBtnWrapper, createPrBtn);
+          createPrBtn.parentNode.removeChild(createPrBtn);
+          createBtnWrapper.appendChild(createPrBtn);
+          resolve({createBtnWrapper, createPrBtn});
         } else if (findCount > MAX_FIND_COUNT) {
           clearInterval(interval);
           reject(new Error("Create PR button doesn't exist"));
@@ -244,11 +266,10 @@
   };
 
   findCreatePrBtn()
-    .then((createPrBtn) => {
+    .then(({createBtnWrapper, createPrBtn}) => {
       initPrChecker();
-      createPrBtn.style.position = "relative";
       const maskBtn = createElement({
-        parent: createPrBtn,
+        parent: createBtnWrapper,
         attributes: { class: "pr-checker-mask-btn" },
       });
       maskBtn.onclick = (e) => {

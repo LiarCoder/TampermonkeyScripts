@@ -7,6 +7,18 @@
   --fd-color-primary-hover: #4dcdb8;
 }
 
+.pr-checker-create-btn {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin-right: 9px;
+}
+
+.pr-checker-create-btn:hover #submit-form {
+  --aui-btn-bg: var(--aui-button-primary-hover-bg-color);
+  --aui-btn-text: var(--aui-button-primary-active-text-color);
+}
+
 #bitbucket-pr-checker {
   font-size: 14px;
   color: var(--fd-color-text);
