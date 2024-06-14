@@ -57,5 +57,4 @@ PRChecker.user.js（PR三思器，在bitbucket中创建PR前强制给用户展�
 
 更新：2024年6月15日01:46:20
 
-> 脚本安装地址：[PRChecker]()
->
+> 脚本安装地址：[PRChecker](https://greasyfork.org/zh-CN/scripts/497933-pr%E4%B8%89%E6%80%9D%E5%99%A8)
