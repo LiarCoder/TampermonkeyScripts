@@ -5,22 +5,105 @@
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=fineres.com
+// @icon         https://code.fineres.com/projects/FX/avatar.png?s=64&v=1452596397000
 // @grant        GM_addStyle
-// @grant        GM_getResourceText
 // @grant        unsafeWindow
 // @run-at       document-end
-// @require file:///F:/Prac_Web/TampermonkeyScripts/PRChecker/PRChecker.user.js
-// @resource pr-checker-css file:///F:/Prac_Web/TampermonkeyScripts/PRChecker/PRChecker.user.css
 // ==/UserScript==
 
 (function () {
   "use strict";
-  GM_addStyle(GM_getResourceText("pr-checker-css"));
+  const prCheckerStyle = `
+  :root {
+    --fd-color-border: #d7d9dc;
+    --fd-color-text: #141e31;
+    --fd-color-white: #ffffff;
+    --fd-color-text-light-solid: #ffffff;
+    --fd-color-primary: #00b899;
+    --fd-color-primary-hover: #4dcdb8;
+  }
 
+  #bitbucket-pr-checker {
+    font-size: 14px;
+    color: var(--fd-color-text);
+    border: none;
+    border-radius: 8px;
+    background: #ffffff;
+    width: 500px;
+    padding: 0;
+    box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
+      0 6px 16px #00000014;
+  }
+
+  #bitbucket-pr-checker::backdrop {
+    background-color: rgba(0, 10, 31, 0.29);
+  }
+
+  #bitbucket-pr-checker .pr-checker-title {
+    border-bottom: 1px solid var(--fd-color-border);
+    padding: 16px 20px;
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 700;
+  }
+
+  #pr-checker-btns {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--fd-color-border);
+  }
+
+  #pr-checker-btns .operate-btn {
+    border: 1px solid;
+    border-radius: 4px;
+    line-height: 32px;
+    padding: 0px 16px;
+    outline: none;
+    cursor: pointer;
+    transition: box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+      background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+      border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+      color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+
+  #pr-checker-btns .pr-checker-close-btn {
+    background: var(--fd-color-white);
+    border-color: var(--fd-color-border);
+  }
+
+  #pr-checker-btns .pr-checker-close-btn:hover {
+    color: var(--fd-color-primary-hover);
+    border-color: var(--fd-color-primary-hover);
+  }
+
+  #pr-checker-btns .pr-checker-ensure-btn {
+    color: var(--fd-color-text-light-solid);
+    background: var(--fd-color-primary);
+    border-color: var(--fd-color-primary);
+  }
+
+  #pr-checker-btns .pr-checker-ensure-btn:hover {
+    background: var(--fd-color-primary-hover);
+  }
+
+  .pr-checker-mask-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+  }
+  `;
+  GM_addStyle(prCheckerStyle);
+
+  // 最大寻找次数，脚本加载后，即在页面中寻找创建按钮，查找次数超过50次后即认为当前页面没有创建按钮
   const MAX_FIND_COUNT = 50;
   const USERNAME =
     document.querySelector("[data-username]")?.dataset.username || "";
+  // 自定义check项的本地缓存
   const CUSTOM_CHECK_ITEMS_KEY = `bitbucket.pr.checker.${USERNAME}`;
 
   // 创建元素函数
@@ -41,7 +124,11 @@
     return element;
   };
 
-  // 初始化PR检查器
+  /**
+   * 初始化PR检查器
+   * 脚本支持在浏览器控制台，通过 window.PrChecker.add('xxx') 的方式添加自定义check项
+   * 也支持通过 window.PrChecker.clear() 的方式清除所有自定义check项
+   */
   const initPrChecker = () => {
     const addCustomCheckItems = (...checkItems) => {
       const cachedItems =
@@ -56,6 +143,11 @@
     const clearCustomCheckItems = () => {
       window.localStorage.removeItem(CUSTOM_CHECK_ITEMS_KEY);
     };
+    /**
+     * 注意这里必须用 unsafeWindow，否则无法在浏览器控制台访问 PrChecker
+     * @see https://www.tampermonkey.net/documentation.php#api:unsafeWindow
+     * @see https://bbs.tampermonkey.net.cn/thread-249-1-1.html#%E7%BB%99%E8%AE%BA%E5%9D%9B%E6%B7%BB%E5%8A%A0%E9%BB%91%E5%A4%9C%E6%A8%A1%E5%BC%8F
+     */
     unsafeWindow.PrChecker = {};
     unsafeWindow.PrChecker.add = addCustomCheckItems;
     unsafeWindow.PrChecker.clear = clearCustomCheckItems;
