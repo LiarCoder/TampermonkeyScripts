@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      V1.1
+// @version      V1.2
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
-// @match        https://code.fineres.com/*
+// @match        https://code.fineres.com/*/pull-requests?create*
 // @icon         https://code.fineres.com/projects/FX/avatar.png?s=64&v=1452596397000
 // @grant        GM_addStyle
 // @grant        unsafeWindow
