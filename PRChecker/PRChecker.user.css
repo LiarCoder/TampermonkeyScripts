@@ -1,0 +1,94 @@
+:root {
+  --fd-color-border: #d7d9dc;
+  --fd-color-text: #141e31;
+  --fd-color-white: #ffffff;
+  --fd-color-text-light-solid: #ffffff;
+  --fd-color-primary: #00b899;
+  --fd-color-primary-hover: #4dcdb8;
+}
+
+.pr-checker-create-btn {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  margin-right: 9px;
+}
+
+.pr-checker-create-btn:hover #submit-form {
+  --aui-btn-bg: var(--aui-button-primary-hover-bg-color);
+  --aui-btn-text: var(--aui-button-primary-active-text-color);
+}
+
+#bitbucket-pr-checker {
+  font-size: 14px;
+  color: var(--fd-color-text);
+  border: none;
+  border-radius: 8px;
+  background: #ffffff;
+  width: 500px;
+  padding: 0;
+  box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
+    0 6px 16px #00000014;
+}
+
+#bitbucket-pr-checker::backdrop {
+  background-color: rgba(0, 10, 31, 0.29);
+}
+
+#bitbucket-pr-checker .pr-checker-title {
+  border-bottom: 1px solid var(--fd-color-border);
+  padding: 16px 20px;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
+#pr-checker-btns {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--fd-color-border);
+}
+
+#pr-checker-btns .operate-btn {
+  border: 1px solid;
+  border-radius: 4px;
+  line-height: 32px;
+  padding: 0px 16px;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+    background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+    border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+    color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+#pr-checker-btns .pr-checker-close-btn {
+  background: var(--fd-color-white);
+  border-color: var(--fd-color-border);
+}
+
+#pr-checker-btns .pr-checker-close-btn:hover {
+  color: var(--fd-color-primary-hover);
+  border-color: var(--fd-color-primary-hover);
+}
+
+#pr-checker-btns .pr-checker-ensure-btn {
+  color: var(--fd-color-text-light-solid);
+  background: var(--fd-color-primary);
+  border-color: var(--fd-color-primary);
+}
+
+#pr-checker-btns .pr-checker-ensure-btn:hover {
+  background: var(--fd-color-primary-hover);
+}
+
+.pr-checker-mask-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}

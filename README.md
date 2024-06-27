@@ -51,3 +51,10 @@ JustJumpAhead.user.js（自动继续跳转页面）
 >
 > 相关博客地址：[【油猴脚本】自动继续访问页面JustJumpAhead（location；正则）_赖念安的博客-CSDN博客](https://blog.csdn.net/qq_44879358/article/details/120558187)
 
+## ⑤ 号脚本：
+
+PRChecker.user.js（PR三思器，在bitbucket中创建PR前强制给用户展示若干个检查项）
+
+更新：2024年6月15日01:46:20
+
+> 脚本安装地址：[PRChecker](https://greasyfork.org/zh-CN/scripts/497933-pr%E4%B8%89%E6%80%9D%E5%99%A8)
