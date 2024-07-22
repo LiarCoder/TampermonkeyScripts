@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      V1.2
+// @version      V1.2.1
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*/pull-requests?create*
@@ -173,6 +173,7 @@
         window.localStorage.getItem(`bitbucket.pr.checker.${USERNAME}`)
       ) || [];
     return [
+      "copy的代码检查了吗？",
       "移动端漏了吗？",
       "CRM漏了吗？",
       "KMS漏了吗？",
