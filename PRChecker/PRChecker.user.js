@@ -173,6 +173,7 @@
         window.localStorage.getItem(`bitbucket.pr.checker.${USERNAME}`)
       ) || [];
     return [
+      "copy的代码检查了吗？",
       "移动端漏了吗？",
       "CRM漏了吗？",
       "KMS漏了吗？",
