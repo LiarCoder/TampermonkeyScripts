@@ -2,7 +2,7 @@
 // 脚本名称
 // @name         复制标题和地址（myFirstScript）
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）
 // @author       LiarCoder
 // 在哪些页面生效, 支持通配符
@@ -34,15 +34,21 @@
    * @param text
    */
   const copyToClipboard = (text) => {
-    if (text && text.length) {
-      const textarea = document.createElement("textarea");
-      textarea.style.background = "transparent";
-      textarea.style.color = "transparent";
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
+    // 【更新：2021年9月12日22:48:36】添加了一个try catch来应对当前页面不能访问 navigator.clipboard 对象的问题
+    try {
+      navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.log("当前页面不支持访问 navigator.clipboard 对象：" + err);
+      if (text && text.length) {
+        const textarea = document.createElement("textarea");
+        textarea.style.background = "transparent";
+        textarea.style.color = "transparent";
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
     }
   };
 
@@ -55,33 +61,42 @@
     }
   #copy-title-and-location:hover {left: 0px; opacity: 1;}
   #copy-title-and-location svg {width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block !important;margin-bottom: 2px;}`;
-  let styleTag = createEle('style', btnStyle, { type: "text/css" });
+  let styleTag = createEle("style", btnStyle, { type: "text/css" });
 
   // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
-  let iconSVG = '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  let btn = createEle('button', '', { id: "copy-title-and-location" });
-  btn.innerHTML = '复制标题和地址' + iconSVG;
+  let iconSVG =
+    '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let btn = createEle("button", "", { id: "copy-title-and-location" });
+  btn.innerHTML = "复制标题和地址" + iconSVG;
 
-  btn.addEventListener('click', () => {
-    let date = new Date();
-    let timeStamp = '更新：' + date.toLocaleDateString().replace('\/', '年').replace('\/', '月') + '日' + date.toLocaleTimeString('chinese', { hour12: false });
-    let titleInfo = document.querySelector('title').innerText;
-    let address = '\n> 参考：[' + titleInfo + '](' + location + ')';
+  const date = new Date();
+  const timeStamp = `更新：${date
+    .toLocaleDateString()
+    .replace("/", "年")
+    .replace("/", "月")}日${date.toLocaleTimeString("chinese", {
+    hour12: false,
+  })}`;
+  const titleInfo = document.querySelector("title").innerText;
+  const getAddress = (hasQuote = true) => {
+    let address = `参考：[${titleInfo}](${location})`;
     // 匹配微信公众号的文章地址
     let regWeChat = /https:\/\/mp.weixin.qq.com\//;
     if (regWeChat.test(location.toString())) {
-      let officialAccount = document.getElementById('js_name');
-      let publishDate = document.getElementById('publish_time');
+      let officialAccount = document.getElementById("js_name");
+      let publishDate = document.getElementById("publish_time");
       publishDate.click();
-      address = '\n> 参考：[【微信公众号：' + officialAccount.innerText + ' ' + publishDate.innerText + '】' + titleInfo + '](' + location + ')';
+      address = `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
     }
-    // 【更新：2021年9月12日22:48:36】添加了一个try catch来应对当前页面不能访问 navigator.clipboard 对象的问题
-    try {
-      navigator.clipboard.writeText(timeStamp + address);
-    } catch (err) {
-      console.log('当前页面不支持访问 navigator.clipboard 对象：' + err);
-      copyToClipboard(timeStamp + address);
-    }
+    return hasQuote ? `\n> ${address}` : address;
+  };
+
+  btn.addEventListener("click", (e) => {
+    copyToClipboard(timeStamp + getAddress());
+  });
+
+  btn.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    copyToClipboard(getAddress(false));
   });
 
   // document.body.appendChild(style); // 这种写法会导致脚本在<iframe>标签的html文档的body标签也被选中
