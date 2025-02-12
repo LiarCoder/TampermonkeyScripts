@@ -64,3 +64,11 @@ V0.4.1
 
 > 适配目标网址：[【JavaScript】数组的sort方法排序原理详解_汪小穆的博客-CSDN博客_数组sort排序原理](https://wangxiaomu.blog.csdn.net/article/details/79540263)
 
+### V0.5
+
+更新时间：2025年2月12日22:17:44
+
+更新功能：
+
+1、让[cursor](https://www.cursor.com/)对脚本进行重构
+
