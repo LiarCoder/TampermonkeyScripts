@@ -12,7 +12,7 @@
 
 ## 安装地址
 
-> [Greasy Fork - 改变网页代码块的字体样式](https://greasyfork.org/zh-CN/scripts/432756-%E6%94%B9%E5%8F%98%E7%BD%91%E9%A1%B5%E4%BB%A3%E7%A0%81%E5%9D%97%E7%9A%84%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F)
+> [Greasy Fork - 改变网页代码块的字体样式](https://greasyfork.org/zh-CN/scripts/483590-%E6%94%B9%E5%8F%98%E7%BD%91%E9%A1%B5%E4%BB%A3%E7%A0%81%E5%9D%97%E7%9A%84%E5%AD%97%E4%BD%93%E6%A0%B7%E5%BC%8F)
 
 ## 功能介绍
 
