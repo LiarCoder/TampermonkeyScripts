@@ -28,67 +28,44 @@
     return ele;
   }
 
-  /**
-   * 复制链接至剪贴板
-   *
-   * @param text
-   */
-  const copyToClipboard = (text) => {
-    // 【更新：2021年9月12日22:48:36】添加了一个try catch来应对当前页面不能访问 navigator.clipboard 对象的问题
-    try {
-      navigator.clipboard.writeText(text);
-    } catch (err) {
-      console.log("当前页面不支持访问 navigator.clipboard 对象：" + err);
-      if (text && text.length) {
-        const textarea = document.createElement("textarea");
-        textarea.style.background = "transparent";
-        textarea.style.color = "transparent";
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textarea);
-      }
-    }
-  };
-
+  // 添加提示框样式
   let btnStyle = `
-  #copy-title-and-location {
-    position: fixed;
-    top: 100px;
-    left: -95px;
-    opacity: 0.3;
-    z-index: 2147483647;
-    background-image: none;
-    cursor: pointer;
-    color: #fff;
-    background-color: #0084ff !important;
-    margin: 5px 0px;
-    width: auto;
-    border-radius: 3px;
-    border: #0084ff;
-    outline: none;
-    padding: 3px 6px;
-    height: 26px;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    transition: left, 0.5s;
-  }
+    #copy-title-and-location {
+      position: fixed;
+      top: 100px;
+      left: -95px;
+      opacity: 0.3;
+      z-index: 2147483647;
+      background-image: none;
+      cursor: pointer;
+      color: #fff;
+      background-color: #0084ff !important;
+      margin: 5px 0px;
+      width: auto;
+      border-radius: 3px;
+      border: #0084ff;
+      outline: none;
+      padding: 3px 6px;
+      height: 26px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      transition: left, 0.5s;
+    }
 
-  #copy-title-and-location:hover {
-    left: 0px;
-    opacity: 1;
-  }
+    #copy-title-and-location:hover {
+      left: 0px;
+      opacity: 1;
+    }
 
-  #copy-title-and-location svg {
-    width: auto;
-    vertical-align: middle;
-    margin-left: 10px;
-    border-style: none;
-    text-align: center;
-    display: inline-block !important;
-    margin-bottom: 2px;
-  }
+    #copy-title-and-location svg {
+      width: auto;
+      vertical-align: middle;
+      margin-left: 10px;
+      border-style: none;
+      text-align: center;
+      display: inline-block !important;
+      margin-bottom: 2px;
+    }
   `;
 
   // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
@@ -104,28 +81,69 @@
     .replace("/", "月")}日${date.toLocaleTimeString("chinese", {
     hour12: false,
   })}`;
-  
+
+  /**
+   * 复制链接至剪贴板
+   */
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.log("尝试使用备用复制方法：" + err);
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.style.cssText = 'position:fixed;top:-999px;left:-999px;';
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      } catch (err) {
+        console.error("复制失败：", err);
+      }
+    }
+  };
+
   const getAddress = (hasQuote = true) => {
     const titleInfo = document.title;
     let address = `参考：[${titleInfo}](${location})`;
-    // 匹配微信公众号的文章地址
-    let regWeChat = /https:\/\/mp.weixin.qq.com\//;
-    if (regWeChat.test(location.toString())) {
-      let officialAccount = document.getElementById("js_name");
-      let publishDate = document.getElementById("publish_time");
-      publishDate.click();
-      address = `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
+    
+    // 网站特殊处理
+    const siteHandlers = {
+      'mp.weixin.qq.com': () => {
+        const officialAccount = document.getElementById("js_name");
+        const publishDate = document.getElementById("publish_time");
+        if (officialAccount && publishDate) {
+          publishDate.click();
+          return `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
+        }
+        return address;
+      },
+      // 'zhihu.com': () => {
+      //   return `参考：[知乎 - ${titleInfo}](${location})`;
+      // }
+      // 可以继续添加其他网站的特殊处理
+    };
+
+    const domain = location.hostname;
+    for (const site in siteHandlers) {
+      if (domain.includes(site)) {
+        address = siteHandlers[site]();
+        break;
+      }
     }
+    
     return hasQuote ? `\n> ${address}` : address;
   };
 
-  btn.addEventListener("click", (e) => {
-    copyToClipboard(timeStamp + getAddress());
+  // 优化按钮事件处理
+  btn.addEventListener("click", async (e) => {
+    await copyToClipboard(timeStamp + getAddress());
   });
 
-  btn.addEventListener("contextmenu", (e) => {
+  btn.addEventListener("contextmenu", async (e) => {
     e.preventDefault();
-    copyToClipboard(getAddress(false));
+    await copyToClipboard(getAddress(false));
   });
 
   // document.body.appendChild(style); // 这种写法会导致脚本在<iframe>标签的html文档的body标签也被选中
