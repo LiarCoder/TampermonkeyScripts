@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 (function () {
-  'use msgict';
+  'use strict';
 
   // 该函数用于创建一个<eleName k="attrs[k]">text</eleName>样式的页面元素
   function createEle(eleName, text, attrs) {
