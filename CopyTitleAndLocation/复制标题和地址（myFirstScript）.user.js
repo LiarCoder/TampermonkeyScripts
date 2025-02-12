@@ -16,11 +16,11 @@
 
   // 该函数用于创建一个<eleName k="attrs[k]">text</eleName>样式的页面元素
   function createEle(eleName, text, attrs) {
-    let ele = document.createElement(eleName);
+    const ele = document.createElement(eleName);
     // innerText 也就是 <p>text会被添加到这里</p>
     ele.innerText = text;
     // attrs 的类型是一个 map
-    for (let k in attrs) {
+    for (const k in attrs) {
       // 遍历 attrs, 给节点 ele 添加我们想要的属性
       ele.setAttribute(k, attrs[k]);
     }
@@ -29,7 +29,7 @@
   }
 
   // 添加提示框样式
-  let btnStyle = `
+  const btnStyle = `
     #copy-title-and-location {
       position: fixed;
       top: 100px;
@@ -69,9 +69,9 @@
   `;
 
   // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
-  let iconSVG =
+  const iconSVG =
     '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  let btn = createEle("button", "", { id: "copy-title-and-location" });
+  const btn = createEle("button", "", { id: "copy-title-and-location" });
   btn.innerHTML = "复制标题和地址" + iconSVG;
 
   const date = new Date();
