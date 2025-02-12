@@ -14,17 +14,19 @@
 (function () {
   'use strict';
 
-  // 该函数用于创建一个<eleName k="attrs[k]">text</eleName>样式的页面元素
+  /**
+   * 创建DOM元素
+   * @param {string} eleName - 元素标签名
+   * @param {string} text - 元素的文本内容
+   * @param {Object} attrs - 元素的属性键值对
+   * @returns {HTMLElement} 创建的DOM元素
+   */
   function createEle(eleName, text, attrs) {
     const ele = document.createElement(eleName);
-    // innerText 也就是 <p>text会被添加到这里</p>
     ele.innerText = text;
-    // attrs 的类型是一个 map
     for (const k in attrs) {
-      // 遍历 attrs, 给节点 ele 添加我们想要的属性
       ele.setAttribute(k, attrs[k]);
     }
-    // 返回节点
     return ele;
   }
 
@@ -83,7 +85,8 @@
   })}`;
 
   /**
-   * 复制链接至剪贴板
+   * 复制文本到剪贴板
+   * @param {string} text - 要复制的文本内容
    */
   const copyToClipboard = async (text) => {
     try {
@@ -91,6 +94,7 @@
     } catch (err) {
       console.log("尝试使用备用复制方法：" + err);
       try {
+        // 创建临时textarea元素用于复制
         const textarea = document.createElement("textarea");
         textarea.style.cssText = 'position:fixed;top:-999px;left:-999px;';
         textarea.value = text;
@@ -104,11 +108,16 @@
     }
   };
 
+  /**
+   * 获取当前页面的引用地址
+   * @param {boolean} hasQuote - 是否添加引用符号(>)
+   * @returns {string} 格式化后的引用地址
+   */
   const getAddress = (hasQuote = true) => {
     const titleInfo = document.title;
     let address = `参考：[${titleInfo}](${location})`;
     
-    // 网站特殊处理
+    // 针对不同网站的特殊处理规则
     const siteHandlers = {
       'mp.weixin.qq.com': () => {
         const officialAccount = document.getElementById("js_name");
@@ -118,11 +127,8 @@
           return `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
         }
         return address;
-      },
-      // 'zhihu.com': () => {
-      //   return `参考：[知乎 - ${titleInfo}](${location})`;
-      // }
-      // 可以继续添加其他网站的特殊处理
+      }
+      // 可在此处添加其他网站的特殊处理规则
     };
 
     const domain = location.hostname;
@@ -136,7 +142,7 @@
     return hasQuote ? `\n> ${address}` : address;
   };
 
-  // 优化按钮事件处理
+  // 注册按钮事件
   btn.addEventListener("click", async (e) => {
     await copyToClipboard(timeStamp + getAddress());
   });
