@@ -1,6 +1,6 @@
 // ==UserScript==
 // 脚本名称
-// @name         复制标题和地址（myFirstScript）
+// @name         复制标题和地址
 // @namespace    http://tampermonkey.net/
 // @version      0.6
 // @description  一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）
