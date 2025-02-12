@@ -7,7 +7,7 @@
 // @author       LiarCoder
 // 在哪些页面生效, 支持通配符
 // @match        *://*/*
-// @grant        none
+// @grant        GM_addStyle
 // @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABTklEQVQ4jY3TO0tcURQF4G/ixFdhCIg2qWysZPwDsUkXSJk2Qso0IpLOTtLERkGwEjQhXV5d0gkGK6v7E/IHgg9EHR0nHLLvzGHujGbB5pzLOXvttfc6twaNRiMta1g1GG28xJfyRlEU6rF/FskpjvA4o7nABD7gM17hY3lYEjzHOd4NqP8QW3gURA+wJzYJI2hV0rq4xtfsexdPcwW3EQmLaSw4wVCQr+M1DtDEJt7iVz1jLRUsB0GOn9iPymWRJ7mChOFY5ysNVFHrHaKwKWEGUyG1HZcnMY4/0UarH0Ez1u+Yq9T8h5tw5BTTg1p4EYfNnuR6WC3srCgo+/odcRdK+7ubrGIRvfeLq7hz3KsgESXPE97HDFKfOUazxLFegst4MAmf7pGfkP6NNNAOwTesYAM/YkgdrzOcYRYLeJMTHMbTTE926T8U7GAb/gI+kkP5n3CsvwAAAABJRU5ErkJggg==
 // ==/UserScript==
 
@@ -54,14 +54,42 @@
 
   let btnStyle = `
   #copy-title-and-location {
-    position: fixed; top: 100px; left: -95px; opacity: 0.3; z-index: 2147483647; 
-    background-image: none; cursor:pointer; color: #fff; background-color: #0084ff !important; 
-    margin: 5px 0px; width: auto; border-radius: 3px; border: #0084ff; outline: none; padding: 3px 6px; height: 26px;
-    font-family: Arial, sans-serif; font-size: 12px; transition: left, 0.5s;
-    }
-  #copy-title-and-location:hover {left: 0px; opacity: 1;}
-  #copy-title-and-location svg {width: auto; vertical-align: middle; margin-left: 10px; border-style: none;text-align: center;display: inline-block !important;margin-bottom: 2px;}`;
-  let styleTag = createEle("style", btnStyle, { type: "text/css" });
+    position: fixed;
+    top: 100px;
+    left: -95px;
+    opacity: 0.3;
+    z-index: 2147483647;
+    background-image: none;
+    cursor: pointer;
+    color: #fff;
+    background-color: #0084ff !important;
+    margin: 5px 0px;
+    width: auto;
+    border-radius: 3px;
+    border: #0084ff;
+    outline: none;
+    padding: 3px 6px;
+    height: 26px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    transition: left, 0.5s;
+  }
+
+  #copy-title-and-location:hover {
+    left: 0px;
+    opacity: 1;
+  }
+
+  #copy-title-and-location svg {
+    width: auto;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-style: none;
+    text-align: center;
+    display: inline-block !important;
+    margin-bottom: 2px;
+  }
+  `;
 
   // 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
   let iconSVG =
@@ -105,10 +133,10 @@
   if (window.self === window.top) {
     if (document.querySelector('body')) {
       document.body.appendChild(btn);
-      document.body.appendChild(styleTag);
+      GM_addStyle(btnStyle);
     } else {
       document.documentElement.appendChild(btn);
-      document.documentElement.appendChild(styleTag);
+      GM_addStyle(btnStyle);
     }
   }
 })();
