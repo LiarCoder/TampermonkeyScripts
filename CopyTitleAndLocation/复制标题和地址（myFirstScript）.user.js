@@ -76,8 +76,9 @@
     .replace("/", "月")}日${date.toLocaleTimeString("chinese", {
     hour12: false,
   })}`;
-  const titleInfo = document.querySelector("title").innerText;
+  
   const getAddress = (hasQuote = true) => {
+    const titleInfo = document.title;
     let address = `参考：[${titleInfo}](${location})`;
     // 匹配微信公众号的文章地址
     let regWeChat = /https:\/\/mp.weixin.qq.com\//;
