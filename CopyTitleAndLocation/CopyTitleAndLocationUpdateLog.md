@@ -4,7 +4,7 @@
 
 ## 安装地址
 
-> [Greasy Fork - 复制标题和地址](https://greasyfork.org/zh-CN/scripts/429598-%E5%A4%8D%E5%88%B6%E6%A0%87%E9%A2%98%E5%92%8C%E5%9C%B0%E5%9D%80-myfirstscript)
+> [Greasy Fork - 复制标题和地址](https://greasyfork.org/zh-CN/scripts/483589-%E5%A4%8D%E5%88%B6%E6%A0%87%E9%A2%98%E5%92%8C%E5%9C%B0%E5%9D%80)
 
 ## 功能介绍
 
