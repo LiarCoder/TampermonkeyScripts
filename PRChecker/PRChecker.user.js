@@ -268,13 +268,13 @@
           const createBtnWrapper = createElement({
             parent: null,
             attributes: {
-              class: 'pr-checker-create-btn'
-            }
+              class: "pr-checker-create-btn",
+            },
           });
           createPrBtn.parentNode.insertBefore(createBtnWrapper, createPrBtn);
           createPrBtn.parentNode.removeChild(createPrBtn);
           createBtnWrapper.appendChild(createPrBtn);
-          resolve({createBtnWrapper, createPrBtn});
+          resolve({ createBtnWrapper, createPrBtn });
         } else if (findCount > MAX_FIND_COUNT) {
           clearInterval(interval);
           reject(new Error("Create PR button doesn't exist"));
@@ -285,7 +285,7 @@
   };
 
   findCreatePrBtn()
-    .then(({createBtnWrapper, createPrBtn}) => {
+    .then(({ createBtnWrapper, createPrBtn }) => {
       initPrChecker();
       const maskBtn = createElement({
         parent: createBtnWrapper,
