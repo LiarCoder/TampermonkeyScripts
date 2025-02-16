@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      V1.2.1
+// @version      V1.2.2
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*/pull-requests?create*
@@ -186,10 +186,12 @@
 
   // 创建检查项列表
   const createCheckItems = (parent) => {
-    parent.innerHTML = "";
+    const fragment = document.createDocumentFragment();
     getCheckItems().forEach((item) => {
-      createElement({ parent, tagName: "li", text: item });
+      createElement({ parent: fragment, tagName: "li", text: item });
     });
+    parent.innerHTML = "";
+    parent.appendChild(fragment);
   };
 
   // 创建对话框
@@ -199,25 +201,37 @@
       createCheckItems(existingDialog.querySelector("#pr-check-items"));
       return existingDialog;
     }
+
+    // 使用文档片段批量创建元素
+    const fragment = document.createDocumentFragment();
     const dialog = createElement({
+      parent: fragment,
       tagName: "dialog",
       attributes: { id: "bitbucket-pr-checker" },
     });
+
+    // 创建标题
     createElement({
       parent: dialog,
       text: "创建PR前请检查以下几项！",
       attributes: { class: "pr-checker-title" },
     });
+
+    // 创建检查项列表
     const checkItemsWrapper = createElement({
       parent: dialog,
       tagName: "ol",
       attributes: { id: "pr-check-items" },
     });
     createCheckItems(checkItemsWrapper);
+
+    // 创建按钮组
     const btnWrapper = createElement({
       parent: dialog,
       attributes: { id: "pr-checker-btns" },
     });
+
+    // 创建按钮
     const closeBtn = createElement({
       parent: btnWrapper,
       tagName: "button",
@@ -225,6 +239,7 @@
       attributes: { class: "operate-btn pr-checker-close-btn" },
     });
     closeBtn.onclick = () => dialog.close();
+
     const ensureBtn = createElement({
       parent: btnWrapper,
       tagName: "button",
@@ -235,6 +250,9 @@
       dialog.close();
       createPrBtn.click();
     };
+
+    // 将片段一次性插入文档
+    document.body.appendChild(fragment);
     return dialog;
   };
 
@@ -250,13 +268,13 @@
           const createBtnWrapper = createElement({
             parent: null,
             attributes: {
-              class: 'pr-checker-create-btn'
-            }
+              class: "pr-checker-create-btn",
+            },
           });
           createPrBtn.parentNode.insertBefore(createBtnWrapper, createPrBtn);
           createPrBtn.parentNode.removeChild(createPrBtn);
           createBtnWrapper.appendChild(createPrBtn);
-          resolve({createBtnWrapper, createPrBtn});
+          resolve({ createBtnWrapper, createPrBtn });
         } else if (findCount > MAX_FIND_COUNT) {
           clearInterval(interval);
           reject(new Error("Create PR button doesn't exist"));
@@ -267,7 +285,7 @@
   };
 
   findCreatePrBtn()
-    .then(({createBtnWrapper, createPrBtn}) => {
+    .then(({ createBtnWrapper, createPrBtn }) => {
       initPrChecker();
       const maskBtn = createElement({
         parent: createBtnWrapper,
