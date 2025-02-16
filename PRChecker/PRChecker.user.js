@@ -186,10 +186,12 @@
 
   // 创建检查项列表
   const createCheckItems = (parent) => {
-    parent.innerHTML = "";
+    const fragment = document.createDocumentFragment();
     getCheckItems().forEach((item) => {
-      createElement({ parent, tagName: "li", text: item });
+      createElement({ parent: fragment, tagName: "li", text: item });
     });
+    parent.innerHTML = "";
+    parent.appendChild(fragment);
   };
 
   // 创建对话框
@@ -199,25 +201,37 @@
       createCheckItems(existingDialog.querySelector("#pr-check-items"));
       return existingDialog;
     }
+
+    // 使用文档片段批量创建元素
+    const fragment = document.createDocumentFragment();
     const dialog = createElement({
+      parent: fragment,
       tagName: "dialog",
       attributes: { id: "bitbucket-pr-checker" },
     });
+
+    // 创建标题
     createElement({
       parent: dialog,
       text: "创建PR前请检查以下几项！",
       attributes: { class: "pr-checker-title" },
     });
+
+    // 创建检查项列表
     const checkItemsWrapper = createElement({
       parent: dialog,
       tagName: "ol",
       attributes: { id: "pr-check-items" },
     });
     createCheckItems(checkItemsWrapper);
+
+    // 创建按钮组
     const btnWrapper = createElement({
       parent: dialog,
       attributes: { id: "pr-checker-btns" },
     });
+
+    // 创建按钮
     const closeBtn = createElement({
       parent: btnWrapper,
       tagName: "button",
@@ -225,6 +239,7 @@
       attributes: { class: "operate-btn pr-checker-close-btn" },
     });
     closeBtn.onclick = () => dialog.close();
+
     const ensureBtn = createElement({
       parent: btnWrapper,
       tagName: "button",
@@ -235,6 +250,9 @@
       dialog.close();
       createPrBtn.click();
     };
+
+    // 将片段一次性插入文档
+    document.body.appendChild(fragment);
     return dialog;
   };
 
