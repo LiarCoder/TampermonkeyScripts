@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      V1.2.2
+// @version      V1.2.3
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*/pull-requests?create*
@@ -20,23 +20,190 @@
     tagName = "div",
     text = "",
     attributes = {},
+    children = [],
+    event = {
+      name: "click",
+      handler: () => {},
+    },
   }) => {
     const element = document.createElement(tagName);
     element.innerText = text;
     Object.keys(attributes).forEach((key) =>
       element.setAttribute(key, attributes[key])
     );
+    const childList = typeof children === 'function' ? children(element) : children;
+    if (childList && childList.length > 0) {
+      childList.forEach(child => {
+        element.appendChild(child);
+      });
+    }
+    if (event && event.name && event.handler) {
+      element.addEventListener(event.name, event.handler);
+    }
     if (parent) {
       parent.appendChild(element);
     }
     return element;
   };
 
-  /**
-   * 在创建PR前进行检查
-   */
-  const checkPrBeforeCreate = () => {
-    const prCheckerStyle = `
+  // 创建对话框
+  const createDialog = ({
+    title = '',
+    text4Ok = '',
+    text4Cancel = '',
+    content = () => null,
+    onOk = () => {},
+    onCancel = () => {},
+    onDialogExist = () => null,
+  }) => {
+    const existingDialog = document.getElementById("bitbucket-pr-checker");
+    if (existingDialog) {
+      onDialogExist(existingDialog);
+      return existingDialog;
+    }
+
+    const initDialogStyle = () => {
+      const dialogStyle = `
+      .pr-checker-mask::backdrop {
+        background-color: rgba(0, 10, 31, 0.29);
+      }
+  
+      .pr-checker-dialog {
+        font-size: 14px;
+        color: var(--fd-color-text);
+        border: none;
+        border-radius: 8px;
+        background: #ffffff;
+        width: 500px;
+        padding: 0;
+        box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
+          0 6px 16px #00000014;
+      }
+  
+      .pr-checker-dialog .pr-checker-title {
+        border-bottom: 1px solid var(--fd-color-border);
+        padding: 16px 20px;
+        font-size: 18px;
+        line-height: 26px;
+        font-weight: 700;
+      }
+
+      .pr-checker-dialog .pr-checker-content {
+        padding: 16px 20px;
+      }
+
+      #pr-checker-btns {
+        margin-top: 14px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 12px 20px;
+        border-top: 1px solid var(--fd-color-border);
+      }
+
+      #pr-checker-btns .pr-checker-btn {
+        border: 1px solid;
+        border-radius: 4px;
+        line-height: 32px;
+        padding: 0px 16px;
+        outline: none;
+        cursor: pointer;
+        transition: box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+          background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+          border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+          color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+      }
+
+      #pr-checker-btns .close-btn {
+        background: var(--fd-color-white);
+        border-color: var(--fd-color-border);
+      }
+
+      #pr-checker-btns .close-btn:hover {
+        color: var(--fd-color-primary-hover);
+        border-color: var(--fd-color-primary-hover);
+      }
+
+      #pr-checker-btns .ensure-btn {
+        color: var(--fd-color-text-light-solid);
+        background: var(--fd-color-primary);
+        border-color: var(--fd-color-primary);
+      }
+
+      #pr-checker-btns .ensure-btn:hover {
+        background: var(--fd-color-primary-hover);
+      }
+    `;
+      GM_addStyle(dialogStyle);
+    }
+
+    // 使用文档片段批量创建元素
+    const fragment = document.createDocumentFragment();
+    const dialog = createElement({
+      parent: fragment,
+      tagName: "dialog",
+      attributes: {
+        id: "bitbucket-pr-checker",
+        class: "pr-checker-dialog pr-checker-mask"
+      },
+      children: [
+        // 创建标题
+        createElement({
+          text: title,
+          attributes: { class: "pr-checker-title" },
+        }),
+        // 创建内容
+        createElement({
+          attributes: { class: "pr-checker-content" },
+          children: (element) => content(element),
+        }),
+        // 创建按钮组
+        createElement({
+          attributes: { id: "pr-checker-btns" },
+          children: [
+            // 取消按钮
+            createElement({
+              tagName: "button",
+              text: text4Cancel,
+              attributes: { 
+                class: "pr-checker-btn close-btn"
+              },
+              event: {
+                name: "click",
+                handler: () => {
+                dialog.close();
+                  onCancel();
+                }
+              }
+            }),
+            // 确认按钮
+            createElement({
+              tagName: "button",
+              text: text4Ok,
+              attributes: { 
+                class: "pr-checker-btn ensure-btn"
+              },
+              event: {
+                name: "click",
+                handler: () => {
+                  dialog.close();
+                  onOk();
+                }
+              }
+            })
+          ]
+        }),
+      ]
+    });
+
+    // 将片段一次性插入文档
+    document.body.appendChild(fragment);
+    initDialogStyle();
+    return dialog;
+  };
+
+  const initCommonStyle = () => {
+    const commonStyle = `
     :root {
       --fd-color-border: #d7d9dc;
       --fd-color-text: #141e31;
@@ -45,7 +212,15 @@
       --fd-color-primary: #00b899;
       --fd-color-primary-hover: #4dcdb8;
     }
+  `;
+    GM_addStyle(commonStyle);
+  }
 
+  /**
+   * 在创建PR前进行检查
+   */
+  const checkPrBeforeCreate = () => {
+    const prCheckerStyle = `
     .pr-checker-create-btn {
       position: relative;
       display: inline-block;
@@ -56,72 +231,6 @@
     .pr-checker-create-btn:hover #submit-form {
       --aui-btn-bg: var(--aui-button-primary-hover-bg-color);
       --aui-btn-text: var(--aui-button-primary-active-text-color);
-    }
-
-    #bitbucket-pr-checker {
-      font-size: 14px;
-      color: var(--fd-color-text);
-      border: none;
-      border-radius: 8px;
-      background: #ffffff;
-      width: 500px;
-      padding: 0;
-      box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
-        0 6px 16px #00000014;
-    }
-
-    #bitbucket-pr-checker::backdrop {
-      background-color: rgba(0, 10, 31, 0.29);
-    }
-
-    #bitbucket-pr-checker .pr-checker-title {
-      border-bottom: 1px solid var(--fd-color-border);
-      padding: 16px 20px;
-      font-size: 18px;
-      line-height: 26px;
-      font-weight: 700;
-    }
-
-    #pr-checker-btns {
-      margin-top: 14px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 12px 20px;
-      border-top: 1px solid var(--fd-color-border);
-    }
-
-    #pr-checker-btns .operate-btn {
-      border: 1px solid;
-      border-radius: 4px;
-      line-height: 32px;
-      padding: 0px 16px;
-      outline: none;
-      cursor: pointer;
-      transition: box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-        background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-        border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-        color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-    }
-
-    #pr-checker-btns .pr-checker-close-btn {
-      background: var(--fd-color-white);
-      border-color: var(--fd-color-border);
-    }
-
-    #pr-checker-btns .pr-checker-close-btn:hover {
-      color: var(--fd-color-primary-hover);
-      border-color: var(--fd-color-primary-hover);
-    }
-
-    #pr-checker-btns .pr-checker-ensure-btn {
-      color: var(--fd-color-text-light-solid);
-      background: var(--fd-color-primary);
-      border-color: var(--fd-color-primary);
-    }
-
-    #pr-checker-btns .pr-checker-ensure-btn:hover {
-      background: var(--fd-color-primary-hover);
     }
 
     .pr-checker-mask-btn {
@@ -198,68 +307,6 @@
       parent.appendChild(fragment);
     };
 
-    // 创建对话框
-    const createDialog = (createPrBtn) => {
-      const existingDialog = document.getElementById("bitbucket-pr-checker");
-      if (existingDialog) {
-        createCheckItems(existingDialog.querySelector("#pr-check-items"));
-        return existingDialog;
-      }
-
-      // 使用文档片段批量创建元素
-      const fragment = document.createDocumentFragment();
-      const dialog = createElement({
-        parent: fragment,
-        tagName: "dialog",
-        attributes: { id: "bitbucket-pr-checker" },
-      });
-
-      // 创建标题
-      createElement({
-        parent: dialog,
-        text: "创建PR前请检查以下几项！",
-        attributes: { class: "pr-checker-title" },
-      });
-
-      // 创建检查项列表
-      const checkItemsWrapper = createElement({
-        parent: dialog,
-        tagName: "ol",
-        attributes: { id: "pr-check-items" },
-      });
-      createCheckItems(checkItemsWrapper);
-
-      // 创建按钮组
-      const btnWrapper = createElement({
-        parent: dialog,
-        attributes: { id: "pr-checker-btns" },
-      });
-
-      // 创建按钮
-      const closeBtn = createElement({
-        parent: btnWrapper,
-        tagName: "button",
-        text: "还需调整",
-        attributes: { class: "operate-btn pr-checker-close-btn" },
-      });
-      closeBtn.onclick = () => dialog.close();
-
-      const ensureBtn = createElement({
-        parent: btnWrapper,
-        tagName: "button",
-        text: "确认创建",
-        attributes: { class: "operate-btn pr-checker-ensure-btn" },
-      });
-      ensureBtn.onclick = () => {
-        dialog.close();
-        createPrBtn.click();
-      };
-
-      // 将片段一次性插入文档
-      document.body.appendChild(fragment);
-      return dialog;
-    };
-
     // 轮询查找创建PR按钮
     const findCreatePrBtn = () => {
       let findCount = 0;
@@ -291,18 +338,42 @@
     findCreatePrBtn()
       .then(({ createBtnWrapper, createPrBtn }) => {
         initPrChecker();
-        const maskBtn = createElement({
+        createElement({
           parent: createBtnWrapper,
-          attributes: { class: "pr-checker-mask-btn" },
+          attributes: { class: "pr-checker-mask-btn"},
+          event: {
+            name: "click",
+            handler: (e) => {
+              e.stopPropagation();
+              const dialog = createDialog({
+                title: "创建PR前请检查以下几项！",
+                text4Ok: "确认创建",
+                text4Cancel: "还需调整",
+                content: (dialog) => {
+                  // 创建检查项列表
+                  const checkItemsWrapper = createElement({
+                    parent: dialog,
+                    tagName: "ol",
+                    attributes: { id: "pr-check-items" },
+                  });
+                  createCheckItems(checkItemsWrapper);
+                  return [checkItemsWrapper];
+                },
+                onOk: () => {
+                  createPrBtn.click();
+                },
+                onDialogExist: (existingDialog) => {
+                  return createCheckItems(existingDialog.getElementById("pr-check-items"));
+                },
+              });
+              dialog.showModal();
+            }
+          }
         });
-        maskBtn.onclick = (e) => {
-          e.stopPropagation();
-          const dialog = createDialog(createPrBtn);
-          dialog.showModal();
-        };
       })
       .catch((err) => console.error(err));
   };
 
+  initCommonStyle();
   checkPrBeforeCreate();
 })();
