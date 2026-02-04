@@ -21,10 +21,7 @@
     text = "",
     attributes = {},
     children = [],
-    event = {
-      name: "click",
-      handler: () => {},
-    },
+    events = [],
   }) => {
     const element = document.createElement(tagName);
     element.innerText = text;
@@ -37,8 +34,12 @@
         element.appendChild(child);
       });
     }
-    if (event && event.name && event.handler) {
-      element.addEventListener(event.name, event.handler);
+    if (events && events.length > 0) {
+      events.forEach(event => {
+        if (event.name && event.handler) {
+          element.addEventListener(event.name, event.handler);
+        }
+      });
     }
     if (parent) {
       parent.appendChild(element);
@@ -169,13 +170,13 @@
               attributes: { 
                 class: "pr-checker-btn close-btn"
               },
-              event: {
+              events: [{
                 name: "click",
                 handler: () => {
                 dialog.close();
                   onCancel();
                 }
-              }
+              }]
             }),
             // 确认按钮
             createElement({
@@ -184,13 +185,13 @@
               attributes: { 
                 class: "pr-checker-btn ensure-btn"
               },
-              event: {
+              events: [{
                 name: "click",
                 handler: () => {
                   dialog.close();
                   onOk();
                 }
-              }
+              }]
             })
           ]
         }),
@@ -354,7 +355,7 @@
         createElement({
           parent: createBtnWrapper,
           attributes: { class: "pr-checker-mask-btn"},
-          event: {
+          events: [{
             name: "click",
             handler: (e) => {
               e.stopPropagation();
@@ -381,7 +382,7 @@
               });
               dialog.showModal();
             }
-          }
+          }]
         });
       })
       .catch((err) => console.error(err));
