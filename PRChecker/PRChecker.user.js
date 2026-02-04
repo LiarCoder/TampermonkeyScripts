@@ -51,6 +51,7 @@
     title = '',
     text4Ok = '',
     text4Cancel = '',
+    closeOnClickMask = true,
     content = () => null,
     onOk = () => {},
     onCancel = () => {},
@@ -199,6 +200,18 @@
     // 将片段一次性插入文档
     document.body.appendChild(fragment);
     initDialogStyle();
+    
+    // 实现点击遮罩关闭功能
+    if (closeOnClickMask) {
+      dialog.addEventListener('click', (e) => {
+        // 如果点击的是 dialog 本身（遮罩层），而不是内部的子元素，则关闭 dialog
+        if (e.target === dialog) {
+          dialog.close();
+          onCancel();
+        }
+      });
+    }
+    
     return dialog;
   };
 
