@@ -3,3 +3,5 @@
 /JueJinMarkdownFormatter/TestDocs/*
 
 *.assets/
+
+.idea/
