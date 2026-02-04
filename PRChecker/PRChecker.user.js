@@ -363,7 +363,7 @@
                   createPrBtn.click();
                 },
                 onDialogExist: (existingDialog) => {
-                  return createCheckItems(existingDialog.getElementById("pr-check-items"));
+                  return createCheckItems(existingDialog.querySelector("#pr-check-items"));
                 },
               });
               dialog.showModal();
