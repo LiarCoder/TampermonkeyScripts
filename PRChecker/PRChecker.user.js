@@ -473,33 +473,36 @@
 
     const ILLEGAL_TARGET_BRANCH = ['master', 'main'];
 
-    const createTargetBranchWarning = (targetBranch) => {
+    const triggerTargetBranchWarning = (targetBranch, isImmediate = false) => {
+      // 【继续】按钮
+      const createPrBtn = document.getElementById("show-create-pr-button");
+      if (!createPrBtn) {
+        return;
+      }
+      const warningWrapper = document.querySelector('.pr-create-warning');
+      const warningText = document.querySelector('.pr-create-warning-text');
       const isCurrentTargetBranchIllegal = ILLEGAL_TARGET_BRANCH.some(
         illegalTargetBranch => targetBranch.includes(illegalTargetBranch)
       );
-      if (!isCurrentTargetBranchIllegal) {
-        return;
-      }
-      const dialog = createDialog({
-        id: "target-branch-warning-dialog",
-        title: "目标分支检测异常！",
-        text4Ok: "知道了",
-        text4Cancel: null,
-        content: (dialog) => {
-          return [
-            createElement({
-              parent: dialog,
-              text: `目标分支不能为 ${targetBranch}`,
-            }),
-          ];
+      // 因为bitbucket可能会更新按钮的disabled状态，所以需要延迟执行
+      setTimeout(() => {
+        if(isCurrentTargetBranchIllegal) {
+          const warningTip = `目标分支不能为 ${targetBranch}`;
+          createPrBtn.setAttribute('disabled', '');
+          createPrBtn.setAttribute('title', warningTip);
+  
+          if (warningWrapper) {
+            warningWrapper.classList.remove('hidden');
+          }
+          if (warningText) {
+            warningText.innerText = warningTip;
+          }
         }
-      });
-      dialog.showModal();
-      return dialog;
+      }, isImmediate ? 0 : 300);
     }
 
     // 初始检查
-    createTargetBranchWarning(targetBranchInput.value);
+    triggerTargetBranchWarning(targetBranchInput.value, true);
 
     /**
      * 使用 MutationObserver 监听 value 属性（attribute）的变化
@@ -508,7 +511,7 @@
     const observer = new MutationObserver(() => {
       const targetBranch = targetBranchInput.value;
       if (targetBranch) {
-        createTargetBranchWarning(targetBranch);
+        triggerTargetBranchWarning(targetBranch);
       }
     });
     observer.observe(targetBranchInput, {
