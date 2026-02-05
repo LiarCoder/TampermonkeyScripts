@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      V1.2.3
+// @version      V1.3.0
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @author       liaw
 // @match        https://code.fineres.com/*/pull-requests?create*
@@ -47,18 +47,34 @@
     return element;
   };
 
+  /**
+   * 压缩数组，去除空值
+   * @param {Array} arr - 数组
+   * @returns {Array} 压缩后的数组
+   */
+  const compact = (arr) => {
+    if (!Array.isArray(arr)) {
+      return [];
+    }
+    if (arr.length === 0) {
+      return [];
+    }
+    return arr.filter(item => Boolean(item));
+  }
+
   // 创建对话框
   const createDialog = ({
+    id = 'pr-checker-dialog',
     title = '',
-    text4Ok = '',
-    text4Cancel = '',
-    closeOnClickMask = true,
+    text4Ok = '确认',
+    text4Cancel = '取消',
+    closeOnClickMask = false,
     content = () => [],
     onOk = () => {},
     onCancel = () => {},
     onDialogExist = () => null,
   }) => {
-    const existingDialog = document.getElementById("bitbucket-pr-checker");
+    const existingDialog = document.getElementById(id);
     if (existingDialog) {
       onDialogExist(existingDialog);
       return existingDialog;
@@ -195,7 +211,7 @@
       parent: fragment,
       tagName: "dialog",
       attributes: {
-        id: "bitbucket-pr-checker",
+        id,
         class: "pr-checker-dialog pr-checker-mask"
       },
       children: (dialog) => {
@@ -213,9 +229,9 @@
           // 创建按钮组
           createElement({
             attributes: { id: "pr-checker-btns" },
-            children: [
+            children: compact([
               // 取消按钮
-              createElement({
+              text4Cancel && createElement({
                 tagName: "button",
                 text: text4Cancel,
                 attributes: {
@@ -229,7 +245,7 @@
                 }]
               }),
               // 确认按钮
-              createElement({
+              text4Ok && createElement({
                 tagName: "button",
                 text: text4Ok,
                 attributes: {
@@ -242,7 +258,7 @@
                   }
                 }]
               })
-            ]
+            ])
           }),
         ]
       }
@@ -419,6 +435,7 @@
             handler: (e) => {
               e.stopPropagation();
               const dialog = createDialog({
+                id: "bitbucket-pr-checker",
                 closeOnClickMask: false,
                 title: "创建PR前请检查以下几项！",
                 text4Ok: "确认创建",
@@ -448,6 +465,59 @@
       .catch((err) => console.error(err));
   };
 
+  const checkTargetBranch = () => {
+    const targetBranchInput = document.getElementById("targetBranch-field");
+    if (!targetBranchInput) {
+      return;
+    }
+
+    const ILLEGAL_TARGET_BRANCH = ['master', 'main'];
+
+    const createTargetBranchWarning = (targetBranch) => {
+      const isCurrentTargetBranchIllegal = ILLEGAL_TARGET_BRANCH.some(
+        illegalTargetBranch => targetBranch.includes(illegalTargetBranch)
+      );
+      if (!isCurrentTargetBranchIllegal) {
+        return;
+      }
+      const dialog = createDialog({
+        id: "target-branch-warning-dialog",
+        title: "目标分支检测异常！",
+        text4Ok: "知道了",
+        text4Cancel: null,
+        content: (dialog) => {
+          return [
+            createElement({
+              parent: dialog,
+              text: `目标分支不能为 ${targetBranch}`,
+            }),
+          ];
+        }
+      });
+      dialog.showModal();
+      return dialog;
+    }
+
+    // 初始检查
+    createTargetBranchWarning(targetBranchInput.value);
+
+    /**
+     * 使用 MutationObserver 监听 value 属性（attribute）的变化
+     * 因为 targetBranchInput 设置了 type="hidden"，无法通过 onChange 直接监听 value 属性的变化
+     */
+    const observer = new MutationObserver(() => {
+      const targetBranch = targetBranchInput.value;
+      if (targetBranch) {
+        createTargetBranchWarning(targetBranch);
+      }
+    });
+    observer.observe(targetBranchInput, {
+      attributes: true,
+      attributeFilter: ['value']
+    });
+  };
+
   initCommonStyle();
+  checkTargetBranch();
   checkPrBeforeCreate();
 })();
