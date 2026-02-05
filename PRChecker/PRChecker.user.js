@@ -53,7 +53,7 @@
     text4Ok = '',
     text4Cancel = '',
     closeOnClickMask = true,
-    content = () => null,
+    content = () => [],
     onOk = () => {},
     onCancel = () => {},
     onDialogExist = () => null,
@@ -66,8 +66,53 @@
 
     const initDialogStyle = () => {
       const dialogStyle = `
+      @keyframes pr-checker-fade-in {
+        from {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes pr-checker-fade-out {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.9);
+        }
+      }
+
+      @keyframes pr-checker-backdrop-fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes pr-checker-backdrop-fade-out {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
+      }
+
       .pr-checker-mask::backdrop {
         background-color: rgba(0, 10, 31, 0.29);
+        animation: pr-checker-backdrop-fade-in 0.3s ease-out;
+      }
+
+      .pr-checker-mask.closing::backdrop {
+        animation: pr-checker-backdrop-fade-out 0.3s ease-out;
       }
   
       .pr-checker-dialog {
@@ -80,6 +125,11 @@
         padding: 0;
         box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
           0 6px 16px #00000014;
+        animation: pr-checker-fade-in 0.3s ease-out;
+      }
+
+      .pr-checker-dialog.closing {
+        animation: pr-checker-fade-out 0.3s ease-out;
       }
   
       .pr-checker-dialog .pr-checker-title {
@@ -148,67 +198,76 @@
         id: "bitbucket-pr-checker",
         class: "pr-checker-dialog pr-checker-mask"
       },
-      children: [
-        // 创建标题
-        createElement({
-          text: title,
-          attributes: { class: "pr-checker-title" },
-        }),
-        // 创建内容
-        createElement({
-          attributes: { class: "pr-checker-content" },
-          children: (element) => content(element),
-        }),
-        // 创建按钮组
-        createElement({
-          attributes: { id: "pr-checker-btns" },
-          children: [
-            // 取消按钮
-            createElement({
-              tagName: "button",
-              text: text4Cancel,
-              attributes: { 
-                class: "pr-checker-btn close-btn"
-              },
-              events: [{
-                name: "click",
-                handler: () => {
-                dialog.close();
-                  onCancel();
-                }
-              }]
-            }),
-            // 确认按钮
-            createElement({
-              tagName: "button",
-              text: text4Ok,
-              attributes: { 
-                class: "pr-checker-btn ensure-btn"
-              },
-              events: [{
-                name: "click",
-                handler: () => {
-                  dialog.close();
-                  onOk();
-                }
-              }]
-            })
-          ]
-        }),
-      ]
+      children: (dialog) => {
+        return [
+          // 创建标题
+          createElement({
+            text: title,
+            attributes: { class: "pr-checker-title" },
+          }),
+          // 创建内容
+          createElement({
+            attributes: { class: "pr-checker-content" },
+            children: (element) => content(element),
+          }),
+          // 创建按钮组
+          createElement({
+            attributes: { id: "pr-checker-btns" },
+            children: [
+              // 取消按钮
+              createElement({
+                tagName: "button",
+                text: text4Cancel,
+                attributes: {
+                  class: "pr-checker-btn close-btn"
+                },
+                events: [{
+                  name: "click",
+                  handler: () => {
+                    closeDialogWithAnimation(onCancel);
+                  }
+                }]
+              }),
+              // 确认按钮
+              createElement({
+                tagName: "button",
+                text: text4Ok,
+                attributes: {
+                  class: "pr-checker-btn ensure-btn"
+                },
+                events: [{
+                  name: "click",
+                  handler: () => {
+                    closeDialogWithAnimation(onOk);
+                  }
+                }]
+              })
+            ]
+          }),
+        ]
+      }
     });
 
     // 将片段一次性插入文档
     document.body.appendChild(fragment);
     initDialogStyle();
     
+    // 带动画的关闭函数
+    const closeDialogWithAnimation = (callback) => {
+      dialog.classList.add('closing');
+      setTimeout(() => {
+        dialog.close();
+        dialog.classList.remove('closing');
+        callback();
+      }, 300); // 动画时长 0.3s
+    };
+    
     // 实现点击遮罩关闭功能
     if (closeOnClickMask) {
       dialog.addEventListener('click', (e) => {
         // 如果点击的是 dialog 本身（遮罩层），而不是内部的子元素，则关闭 dialog
         if (e.target === dialog) {
-          dialog.close();
-          onCancel();
+          closeDialogWithAnimation(onCancel);
         }
       });
     }
@@ -360,6 +419,7 @@
             handler: (e) => {
               e.stopPropagation();
               const dialog = createDialog({
+                closeOnClickMask: false,
                 title: "创建PR前请检查以下几项！",
                 text4Ok: "确认创建",
                 text4Cancel: "还需调整",
