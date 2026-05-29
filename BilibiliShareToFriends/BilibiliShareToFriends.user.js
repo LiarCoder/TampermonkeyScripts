@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.1.9
+// @version      0.1.10
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以私信分享卡片发送给最近私信联系人
 // @author       LiarCoder
 // @match        https://www.bilibili.com/video/*
@@ -185,9 +185,20 @@
       .${SCRIPT_ID}-cover {
         width: 88px;
         aspect-ratio: 16 / 10;
-        object-fit: cover;
         border-radius: 4px;
         background: #e3e5e7;
+      }
+
+      .${SCRIPT_ID}-cover-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9499a0;
+        font-size: 12px;
+      }
+
+      .${SCRIPT_ID}-cover-img {
+        object-fit: cover;
       }
 
       .${SCRIPT_ID}-video-title {
@@ -907,6 +918,40 @@
       text,
     });
 
+  const createVideoCover = (video) => {
+    if (!video?.pic) {
+      return createElement({
+        attributes: {
+          class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`,
+        },
+        text: "读取中",
+      });
+    }
+    return createElement({
+      tagName: "img",
+      attributes: {
+        class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-img`,
+        src: video.pic,
+        alt: "",
+        referrerpolicy: "no-referrer",
+      },
+      events: [
+        {
+          name: "error",
+          handler: (event) => {
+            const placeholder = createElement({
+              attributes: {
+                class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`,
+              },
+              text: "封面加载失败",
+            });
+            event.currentTarget.replaceWith(placeholder);
+          },
+        },
+      ],
+    });
+  };
+
   const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" }) => {
     let selectedSession = null;
     let sending = false;
@@ -935,14 +980,7 @@
     const videoPreview = createElement({
       attributes: { class: `${SCRIPT_ID}-video` },
       children: [
-        createElement({
-          tagName: "img",
-          attributes: {
-            class: `${SCRIPT_ID}-cover`,
-            src: video?.pic || "",
-            alt: "",
-          },
-        }),
+        createVideoCover(video),
         createElement({
           children: [
             createElement({
