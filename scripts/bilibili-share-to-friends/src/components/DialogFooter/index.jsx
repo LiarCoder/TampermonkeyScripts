@@ -27,9 +27,10 @@ export const CloseFooter = ({ onClose }) => (
 );
 
 export const createDialogFooter = ({ onCancel }) => {
-  const footer = renderToElement(DialogFooter({ onCancel }));
+  const footer = renderToElement(<DialogFooter onCancel={onCancel} />);
   const [cancelBtn, sendBtn] = footer.querySelectorAll("button");
   return { footer, cancelBtn, sendBtn };
 };
 
-export const createCloseFooter = ({ onClose }) => renderToElement(CloseFooter({ onClose }));
+export const createCloseFooter = ({ onClose }) =>
+  renderToElement(<CloseFooter onClose={onClose} />);

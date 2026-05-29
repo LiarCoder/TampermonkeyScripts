@@ -24,4 +24,4 @@ export const RecipientTabs = ({ activeTab, onChange }) => (
 );
 
 export const createRecipientTabs = ({ activeTab, onChange }) =>
-  renderToElement(RecipientTabs({ activeTab, onChange }));
+  renderToElement(<RecipientTabs activeTab={activeTab} onChange={onChange} />);

@@ -39,5 +39,5 @@ export const SearchBox = ({
 
 export const createSearchBox = (props) => {
   const composing = { value: false };
-  return renderToElement(SearchBox({ ...props, composing }));
+  return renderToElement(<SearchBox {...props} composing={composing} />);
 };

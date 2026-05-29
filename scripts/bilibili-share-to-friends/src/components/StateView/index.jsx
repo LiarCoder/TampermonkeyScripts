@@ -6,4 +6,5 @@ export const StateView = ({ text, isError = false }) => (
   <div className={`${SCRIPT_ID}-state${isError ? ` ${SCRIPT_ID}-state-error` : ""}`}>{text}</div>
 );
 
-export const createState = (text, isError = false) => renderToElement(StateView({ text, isError }));
+export const createState = (text, isError = false) =>
+  renderToElement(<StateView text={text} isError={isError} />);

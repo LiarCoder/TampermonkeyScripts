@@ -30,5 +30,5 @@ const EntryButton = ({ onClick }) => (
 );
 
 export const createEntryButton = ({ onClick }) => {
-  return renderToElement(EntryButton({ onClick }));
+  return renderToElement(<EntryButton onClick={onClick} />);
 };

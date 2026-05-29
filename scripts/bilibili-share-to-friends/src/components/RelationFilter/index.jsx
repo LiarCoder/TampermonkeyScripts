@@ -25,4 +25,4 @@ export const RelationFilter = ({ activeRelation, onChange }) => (
 );
 
 export const createRelationFilter = ({ activeRelation, onChange }) =>
-  renderToElement(RelationFilter({ activeRelation, onChange }));
+  renderToElement(<RelationFilter activeRelation={activeRelation} onChange={onChange} />);

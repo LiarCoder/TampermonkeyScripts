@@ -29,18 +29,18 @@ export const UserList = ({
     <ul className={`${SCRIPT_ID}-list`}>
       {users.map((user) => (
         <li key={user.mid}>
-          {UserListItem({ user, selected: user.mid === selectedMid, onSelect })}
+          <UserListItem user={user} selected={user.mid === selectedMid} onSelect={onSelect} />
         </li>
       ))}
     </ul>
-    {showFooter
-      ? UserListFooter({
-          loadingMore,
-          hasMore,
-          moreError,
-          onRetry,
-        })
-      : null}
+    {showFooter ? (
+      <UserListFooter
+        loadingMore={loadingMore}
+        hasMore={hasMore}
+        moreError={moreError}
+        onRetry={onRetry}
+      />
+    ) : null}
     {showFooter && hasMore && !moreError ? (
       <div
         className={`${SCRIPT_ID}-list-sentinel`}
@@ -50,4 +50,4 @@ export const UserList = ({
   </div>
 );
 
-export const createUserList = (props) => renderToElement(UserList(props));
+export const createUserList = (props) => renderToElement(<UserList {...props} />);

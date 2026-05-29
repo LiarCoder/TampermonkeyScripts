@@ -28,7 +28,7 @@ export const VideoCover = ({ video }) => {
 
 export const VideoPreview = ({ video }) => (
   <div className={`${SCRIPT_ID}-video`}>
-    {VideoCover({ video })}
+    <VideoCover video={video} />
     <div>
       <p className={`${SCRIPT_ID}-video-title`}>{video?.title || "当前视频"}</p>
       <div className={`${SCRIPT_ID}-video-author`}>
@@ -38,4 +38,4 @@ export const VideoPreview = ({ video }) => (
   </div>
 );
 
-export const createVideoPreview = (video) => renderToElement(VideoPreview({ video }));
+export const createVideoPreview = (video) => renderToElement(<VideoPreview video={video} />);

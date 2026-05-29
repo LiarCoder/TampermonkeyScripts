@@ -53,7 +53,7 @@ export const DialogHeader = ({ title, onClose, disabled = false }) => (
 );
 
 export const createDialogHeader = ({ title, onClose }) => {
-  const header = renderToElement(DialogHeader({ title, onClose }));
+  const header = renderToElement(<DialogHeader title={title} onClose={onClose} />);
   const closeBtn = header.querySelector(`.${SCRIPT_ID}-close`);
   return { header, closeBtn };
 };
