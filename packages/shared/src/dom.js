@@ -1,9 +1,4 @@
-export const compact = (items) => {
-  if (!Array.isArray(items)) {
-    return [];
-  }
-  return items.filter(Boolean);
-};
+import { compact } from "./array.js";
 
 export const createElement = ({
   parent = null,
