@@ -7,7 +7,7 @@ const relationOptions = [
   { value: "followers", label: "我的粉丝" },
 ];
 
-const RelationFilter = ({ activeRelation, onChange }) => (
+export const RelationFilter = ({ activeRelation, onChange }) => (
   <div className={`${SCRIPT_ID}-relation-filter`}>
     {relationOptions.map((option) => (
       <label key={option.value} className={`${SCRIPT_ID}-relation-option`}>

@@ -1,3 +1,5 @@
+import { render } from "preact";
+
 import { SCRIPT_ID } from "../../constants.js";
 import { renderToElement } from "../../render.js";
 import "./style.css";
@@ -7,6 +9,7 @@ export const closeDialog = (dialog) => {
     return;
   }
   try {
+    render(null, dialog);
     if (dialog.open) {
       dialog.close();
     }
@@ -34,10 +37,16 @@ export const setDialogContent = (dialog, child) => {
   dialog.appendChild(child);
 };
 
-const DialogHeader = ({ title, onClose }) => (
+export const DialogHeader = ({ title, onClose, disabled = false }) => (
   <div className={`${SCRIPT_ID}-header`}>
     <h3 className={`${SCRIPT_ID}-title`}>{title}</h3>
-    <button className={`${SCRIPT_ID}-close`} title="关闭" type="button" onClick={onClose}>
+    <button
+      className={`${SCRIPT_ID}-close`}
+      title="关闭"
+      type="button"
+      disabled={disabled}
+      onClick={onClose}
+    >
       ×
     </button>
   </div>

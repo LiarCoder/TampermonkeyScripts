@@ -9,7 +9,7 @@ const createCoverPlaceholder = (text) => {
   return placeholder;
 };
 
-const VideoCover = ({ video }) => {
+export const VideoCover = ({ video }) => {
   if (!video?.pic) {
     return <div className={`${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`}>读取中</div>;
   }
@@ -26,7 +26,7 @@ const VideoCover = ({ video }) => {
   );
 };
 
-const VideoPreview = ({ video }) => (
+export const VideoPreview = ({ video }) => (
   <div className={`${SCRIPT_ID}-video`}>
     {VideoCover({ video })}
     <div>

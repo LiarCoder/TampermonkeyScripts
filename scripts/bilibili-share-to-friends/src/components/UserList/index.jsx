@@ -3,7 +3,7 @@ import { renderToElement } from "../../render.js";
 import { UserListItem } from "../UserListItem/index.jsx";
 import "./style.css";
 
-const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
+export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
   <div className={`${SCRIPT_ID}-list-footer`}>
     {moreError ? (
       <button className={`${SCRIPT_ID}-list-retry`} type="button" onClick={onRetry}>
@@ -15,7 +15,7 @@ const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
   </div>
 );
 
-const UserList = ({
+export const UserList = ({
   users,
   selectedMid = null,
   loadingMore = false,

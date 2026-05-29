@@ -2,18 +2,23 @@ import { SCRIPT_ID } from "../../constants.js";
 import { renderToElement } from "../../render.js";
 import "./style.css";
 
-const DialogFooter = ({ onCancel }) => (
+export const DialogFooter = ({ sending = false, canSend = false, onCancel, onSend = () => {} }) => (
   <div className={`${SCRIPT_ID}-footer`}>
-    <button className={`${SCRIPT_ID}-btn`} type="button" onClick={onCancel}>
+    <button className={`${SCRIPT_ID}-btn`} type="button" disabled={sending} onClick={onCancel}>
       取消
     </button>
-    <button className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`} type="button" disabled>
-      发送
+    <button
+      className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`}
+      type="button"
+      disabled={sending || !canSend}
+      onClick={onSend}
+    >
+      {sending ? "发送中" : "发送"}
     </button>
   </div>
 );
 
-const CloseFooter = ({ onClose }) => (
+export const CloseFooter = ({ onClose }) => (
   <div className={`${SCRIPT_ID}-footer`}>
     <button className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`} type="button" onClick={onClose}>
       关闭

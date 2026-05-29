@@ -7,7 +7,7 @@ const tabs = [
   { value: "all", label: "全部好友" },
 ];
 
-const RecipientTabs = ({ activeTab, onChange }) => (
+export const RecipientTabs = ({ activeTab, onChange }) => (
   <div className={`${SCRIPT_ID}-tabs`}>
     {tabs.map((tab) => (
       <button

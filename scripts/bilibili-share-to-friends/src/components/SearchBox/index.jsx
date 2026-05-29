@@ -2,13 +2,13 @@ import { SCRIPT_ID } from "../../constants.js";
 import { renderToElement } from "../../render.js";
 import "./style.css";
 
-const SearchBox = ({
+export const SearchBox = ({
   value,
   placeholder = "搜索用户昵称",
   notice = "",
   onCompositionStart = () => {},
   onInput,
-  composing,
+  composing = { value: false },
 }) => {
   return (
     <div className={`${SCRIPT_ID}-search`}>
