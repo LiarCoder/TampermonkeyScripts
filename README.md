@@ -15,7 +15,8 @@
 
 - `packages/shared`：跨脚本复用的 DOM、样式、路由和缓存工具。
 - `scripts/*/legacy`：原始脚本文件，保留历史和对照。
-- `scripts/bilibili-share-to-friends/src`：第一个 Vite 工程化试点。
+- `scripts/*/src`：各脚本的 Vite 构建入口。
+- `scripts/bilibili-share-to-friends/src`：已按 API、UI、样式、元信息做首个深度拆分的试点。
 
 常用命令：
 
@@ -23,6 +24,7 @@
 pnpm install
 pnpm dev:bilibili
 pnpm build:bilibili
+pnpm build
 pnpm shell:bilibili
 pnpm lint
 pnpm test
