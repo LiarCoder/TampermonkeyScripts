@@ -1,10 +1,10 @@
 .bili-share-to-friends-person {
   display: grid;
-  grid-template-columns: 40px 1fr auto;
+  grid-template-columns: 36px 1fr auto;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   width: 100%;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: 0;
   background: #fff;
   color: inherit;
@@ -18,8 +18,8 @@
 }
 
 .bili-share-to-friends-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   background: #e3e5e7;
@@ -36,7 +36,7 @@
 
 .bili-share-to-friends-meta {
   min-width: 0;
-  margin-top: 2px;
+  margin-top: 1px;
   color: #9499a0;
   font-size: 12px;
   overflow: hidden;

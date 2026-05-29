@@ -8,8 +8,11 @@
 }
 
 .bili-share-to-friends-dialog {
+  display: flex;
+  flex-direction: column;
   width: min(420px, calc(100vw - 32px));
-  max-height: min(680px, calc(100vh - 48px));
+  height: min(620px, calc(100vh - 48px));
+  max-height: calc(100vh - 48px);
   padding: 0;
   border: 0;
   border-radius: 8px;
@@ -29,7 +32,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  flex: 0 0 auto;
+  padding: 8px 14px;
   border-bottom: 1px solid #e3e5e7;
 }
 
@@ -40,14 +44,14 @@
 }
 
 .bili-share-to-friends-close {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: #61666d;
   font-size: 22px;
-  line-height: 28px;
+  line-height: 26px;
   cursor: pointer;
 }
 

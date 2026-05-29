@@ -1,7 +1,8 @@
 .bili-share-to-friends-relation-filter {
   display: flex;
   gap: 18px;
-  padding: 10px 16px 2px;
+  flex: 0 0 auto;
+  padding: 7px 14px 1px;
   color: #18191c;
 }
 
