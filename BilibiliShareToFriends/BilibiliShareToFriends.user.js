@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.1.11
+// @version      0.2.0
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以私信分享卡片发送给最近私信联系人
 // @author       LiarCoder
 // @match        https://www.bilibili.com/video/*
@@ -800,36 +800,6 @@
     return devId;
   };
 
-  const sendVideoCard = async ({ nav, csrf, video, receiver }) => {
-    const devId = getDevId();
-    const timestamp = Math.round(Date.now() / 1000);
-    const content = {
-      id: video.aid,
-      title: video.title,
-      source: 5,
-      thumb: video.pic,
-      author: video.ownerName,
-      author_id: String(video.ownerMid),
-    };
-    const form = createSendMessageForm({
-      nav,
-      csrf,
-      receiver,
-      msgType: 7,
-      content,
-      devId,
-      timestamp,
-      fromFirework: "1",
-    });
-    return postPrivateMessage({
-      nav,
-      form,
-      receiver,
-      devId,
-      action: "发送视频卡片私信",
-    });
-  };
-
   const sendVideoText = async ({ nav, csrf, video, receiver }) => {
     const devId = getDevId();
     const timestamp = Math.round(Date.now() / 1000);
@@ -853,17 +823,6 @@
       devId,
       action: "发送视频链接私信",
     });
-  };
-
-  const shareVideoToFriend = async ({ nav, csrf, video, receiver }) => {
-    try {
-      await sendVideoCard({ nav, csrf, video, receiver });
-      return { mode: "card" };
-    } catch (cardError) {
-      // PC Web 端视频卡片接口不稳定；卡片失败时保证文本链接能发出去。
-      await sendVideoText({ nav, csrf, video, receiver });
-      return { mode: "text", cardError };
-    }
   };
 
   const closeDialog = (dialog) => {
@@ -1133,17 +1092,13 @@
       setSending(true);
       try {
         const { nav, csrf } = await assertLogin();
-        const shareResult = await shareVideoToFriend({
+        await sendVideoText({
           nav,
           csrf,
           video,
           receiver: selectedSession,
         });
-        showResult(
-          shareResult.mode === "card"
-            ? `已发送给 ${selectedSession.name}。`
-            : `视频卡片发送失败，已改用文本链接发送给 ${selectedSession.name}。`
-        );
+        showResult(`已将视频链接发送给 ${selectedSession.name}。`);
       } catch (sendError) {
         setSending(false);
         clearErrorStates();
