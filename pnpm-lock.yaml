@@ -23,11 +23,47 @@ importers:
 
   packages/shared: {}
 
+  scripts/beautify-code-block-font-style:
+    devDependencies:
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1(lightningcss@1.32.0)
+      vite-plugin-monkey:
+        specifier: 6.0.1
+        version: 6.0.1(postcss@8.5.15)(vite@6.4.1(lightningcss@1.32.0))
+
   scripts/bilibili-share-to-friends:
     dependencies:
       '@tampermonkey-scripts/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+    devDependencies:
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1(lightningcss@1.32.0)
+      vite-plugin-monkey:
+        specifier: 6.0.1
+        version: 6.0.1(postcss@8.5.15)(vite@6.4.1(lightningcss@1.32.0))
+
+  scripts/copy-title-and-location:
+    devDependencies:
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1(lightningcss@1.32.0)
+      vite-plugin-monkey:
+        specifier: 6.0.1
+        version: 6.0.1(postcss@8.5.15)(vite@6.4.1(lightningcss@1.32.0))
+
+  scripts/juejin-markdown-formatter:
+    devDependencies:
+      vite:
+        specifier: 6.4.1
+        version: 6.4.1(lightningcss@1.32.0)
+      vite-plugin-monkey:
+        specifier: 6.0.1
+        version: 6.0.1(postcss@8.5.15)(vite@6.4.1(lightningcss@1.32.0))
+
+  scripts/just-jump-ahead:
     devDependencies:
       vite:
         specifier: 6.4.1
