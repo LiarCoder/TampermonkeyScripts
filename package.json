@@ -32,15 +32,22 @@
     "shell:jump-ahead": "pnpm build:jump-ahead && node tools/generate-local-shell.js scripts/just-jump-ahead",
     "shell:pr-checker": "pnpm build:pr-checker && node tools/generate-local-shell.js scripts/pr-checker",
     "generate:shell": "node tools/generate-local-shell.js",
+    "prepare": "husky",
     "test": "pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "lint:staged": "lint-staged",
+    "commitlint": "commitlint --edit",
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@commitlint/cli": "20.5.3",
+    "@commitlint/config-conventional": "20.5.3",
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
     "prettier": "^3.6.2"
   }
 }
