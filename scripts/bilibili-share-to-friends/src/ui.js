@@ -25,6 +25,8 @@ import { createUserList } from "./components/UserList/index.js";
 import { createVideoPreview } from "./components/VideoPreview/index.js";
 import { SCRIPT_ID } from "./constants.js";
 
+const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
+
 const clearErrorStates = (body) => {
   body.querySelectorAll(`.${SCRIPT_ID}-state-error`).forEach((element) => element.remove());
 };
@@ -182,6 +184,18 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     }
   };
 
+  const getListScrollTop = () => body.querySelector(LIST_SCROLL_SELECTOR)?.scrollTop ?? 0;
+
+  const restoreListScroll = (scrollTop) => {
+    if (scrollTop === null) {
+      return;
+    }
+    const scrollRoot = body.querySelector(LIST_SCROLL_SELECTOR);
+    if (scrollRoot) {
+      scrollRoot.scrollTop = scrollTop;
+    }
+  };
+
   const observeLoadMore = () => {
     disconnectLoadMoreObserver();
     if (state.activeTab !== "all") {
@@ -191,7 +205,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
       return;
     }
-    const scrollRoot = body.querySelector("[data-bili-share-to-friends-list-scroll]");
+    const scrollRoot = body.querySelector(LIST_SCROLL_SELECTOR);
     const sentinel = scrollRoot?.querySelector("[data-bili-share-to-friends-list-sentinel]");
     if (!scrollRoot || !sentinel) {
       return;
@@ -275,41 +289,45 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     observeLoadMore();
   };
 
-  const renderBody = () => {
+  const renderBody = ({ listScrollTop = null } = {}) => {
     body.innerHTML = "";
-    sendBtn.disabled = sending || !state.selectedUser;
-    if (status) {
-      body.appendChild(createState(status));
-      return;
+    try {
+      sendBtn.disabled = sending || !state.selectedUser;
+      if (status) {
+        body.appendChild(createState(status));
+        return;
+      }
+      if (error) {
+        body.appendChild(createState(error, true));
+        return;
+      }
+      body.appendChild(
+        createRecipientTabs({
+          activeTab: state.activeTab,
+          onChange: (tab) => {
+            if (state.activeTab === tab) {
+              return;
+            }
+            resetSelection();
+            state.activeTab = tab;
+            renderBody();
+            if (tab === "all") {
+              loadRelationUsers(state.activeRelation);
+            }
+          },
+        })
+      );
+      if (state.activeTab === "recent") {
+        renderUsers({
+          users: state.recent.users,
+          emptyText: "暂无最近私信联系人。",
+        });
+        return;
+      }
+      renderRelationContent();
+    } finally {
+      restoreListScroll(listScrollTop);
     }
-    if (error) {
-      body.appendChild(createState(error, true));
-      return;
-    }
-    body.appendChild(
-      createRecipientTabs({
-        activeTab: state.activeTab,
-        onChange: (tab) => {
-          if (state.activeTab === tab) {
-            return;
-          }
-          resetSelection();
-          state.activeTab = tab;
-          renderBody();
-          if (tab === "all") {
-            loadRelationUsers(state.activeRelation);
-          }
-        },
-      })
-    );
-    if (state.activeTab === "recent") {
-      renderUsers({
-        users: state.recent.users,
-        emptyText: "暂无最近私信联系人。",
-      });
-      return;
-    }
-    renderRelationContent();
   };
 
   const loadRelationUsers = async (relation, { reset = false } = {}) => {
@@ -326,11 +344,12 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
       return;
     }
     const nextPage = reset ? 1 : displayState.page + 1;
+    const listScrollTop = !reset && displayState.loaded ? getListScrollTop() : null;
     displayState.loading = reset || !displayState.loaded;
     displayState.loadingMore = !displayState.loading;
     displayState.error = "";
     displayState.moreError = "";
-    renderBody();
+    renderBody({ listScrollTop });
     try {
       const loader = useSearch
         ? searchFollowings
@@ -361,7 +380,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     } finally {
       displayState.loading = false;
       displayState.loadingMore = false;
-      renderBody();
+      renderBody({ listScrollTop });
     }
   };
 
