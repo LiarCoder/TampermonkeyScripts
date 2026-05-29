@@ -6,6 +6,7 @@ import {
   getFollowings,
   getRecentSessions,
   getVideoInfo,
+  searchFollowings,
   sendVideoText,
 } from "./api.js";
 import {
@@ -18,6 +19,7 @@ import { createDialogFooter, createCloseFooter } from "./components/DialogFooter
 import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.js";
 import { createRecipientTabs } from "./components/RecipientTabs/index.js";
 import { createRelationFilter } from "./components/RelationFilter/index.js";
+import { createSearchBox } from "./components/SearchBox/index.js";
 import { createState } from "./components/StateView/index.js";
 import { createUserList } from "./components/UserList/index.js";
 import { createVideoPreview } from "./components/VideoPreview/index.js";
@@ -29,15 +31,31 @@ const clearErrorStates = (body) => {
 
 const createEmptyRelationState = () => ({
   users: [],
+  page: 0,
+  hasMore: true,
   loading: false,
+  loadingMore: false,
+  moreError: "",
   error: "",
   loaded: false,
+  search: {
+    users: [],
+    page: 0,
+    hasMore: true,
+    loading: false,
+    loadingMore: false,
+    moreError: "",
+    error: "",
+    loaded: false,
+    keyword: "",
+  },
 });
 
 const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", error = "" }) => {
   const state = {
     activeTab: "recent",
     activeRelation: "following",
+    searchTerm: "",
     selectedUser: null,
     recent: {
       users: sessions,
@@ -51,6 +69,8 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     },
   };
   let sending = false;
+  let searchTimer = null;
+  let loadMoreObserver = null;
 
   const { header, closeBtn } = createDialogHeader({
     title: "分享给 B站好友",
@@ -73,6 +93,11 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     sendBtn.removeAttribute("disabled");
   };
 
+  const resetSelection = () => {
+    state.selectedUser = null;
+    sendBtn.disabled = true;
+  };
+
   const setSending = (nextSending) => {
     sending = nextSending;
     sendBtn.disabled = nextSending || !state.selectedUser;
@@ -88,18 +113,118 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     closeBtn.disabled = false;
   };
 
-  const renderUsers = ({ users, emptyText }) => {
+  const renderUsers = ({
+    users,
+    emptyText,
+    hasMore = false,
+    loadingMore = false,
+    moreError = "",
+    showFooter = false,
+    onRetry = () => {},
+  }) => {
     if (users.length === 0) {
       body.appendChild(createState(emptyText));
+      if (showFooter) {
+        body.appendChild(
+          createUserList({
+            users,
+            selectedMid: state.selectedUser?.mid,
+            hasMore,
+            loadingMore,
+            moreError,
+            showFooter,
+            onRetry,
+            onSelect: updateSelection,
+          })
+        );
+      }
       return;
     }
     body.appendChild(
       createUserList({
         users,
         selectedMid: state.selectedUser?.mid,
+        hasMore,
+        loadingMore,
+        moreError,
+        showFooter,
+        onRetry,
         onSelect: updateSelection,
       })
     );
+  };
+
+  const getRelationDisplayState = (relation) => {
+    const relationState = state.relations[relation];
+    const keyword = state.searchTerm.trim();
+    if (relation === "following" && keyword) {
+      return relationState.search;
+    }
+    return relationState;
+  };
+
+  const getRelationDisplayUsers = (relation) => {
+    const relationState = state.relations[relation];
+    const keyword = state.searchTerm.trim().toLowerCase();
+    if (!keyword) {
+      return relationState.users;
+    }
+    if (relation === "following") {
+      return relationState.search.users;
+    }
+    return relationState.users.filter((user) => user.name.toLowerCase().includes(keyword));
+  };
+
+  const disconnectLoadMoreObserver = () => {
+    if (loadMoreObserver) {
+      loadMoreObserver.disconnect();
+      loadMoreObserver = null;
+    }
+  };
+
+  const observeLoadMore = () => {
+    disconnectLoadMoreObserver();
+    if (state.activeTab !== "all") {
+      return;
+    }
+    const displayState = getRelationDisplayState(state.activeRelation);
+    if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
+      return;
+    }
+    const sentinel = body.querySelector("[data-bili-share-to-friends-list-sentinel]");
+    if (!sentinel) {
+      return;
+    }
+    loadMoreObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadRelationUsers(state.activeRelation);
+        }
+      },
+      { root: body, threshold: 0.1 }
+    );
+    loadMoreObserver.observe(sentinel);
+  };
+
+  const scheduleSearch = (value) => {
+    if (state.searchTerm !== value) {
+      resetSelection();
+    }
+    state.searchTerm = value;
+    renderBody();
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      if (state.activeTab !== "all") {
+        return;
+      }
+      const keyword = state.searchTerm.trim();
+      if (state.activeRelation === "following" && keyword) {
+        state.relations.following.search.keyword = keyword;
+        loadRelationUsers("following", { reset: true });
+        return;
+      }
+      renderBody();
+    }, 300);
   };
 
   const renderRelationContent = () => {
@@ -110,25 +235,43 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
           if (state.activeRelation === relation) {
             return;
           }
+          resetSelection();
           state.activeRelation = relation;
           renderBody();
           loadRelationUsers(relation);
         },
       })
     );
-    const relationState = state.relations[state.activeRelation];
-    if (relationState.loading) {
+    const keyword = state.searchTerm.trim();
+    body.appendChild(
+      createSearchBox({
+        value: state.searchTerm,
+        notice:
+          state.activeRelation === "followers" && keyword
+            ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
+            : "",
+        onInput: scheduleSearch,
+      })
+    );
+    const displayState = getRelationDisplayState(state.activeRelation);
+    if (displayState.loading) {
       body.appendChild(createState("正在读取用户列表..."));
       return;
     }
-    if (relationState.error) {
-      body.appendChild(createState(relationState.error, true));
+    if (displayState.error) {
+      body.appendChild(createState(displayState.error, true));
       return;
     }
     renderUsers({
-      users: relationState.users,
+      users: getRelationDisplayUsers(state.activeRelation),
       emptyText: state.activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。",
+      hasMore: displayState.hasMore,
+      loadingMore: displayState.loadingMore,
+      moreError: displayState.moreError,
+      showFooter: true,
+      onRetry: () => loadRelationUsers(state.activeRelation),
     });
+    observeLoadMore();
   };
 
   const renderBody = () => {
@@ -149,6 +292,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
           if (state.activeTab === tab) {
             return;
           }
+          resetSelection();
           state.activeTab = tab;
           renderBody();
           if (tab === "all") {
@@ -167,23 +311,55 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     renderRelationContent();
   };
 
-  const loadRelationUsers = async (relation) => {
+  const loadRelationUsers = async (relation, { reset = false } = {}) => {
     const relationState = state.relations[relation];
-    if (!nav || relationState.loading || relationState.loaded) {
+    const keyword = state.searchTerm.trim();
+    const useSearch = relation === "following" && keyword;
+    const displayState = useSearch ? relationState.search : relationState;
+    if (
+      !nav ||
+      displayState.loading ||
+      displayState.loadingMore ||
+      (!reset && displayState.loaded && !displayState.hasMore)
+    ) {
       return;
     }
-    relationState.loading = true;
-    relationState.error = "";
+    const nextPage = reset ? 1 : displayState.page + 1;
+    displayState.loading = reset || !displayState.loaded;
+    displayState.loadingMore = !displayState.loading;
+    displayState.error = "";
+    displayState.moreError = "";
     renderBody();
     try {
-      const loader = relation === "following" ? getFollowings : getFollowers;
-      const result = await loader({ mid: nav.mid });
-      relationState.users = result.users;
-      relationState.loaded = true;
+      const loader = useSearch
+        ? searchFollowings
+        : relation === "following"
+          ? getFollowings
+          : getFollowers;
+      const result = await loader({
+        mid: nav.mid,
+        keyword,
+        page: nextPage,
+      });
+      displayState.users = nextPage === 1 ? result.users : [...displayState.users, ...result.users];
+      displayState.page = nextPage;
+      displayState.hasMore = result.hasMore;
+      displayState.loaded = true;
     } catch (loadError) {
-      relationState.error = loadError.message;
+      if (useSearch && nextPage === 1) {
+        displayState.users = relationState.users.filter((user) =>
+          user.name.toLowerCase().includes(keyword.toLowerCase())
+        );
+        displayState.hasMore = false;
+        displayState.loaded = true;
+      } else if (nextPage === 1) {
+        displayState.error = loadError.message;
+      } else {
+        displayState.moreError = loadError.message;
+      }
     } finally {
-      relationState.loading = false;
+      displayState.loading = false;
+      displayState.loadingMore = false;
       renderBody();
     }
   };

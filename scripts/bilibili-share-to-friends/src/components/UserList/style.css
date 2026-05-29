@@ -3,3 +3,23 @@
   padding: 8px 0;
   list-style: none;
 }
+
+.bili-share-to-friends-list-footer {
+  min-height: 28px;
+  padding: 0 16px 8px;
+  color: #9499a0;
+  font-size: 12px;
+  line-height: 28px;
+  text-align: center;
+}
+
+.bili-share-to-friends-list-retry {
+  border: 0;
+  background: transparent;
+  color: #00aeec;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-list-sentinel {
+  height: 1px;
+}

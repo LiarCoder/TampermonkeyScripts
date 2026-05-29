@@ -467,7 +467,7 @@ export const getRecentSessions = async (forceRefresh = false) => {
   return sessions;
 };
 
-const getRelationUsers = async ({ action, url, mid, page, pageSize }) => {
+const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams = {} }) => {
   const result = await httpRequest({
     url: `${url}?${buildQuery({
       vmid: mid,
@@ -475,6 +475,7 @@ const getRelationUsers = async ({ action, url, mid, page, pageSize }) => {
       ps: pageSize,
       order: "desc",
       order_type: "attention",
+      ...extraParams,
     })}`,
   });
   const data = assertSuccess(result, action);
@@ -494,6 +495,18 @@ export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) 
     mid,
     page,
     pageSize,
+  });
+
+export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
+  getRelationUsers({
+    action: "搜索我的关注",
+    url: "https://api.bilibili.com/x/relation/followings/search",
+    mid,
+    page,
+    pageSize,
+    extraParams: {
+      name: keyword,
+    },
   });
 
 export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
