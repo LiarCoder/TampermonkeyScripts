@@ -3,14 +3,7 @@ import globals from "globals";
 
 export default [
   {
-    ignores: [
-      "node_modules/**",
-      "**/dist/**",
-      "**/archive/**",
-      "**/*.user.js",
-      "**/FunctionTests/**",
-      "**/PreviousVersions/**"
-    ]
+    ignores: ["node_modules/**", "**/dist/**", "**/archive/**", "**/*.user.js"],
   },
   js.configs.recommended,
   {
@@ -23,11 +16,11 @@ export default [
         ...globals.node,
         GM_addStyle: "readonly",
         GM_xmlhttpRequest: "readonly",
-        unsafeWindow: "readonly"
-      }
+        unsafeWindow: "readonly",
+      },
     },
     rules: {
-      "no-console": "off"
-    }
-  }
+      "no-console": "off",
+    },
+  },
 ];
