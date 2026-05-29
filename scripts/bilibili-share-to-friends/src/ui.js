@@ -247,19 +247,23 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
   };
 
   const scheduleSearch = (value) => {
-    if (state.searchTerm !== value) {
+    const previousKeyword = state.searchTerm.trim();
+    const nextKeyword = value.trim();
+    state.searchTerm = value;
+    if (previousKeyword === nextKeyword) {
+      return;
+    }
+    if (previousKeyword || nextKeyword) {
       resetSelection();
     }
-    state.searchTerm = value;
     sendBtn.disabled = true;
     window.clearTimeout(searchTimer);
     searchTimer = window.setTimeout(() => {
       if (state.activeTab !== "all") {
         return;
       }
-      const keyword = state.searchTerm.trim();
-      if (state.activeRelation === "following" && keyword) {
-        state.relations.following.search.keyword = keyword;
+      if (state.activeRelation === "following" && nextKeyword) {
+        state.relations.following.search.keyword = nextKeyword;
         loadRelationUsers("following", { reset: true });
         return;
       }
