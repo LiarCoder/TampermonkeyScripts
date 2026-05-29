@@ -599,6 +599,7 @@
       .join("")
       .slice(0, 32);
 
+  // 部分 B 站 Web API 需要 WBI 签名；私信补用户资料接口会用到。
   const signWbi = (params, wbiImg) => {
     if (!wbiImg?.img_url || !wbiImg?.sub_url) {
       return params;
@@ -732,6 +733,7 @@
   };
 
   const enrichSessionsWithUserInfo = async (sessions) => {
+    // 最近私信接口经常只返回 talker_id，这里按 UID 补齐昵称和头像。
     const sessionsNeedUserInfo = sessions.filter(
       (session) => !session.avatar || session.name === `UID ${session.mid}`
     );
@@ -739,6 +741,7 @@
       return sessions;
     }
     const userInfoResults = [];
+    // 分批请求，避免打开弹窗时瞬间打出过多用户资料请求。
     for (let index = 0; index < sessionsNeedUserInfo.length; index += 4) {
       const batch = sessionsNeedUserInfo.slice(index, index + 4);
       const batchResults = await Promise.allSettled(
@@ -865,6 +868,7 @@
       await sendVideoCard({ nav, csrf, video, receiver });
       return { mode: "card" };
     } catch (cardError) {
+      // PC Web 端视频卡片接口不稳定；卡片失败时保证文本链接能发出去。
       await sendVideoText({ nav, csrf, video, receiver });
       return { mode: "text", cardError };
     }
@@ -879,6 +883,7 @@
         dialog.close();
       }
     } finally {
+      // B 站页面有自己的浮层样式，关闭后直接移除节点可避免透明遮罩残留。
       dialog.remove();
     }
   };
@@ -1236,6 +1241,7 @@
   };
 
   const findShareMethodContainer = () => {
+    // 以“嵌入代码”为锚点定位分享方式列表，避免误插到底部工具栏分享按钮附近。
     const embedLabel = Array.from(document.querySelectorAll("button, a, div, span"))
       .filter((element) => normalizeText(element.innerText || "") === "嵌入代码")
       .sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0];
