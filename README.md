@@ -14,10 +14,10 @@
 当前仓库使用 pnpm workspace 管理脚本工程：
 
 - `packages/shared`：跨脚本复用的 DOM、样式、路由和缓存工具。
-- `scripts/*/legacy`：原始脚本文件，保留历史和对照。
 - `scripts/*/src`：各脚本的 Vite 构建入口。
 - `scripts/*/CHANGELOG.md`：各脚本的更新日志。
 - `scripts/*/README.md`：脚本专属开发、调试或发布说明。
+- `scripts/*/archive`、`scripts/*/fixtures`、`scripts/*/assets`、`scripts/*/tests`：仅在脚本确有历史版本、测试资料或素材时保留。
 
 常用命令：
 
