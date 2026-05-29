@@ -1,3 +1,5 @@
+import { GM_addStyle } from "$";
+
 /* eslint-disable */
 /**
    * 创建DOM元素

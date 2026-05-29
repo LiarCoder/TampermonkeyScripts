@@ -1,3 +1,5 @@
+import { GM_xmlhttpRequest } from "$";
+
 import {
   DEV_ID_KEY,
   SESSION_CACHE_KEY,

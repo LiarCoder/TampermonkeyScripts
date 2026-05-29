@@ -1,3 +1,5 @@
+import { GM_addStyle, unsafeWindow } from "$";
+
 // 创建元素函数
   const createElement = ({
     parent = document.body,

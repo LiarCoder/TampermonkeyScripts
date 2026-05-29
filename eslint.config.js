@@ -6,7 +6,7 @@ export default [
     ignores: [
       "node_modules/**",
       "**/dist/**",
-      "**/legacy/**",
+      "**/archive/**",
       "**/*.user.js",
       "**/FunctionTests/**",
       "**/PreviousVersions/**"
