@@ -1,0 +1,57 @@
+.bili-share-to-friends-person {
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 8px 14px;
+  border: 0;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-person:hover,
+.bili-share-to-friends-person[aria-selected="true"] {
+  background: #f6fbff;
+}
+
+.bili-share-to-friends-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e3e5e7;
+}
+
+.bili-share-to-friends-name {
+  min-width: 0;
+  font-size: 14px;
+  color: #18191c;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bili-share-to-friends-meta {
+  min-width: 0;
+  margin-top: 1px;
+  color: #9499a0;
+  font-size: 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.bili-share-to-friends-check {
+  width: 18px;
+  height: 18px;
+  border: 1px solid #c9ccd0;
+  border-radius: 50%;
+}
+
+.bili-share-to-friends-person[aria-selected="true"] .bili-share-to-friends-check {
+  border-color: #00aeec;
+  background: radial-gradient(circle at center, #00aeec 0 45%, transparent 47%);
+}

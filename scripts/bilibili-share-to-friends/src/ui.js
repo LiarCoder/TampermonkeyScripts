@@ -1,170 +1,94 @@
 import { createElement } from "@tampermonkey-scripts/shared";
 
+import {
+  assertLogin,
+  getFollowers,
+  getFollowings,
+  getRecentSessions,
+  getVideoInfo,
+  searchFollowings,
+  sendVideoText,
+} from "./api.js";
+import {
+  closeDialog,
+  createDialog,
+  createDialogHeader,
+  setDialogContent,
+} from "./components/Dialog/index.js";
+import { createDialogFooter, createCloseFooter } from "./components/DialogFooter/index.js";
+import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.js";
+import { createRecipientTabs } from "./components/RecipientTabs/index.js";
+import { createRelationFilter } from "./components/RelationFilter/index.js";
+import { createSearchBox } from "./components/SearchBox/index.js";
+import { createState } from "./components/StateView/index.js";
+import { createUserList } from "./components/UserList/index.js";
+import { createVideoPreview } from "./components/VideoPreview/index.js";
 import { SCRIPT_ID } from "./constants.js";
-import { assertLogin, getRecentSessions, getVideoInfo, sendVideoText } from "./api.js";
 
-const closeDialog = (dialog) => {
-  if (!dialog) {
-    return;
-  }
-  try {
-    if (dialog.open) {
-      dialog.close();
-    }
-  } finally {
-    // B 站页面有自己的浮层样式，关闭后直接移除节点可避免透明遮罩残留。
-    dialog.remove();
-  }
+const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
+const SEARCH_INPUT_SELECTOR = `.${SCRIPT_ID}-search-input`;
+
+const clearErrorStates = (body) => {
+  body.querySelectorAll(`.${SCRIPT_ID}-state-error`).forEach((element) => element.remove());
 };
 
-const createDialog = () => {
-  closeDialog(document.getElementById(`${SCRIPT_ID}-dialog`));
-  const dialog = createElement({
-    tagName: "dialog",
-    attributes: {
-      id: `${SCRIPT_ID}-dialog`,
-      class: `${SCRIPT_ID}-dialog`,
+const createEmptyRelationState = () => ({
+  users: [],
+  page: 0,
+  hasMore: true,
+  loading: false,
+  loadingMore: false,
+  moreError: "",
+  error: "",
+  loaded: false,
+  search: {
+    users: [],
+    page: 0,
+    hasMore: true,
+    loading: false,
+    loadingMore: false,
+    moreError: "",
+    error: "",
+    loaded: false,
+    keyword: "",
+  },
+});
+
+const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", error = "" }) => {
+  const state = {
+    activeTab: "recent",
+    activeRelation: "following",
+    searchTerm: "",
+    selectedUser: null,
+    recent: {
+      users: sessions,
+      error: "",
+      loading: false,
+      loaded: sessions.length > 0,
     },
-    events: [
-      {
-        name: "cancel",
-        handler: (event) => {
-          event.preventDefault();
-          closeDialog(dialog);
-        },
-      },
-    ],
-  });
-  document.body.appendChild(dialog);
-  return dialog;
-};
-
-const setDialogContent = (dialog, child) => {
-  dialog.innerHTML = "";
-  dialog.appendChild(child);
-};
-
-const createState = (text, isError = false) =>
-  createElement({
-    attributes: {
-      class: `${SCRIPT_ID}-state${isError ? ` ${SCRIPT_ID}-state-error` : ""}`,
+    relations: {
+      following: createEmptyRelationState(),
+      followers: createEmptyRelationState(),
     },
-    text,
-  });
-
-const createVideoCover = (video) => {
-  if (!video?.pic) {
-    return createElement({
-      attributes: {
-        class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`,
-      },
-      text: "读取中",
-    });
-  }
-  return createElement({
-    tagName: "img",
-    attributes: {
-      class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-img`,
-      src: video.pic,
-      alt: "",
-      referrerpolicy: "no-referrer",
-    },
-    events: [
-      {
-        name: "error",
-        handler: (event) => {
-          const placeholder = createElement({
-            attributes: {
-              class: `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`,
-            },
-            text: "封面加载失败",
-          });
-          event.currentTarget.replaceWith(placeholder);
-        },
-      },
-    ],
-  });
-};
-
-const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" }) => {
-  let selectedSession = null;
+  };
   let sending = false;
+  let searchTimer = null;
+  let loadMoreObserver = null;
 
-  const closeBtn = createElement({
-    tagName: "button",
-    text: "×",
-    attributes: {
-      class: `${SCRIPT_ID}-close`,
-      title: "关闭",
-      type: "button",
-    },
-    events: [{ name: "click", handler: () => closeDialog(dialog) }],
-  });
-  const header = createElement({
-    attributes: { class: `${SCRIPT_ID}-header` },
-    children: [
-      createElement({
-        tagName: "h3",
-        text: "分享给 B站好友",
-        attributes: { class: `${SCRIPT_ID}-title` },
-      }),
-      closeBtn,
-    ],
-  });
-  const videoPreview = createElement({
-    attributes: { class: `${SCRIPT_ID}-video` },
-    children: [
-      createVideoCover(video),
-      createElement({
-        children: [
-          createElement({
-            tagName: "p",
-            text: video?.title || "当前视频",
-            attributes: { class: `${SCRIPT_ID}-video-title` },
-          }),
-          createElement({
-            text: video?.ownerName ? `UP主：${video.ownerName}` : "",
-            attributes: { class: `${SCRIPT_ID}-video-author` },
-          }),
-        ],
-      }),
-    ],
+  const { header, closeBtn } = createDialogHeader({
+    title: "分享给 B站好友",
+    onClose: () => closeDialog(dialog),
   });
   const body = createElement({
     attributes: { class: `${SCRIPT_ID}-body` },
   });
-  const cancelBtn = createElement({
-    tagName: "button",
-    text: "取消",
-    attributes: {
-      class: `${SCRIPT_ID}-btn`,
-      type: "button",
-    },
-    events: [{ name: "click", handler: () => closeDialog(dialog) }],
-  });
-  const sendBtn = createElement({
-    tagName: "button",
-    text: "发送",
-    attributes: {
-      class: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
-      type: "button",
-      disabled: "disabled",
-    },
-  });
-  const footer = createElement({
-    attributes: { class: `${SCRIPT_ID}-footer` },
-    children: [cancelBtn, sendBtn],
+  const { footer, cancelBtn, sendBtn } = createDialogFooter({
+    onCancel: () => closeDialog(dialog),
   });
 
-  const clearErrorStates = () => {
-    body
-      .querySelectorAll(`.${SCRIPT_ID}-state-error`)
-      .forEach((element) => element.remove());
-  };
-
-  const updateSelection = (button, session) => {
-    clearErrorStates();
-    selectedSession = session;
+  const updateSelection = (button, user) => {
+    clearErrorStates(body);
+    state.selectedUser = user;
     body
       .querySelectorAll(`.${SCRIPT_ID}-person`)
       .forEach((item) => item.setAttribute("aria-selected", "false"));
@@ -172,9 +96,14 @@ const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" })
     sendBtn.removeAttribute("disabled");
   };
 
+  const resetSelection = () => {
+    state.selectedUser = null;
+    sendBtn.disabled = true;
+  };
+
   const setSending = (nextSending) => {
     sending = nextSending;
-    sendBtn.disabled = nextSending || !selectedSession;
+    sendBtn.disabled = nextSending || !state.selectedUser;
     cancelBtn.disabled = nextSending;
     closeBtn.disabled = nextSending;
     sendBtn.innerText = nextSending ? "发送中" : "发送";
@@ -183,88 +112,320 @@ const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" })
   const showResult = (message, isError = false) => {
     body.innerHTML = "";
     body.appendChild(createState(message, isError));
-    footer.innerHTML = "";
-    footer.appendChild(
-      createElement({
-        tagName: "button",
-        text: "关闭",
-        attributes: {
-          class: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
-          type: "button",
-        },
-        events: [{ name: "click", handler: () => closeDialog(dialog) }],
-      })
-    );
+    footer.replaceWith(createCloseFooter({ onClose: () => closeDialog(dialog) }));
     closeBtn.disabled = false;
   };
 
-  if (status) {
-    body.appendChild(createState(status));
-  } else if (error) {
-    body.appendChild(createState(error, true));
-  } else if (sessions.length === 0) {
-    body.appendChild(createState("暂无最近私信联系人。"));
-  } else {
-    const list = createElement({
-      tagName: "ul",
-      attributes: { class: `${SCRIPT_ID}-list` },
-    });
-    sessions.forEach((session) => {
-      const button = createElement({
-        tagName: "button",
-        attributes: {
-          class: `${SCRIPT_ID}-person`,
-          type: "button",
-          "aria-selected": "false",
+  const renderUsers = ({
+    users,
+    emptyText,
+    hasMore = false,
+    loadingMore = false,
+    moreError = "",
+    showFooter = false,
+    onRetry = () => {},
+  }) => {
+    if (users.length === 0) {
+      body.appendChild(createState(emptyText));
+      if (showFooter) {
+        body.appendChild(
+          createUserList({
+            users,
+            selectedMid: state.selectedUser?.mid,
+            hasMore,
+            loadingMore,
+            moreError,
+            showFooter,
+            onRetry,
+            onSelect: updateSelection,
+          })
+        );
+      }
+      return;
+    }
+    body.appendChild(
+      createUserList({
+        users,
+        selectedMid: state.selectedUser?.mid,
+        hasMore,
+        loadingMore,
+        moreError,
+        showFooter,
+        onRetry,
+        onSelect: updateSelection,
+      })
+    );
+  };
+
+  const getRelationDisplayState = (relation) => {
+    const relationState = state.relations[relation];
+    const keyword = state.searchTerm.trim();
+    if (relation === "following" && keyword) {
+      return relationState.search;
+    }
+    return relationState;
+  };
+
+  const getRelationDisplayUsers = (relation) => {
+    const relationState = state.relations[relation];
+    const keyword = state.searchTerm.trim().toLowerCase();
+    if (!keyword) {
+      return relationState.users;
+    }
+    if (relation === "following") {
+      return relationState.search.users;
+    }
+    return relationState.users.filter((user) => user.name.toLowerCase().includes(keyword));
+  };
+
+  const disconnectLoadMoreObserver = () => {
+    if (loadMoreObserver) {
+      loadMoreObserver.disconnect();
+      loadMoreObserver = null;
+    }
+  };
+
+  const getListScrollTop = () => body.querySelector(LIST_SCROLL_SELECTOR)?.scrollTop ?? 0;
+
+  const restoreListScroll = (scrollTop) => {
+    if (scrollTop === null) {
+      return;
+    }
+    const scrollRoot = body.querySelector(LIST_SCROLL_SELECTOR);
+    if (scrollRoot) {
+      scrollRoot.scrollTop = scrollTop;
+    }
+  };
+
+  const getSearchFocus = () => {
+    const input = document.activeElement;
+    if (!(input instanceof HTMLInputElement) || !input.matches(SEARCH_INPUT_SELECTOR)) {
+      return null;
+    }
+    return {
+      start: input.selectionStart,
+      end: input.selectionEnd,
+      direction: input.selectionDirection,
+    };
+  };
+
+  const restoreSearchFocus = (focusState) => {
+    if (!focusState) {
+      return;
+    }
+    const input = body.querySelector(SEARCH_INPUT_SELECTOR);
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(focusState.start, focusState.end, focusState.direction);
+  };
+
+  const observeLoadMore = () => {
+    disconnectLoadMoreObserver();
+    if (state.activeTab !== "all") {
+      return;
+    }
+    const displayState = getRelationDisplayState(state.activeRelation);
+    if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
+      return;
+    }
+    const scrollRoot = body.querySelector(LIST_SCROLL_SELECTOR);
+    const sentinel = scrollRoot?.querySelector("[data-bili-share-to-friends-list-sentinel]");
+    if (!scrollRoot || !sentinel) {
+      return;
+    }
+    loadMoreObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          loadRelationUsers(state.activeRelation);
+        }
+      },
+      { root: scrollRoot, threshold: 0.1 }
+    );
+    loadMoreObserver.observe(sentinel);
+  };
+
+  const scheduleSearch = (value) => {
+    const previousKeyword = state.searchTerm.trim();
+    const nextKeyword = value.trim();
+    state.searchTerm = value;
+    if (previousKeyword === nextKeyword) {
+      return;
+    }
+    if (previousKeyword || nextKeyword) {
+      resetSelection();
+    }
+    sendBtn.disabled = true;
+    window.clearTimeout(searchTimer);
+    searchTimer = window.setTimeout(() => {
+      if (state.activeTab !== "all") {
+        return;
+      }
+      if (state.activeRelation === "following" && nextKeyword) {
+        state.relations.following.search.keyword = nextKeyword;
+        loadRelationUsers("following", { reset: true });
+        return;
+      }
+      renderBody();
+    }, 300);
+  };
+
+  const renderRelationContent = () => {
+    body.appendChild(
+      createRelationFilter({
+        activeRelation: state.activeRelation,
+        onChange: (relation) => {
+          if (state.activeRelation === relation) {
+            return;
+          }
+          resetSelection();
+          state.activeRelation = relation;
+          renderBody();
+          loadRelationUsers(relation);
         },
-        children: [
-          createElement({
-            tagName: "img",
-            attributes: {
-              class: `${SCRIPT_ID}-avatar`,
-              src: session.avatar,
-              alt: "",
-              referrerpolicy: "no-referrer",
-            },
-            events: [
-              {
-                name: "error",
-                handler: (event) => {
-                  if (event.currentTarget.dataset.fallbackApplied === "true") {
-                    return;
-                  }
-                  event.currentTarget.dataset.fallbackApplied = "true";
-                  event.currentTarget.src =
-                    "https://static.hdslb.com/images/member/noface.gif";
-                },
-              },
-            ],
-          }),
-          createElement({
-            children: [
-              createElement({
-                text: session.name,
-                attributes: { class: `${SCRIPT_ID}-name` },
-              }),
-              createElement({
-                text: session.unreadCount > 0 ? `${session.unreadCount} 条未读` : `UID ${session.mid}`,
-                attributes: { class: `${SCRIPT_ID}-meta` },
-              }),
-            ],
-          }),
-          createElement({
-            attributes: { class: `${SCRIPT_ID}-check` },
-          }),
-        ],
-      });
-      button.addEventListener("click", () => updateSelection(button, session));
-      list.appendChild(createElement({ tagName: "li", children: [button] }));
+      })
+    );
+    const keyword = state.searchTerm.trim();
+    body.appendChild(
+      createSearchBox({
+        value: state.searchTerm,
+        notice:
+          state.activeRelation === "followers" && keyword
+            ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
+            : "",
+        onCompositionStart: () => window.clearTimeout(searchTimer),
+        onInput: scheduleSearch,
+      })
+    );
+    const displayState = getRelationDisplayState(state.activeRelation);
+    if (displayState.loading) {
+      body.appendChild(createState("正在读取用户列表..."));
+      return;
+    }
+    if (displayState.error) {
+      body.appendChild(createState(displayState.error, true));
+      return;
+    }
+    renderUsers({
+      users: getRelationDisplayUsers(state.activeRelation),
+      emptyText: state.activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。",
+      hasMore: displayState.hasMore,
+      loadingMore: displayState.loadingMore,
+      moreError: displayState.moreError,
+      showFooter: true,
+      onRetry: () => loadRelationUsers(state.activeRelation),
     });
-    body.appendChild(list);
+    observeLoadMore();
+  };
+
+  const renderBody = ({ listScrollTop = null } = {}) => {
+    const searchFocus = getSearchFocus();
+    body.innerHTML = "";
+    try {
+      sendBtn.disabled = sending || !state.selectedUser;
+      if (status) {
+        body.appendChild(createState(status));
+        return;
+      }
+      if (error) {
+        body.appendChild(createState(error, true));
+        return;
+      }
+      body.appendChild(
+        createRecipientTabs({
+          activeTab: state.activeTab,
+          onChange: (tab) => {
+            if (state.activeTab === tab) {
+              return;
+            }
+            resetSelection();
+            state.activeTab = tab;
+            renderBody();
+            if (tab === "all") {
+              loadRelationUsers(state.activeRelation);
+            }
+          },
+        })
+      );
+      if (state.activeTab === "recent") {
+        renderUsers({
+          users: state.recent.users,
+          emptyText: "暂无最近私信联系人。",
+        });
+        return;
+      }
+      renderRelationContent();
+    } finally {
+      restoreListScroll(listScrollTop);
+      restoreSearchFocus(searchFocus);
+    }
+  };
+
+  const loadRelationUsers = async (relation, { reset = false } = {}) => {
+    const relationState = state.relations[relation];
+    const keyword = state.searchTerm.trim();
+    const useSearch = relation === "following" && keyword;
+    const displayState = useSearch ? relationState.search : relationState;
+    if (
+      !nav ||
+      displayState.loading ||
+      displayState.loadingMore ||
+      (!reset && displayState.loaded && !displayState.hasMore)
+    ) {
+      return;
+    }
+    const nextPage = reset ? 1 : displayState.page + 1;
+    const listScrollTop = !reset && displayState.loaded ? getListScrollTop() : null;
+    displayState.loading = reset || !displayState.loaded;
+    displayState.loadingMore = !displayState.loading;
+    displayState.error = "";
+    displayState.moreError = "";
+    renderBody({ listScrollTop });
+    try {
+      const loader = useSearch
+        ? searchFollowings
+        : relation === "following"
+          ? getFollowings
+          : getFollowers;
+      const result = await loader({
+        mid: nav.mid,
+        keyword,
+        page: nextPage,
+      });
+      displayState.users = nextPage === 1 ? result.users : [...displayState.users, ...result.users];
+      displayState.page = nextPage;
+      displayState.hasMore = result.hasMore;
+      displayState.loaded = true;
+    } catch (loadError) {
+      if (useSearch && nextPage === 1) {
+        displayState.users = relationState.users.filter((user) =>
+          user.name.toLowerCase().includes(keyword.toLowerCase())
+        );
+        displayState.hasMore = false;
+        displayState.loaded = true;
+      } else if (nextPage === 1) {
+        displayState.error = loadError.message;
+      } else {
+        displayState.moreError = loadError.message;
+      }
+    } finally {
+      displayState.loading = false;
+      displayState.loadingMore = false;
+      renderBody({ listScrollTop });
+    }
+  };
+
+  if (status) {
+    renderBody();
+  } else if (error) {
+    renderBody();
+  } else {
+    renderBody();
   }
 
   sendBtn.addEventListener("click", async () => {
-    if (!selectedSession || sending) {
+    if (!state.selectedUser || sending) {
       return;
     }
     setSending(true);
@@ -274,12 +435,12 @@ const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" })
         nav,
         csrf,
         video,
-        receiver: selectedSession,
+        receiver: state.selectedUser,
       });
-      showResult(`已将视频链接发送给 ${selectedSession.name}。`);
+      showResult(`已将视频链接发送给 ${state.selectedUser.name}。`);
     } catch (sendError) {
       setSending(false);
-      clearErrorStates();
+      clearErrorStates(body);
       body.prepend(createState(sendError.message, true));
     }
   });
@@ -287,7 +448,8 @@ const renderDialog = ({ dialog, video, sessions = [], status = "", error = "" })
   setDialogContent(
     dialog,
     createElement({
-      children: [header, videoPreview, body, footer],
+      attributes: { class: `${SCRIPT_ID}-dialog-content` },
+      children: [header, createVideoPreview(video), body, footer],
     })
   );
 };
@@ -309,13 +471,13 @@ const openShareDialog = async () => {
   }
 
   try {
-    await assertLogin();
+    const { nav } = await assertLogin();
     const video = await getVideoInfo();
     const sessions = await getRecentSessions();
     if (!dialog.isConnected || !dialog.open) {
       return;
     }
-    renderDialog({ dialog, video, sessions });
+    renderDialog({ dialog, video, nav, sessions });
   } catch (error) {
     if (!dialog.isConnected || !dialog.open) {
       return;
@@ -328,32 +490,4 @@ const openShareDialog = async () => {
   }
 };
 
-export const createEntryButton = () =>
-  createElement({
-    tagName: "button",
-    attributes: {
-      class: `${SCRIPT_ID}-entry`,
-      type: "button",
-      "data-bili-share-to-friends-entry": "true",
-      title: "分享给 B站好友",
-    },
-    html: `
-      <span class="${SCRIPT_ID}-entry-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path d="M4 5.5A3.5 3.5 0 0 1 7.5 2h9A3.5 3.5 0 0 1 20 5.5v6A3.5 3.5 0 0 1 16.5 15H12l-4.2 4.2A1 1 0 0 1 6 18.5V15A3.5 3.5 0 0 1 4 11.8V5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-          <path d="M8 7.5h8M8 11h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-      </span>
-      <span class="${SCRIPT_ID}-entry-text">B站好友</span>
-    `,
-    events: [
-      {
-        name: "click",
-        handler: (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          openShareDialog();
-        },
-      },
-    ],
-  });
+export const createEntryButton = () => createShareEntryButton({ onClick: openShareDialog });

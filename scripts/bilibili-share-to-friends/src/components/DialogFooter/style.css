@@ -1,0 +1,44 @@
+.bili-share-to-friends-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  border-top: 1px solid #e3e5e7;
+}
+
+.bili-share-to-friends-btn {
+  min-width: 76px;
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid #c9ccd0;
+  border-radius: 4px;
+  background: #fff;
+  color: #18191c;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-btn:hover {
+  border-color: #00aeec;
+  color: #00aeec;
+}
+
+.bili-share-to-friends-btn-primary {
+  color: #fff;
+  border-color: #00aeec;
+  background: #00aeec;
+}
+
+.bili-share-to-friends-btn-primary:hover {
+  color: #fff;
+  border-color: #40c5f1;
+  background: #40c5f1;
+}
+
+.bili-share-to-friends-btn:disabled {
+  border-color: #e3e5e7;
+  background: #f6f7f8;
+  color: #c9ccd0;
+  cursor: not-allowed;
+}

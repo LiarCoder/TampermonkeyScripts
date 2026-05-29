@@ -1,0 +1,67 @@
+.bili-share-to-friends-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.38);
+}
+
+.bili-share-to-friends-dialog:not([open]) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.bili-share-to-friends-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 32px));
+  height: min(620px, calc(100vh - 48px));
+  max-height: calc(100vh - 48px);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #18191c;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  font:
+    14px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Microsoft YaHei",
+    sans-serif;
+}
+
+.bili-share-to-friends-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-bottom: 1px solid #e3e5e7;
+}
+
+.bili-share-to-friends-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.bili-share-to-friends-close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #61666d;
+  font-size: 22px;
+  line-height: 26px;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-close:hover {
+  background: #f1f2f3;
+}
+
+.bili-share-to-friends-dialog-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}

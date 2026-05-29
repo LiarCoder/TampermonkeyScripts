@@ -1,0 +1,9 @@
+.bili-share-to-friends-state {
+  padding: 28px 16px;
+  color: #61666d;
+  text-align: center;
+}
+
+.bili-share-to-friends-state-error {
+  color: #d03050;
+}
