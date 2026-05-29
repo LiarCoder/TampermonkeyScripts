@@ -2,7 +2,7 @@ import "./styles.css";
 
 import { getBvidFromLocation } from "./api.js";
 import { SHARE_BUTTONS_SELECTOR } from "./constants.js";
-import { createEntryButton } from "./ui.js";
+import { createEntryButton } from "./ui.jsx";
 
 let currentBvid = "";
 
@@ -15,13 +15,11 @@ const injectEntry = () => {
   if (!container) {
     return;
   }
-  document
-    .querySelectorAll("[data-bili-share-to-friends-entry]")
-    .forEach((entry) => {
-      if (!container.contains(entry)) {
-        entry.remove();
-      }
-    });
+  document.querySelectorAll("[data-bili-share-to-friends-entry]").forEach((entry) => {
+    if (!container.contains(entry)) {
+      entry.remove();
+    }
+  });
   if (container.querySelector("[data-bili-share-to-friends-entry]")) {
     return;
   }
