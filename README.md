@@ -26,10 +26,20 @@ pnpm install
 pnpm build
 pnpm lint
 pnpm test
-pnpm --filter <package-name> dev
-pnpm --filter <package-name> build
-pnpm --filter <package-name> build:watch
 ```
+
+单脚本开发命令：
+
+| 脚本 | dev | build | watch | 本地 file:// 壳脚本 |
+| --- | --- | --- | --- | --- |
+| 改变代码块字体 | `pnpm dev:beautify` | `pnpm build:beautify` | `pnpm watch:beautify` | `pnpm shell:beautify` |
+| B站视频分享给好友 | `pnpm dev:bilibili` | `pnpm build:bilibili` | `pnpm watch:bilibili` | `pnpm shell:bilibili` |
+| 复制标题和地址 | `pnpm dev:copy-title` | `pnpm build:copy-title` | `pnpm watch:copy-title` | `pnpm shell:copy-title` |
+| 掘金 Markdown 格式适配器 | `pnpm dev:juejin` | `pnpm build:juejin` | `pnpm watch:juejin` | `pnpm shell:juejin` |
+| JustJumpAhead | `pnpm dev:jump-ahead` | `pnpm build:jump-ahead` | `pnpm watch:jump-ahead` | `pnpm shell:jump-ahead` |
+| PR三思器 | `pnpm dev:pr-checker` | `pnpm build:pr-checker` | `pnpm watch:pr-checker` | `pnpm shell:pr-checker` |
+
+日常开发优先用对应的 `pnpm dev:*`。如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，再用对应的 `pnpm shell:*` 生成本地壳脚本，然后开对应的 `pnpm watch:*` 持续更新 `dist/*.user.js`。
 
 prod 构建默认不压缩混淆，生成的 `scripts/<name>/dist/*.user.js` 可读，便于调试和提交到 Greasy Fork。
 
