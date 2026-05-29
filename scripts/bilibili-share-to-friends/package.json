@@ -1,0 +1,19 @@
+{
+  "name": "@tampermonkey-scripts/bilibili-share-to-friends",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@tampermonkey-scripts/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "6.4.1",
+    "vite-plugin-monkey": "6.0.1"
+  }
+}
