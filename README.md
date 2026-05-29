@@ -9,6 +9,32 @@
 # TampermonkeyScripts
 油猴脚本练习
 
+## 工程化开发
+
+当前仓库使用 pnpm workspace 管理脚本工程：
+
+- `packages/shared`：跨脚本复用的 DOM、样式、路由和缓存工具。
+- `scripts/*/legacy`：原始脚本文件，保留历史和对照。
+- `scripts/bilibili-share-to-friends/src`：第一个 Vite 工程化试点。
+
+常用命令：
+
+```shell
+pnpm install
+pnpm dev:bilibili
+pnpm build:bilibili
+pnpm shell:bilibili
+pnpm lint
+pnpm test
+```
+
+开发同步有两种方式：
+
+1. 推荐先运行 `pnpm dev:bilibili`，按 `vite-plugin-monkey` 打开的安装页安装开发版脚本。之后本地代码变更会通过 Vite dev server 加载，通常不需要再复制粘贴到 Tampermonkey 编辑器。
+2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dev/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build:watch`，刷新目标页面即可加载本地 `dist/*.user.js`。
+
+prod 构建默认不压缩混淆，生成的 `scripts/<name>/dist/*.user.js` 可读，便于调试和提交到 Greasy Fork。
+
 为了方便在写提交信息时指明所修改的脚本，我特地把我写的脚本做以下编号：
 
 ## ①号脚本：

@@ -9,5 +9,6 @@
 node_modules/
 dist/
 **/dist/
+**/dev/*.local.user.js
 .vite/
 *.local

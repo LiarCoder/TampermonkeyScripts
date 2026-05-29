@@ -9,6 +9,8 @@
     "build": "pnpm --filter ./scripts/* build",
     "build:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build",
     "dev:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends dev",
+    "shell:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build && node tools/generate-local-shell.js scripts/bilibili-share-to-friends",
+    "generate:shell": "node tools/generate-local-shell.js",
     "test": "pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
