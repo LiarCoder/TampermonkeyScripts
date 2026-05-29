@@ -12,3 +12,5 @@ dist/
 **/dev/*.local.user.js
 .vite/
 *.local
+
+temp/
