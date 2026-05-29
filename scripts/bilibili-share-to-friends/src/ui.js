@@ -26,6 +26,7 @@ import { createVideoPreview } from "./components/VideoPreview/index.js";
 import { SCRIPT_ID } from "./constants.js";
 
 const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
+const SEARCH_INPUT_SELECTOR = `.${SCRIPT_ID}-search-input`;
 
 const clearErrorStates = (body) => {
   body.querySelectorAll(`.${SCRIPT_ID}-state-error`).forEach((element) => element.remove());
@@ -196,6 +197,30 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     }
   };
 
+  const getSearchFocus = () => {
+    const input = document.activeElement;
+    if (!(input instanceof HTMLInputElement) || !input.matches(SEARCH_INPUT_SELECTOR)) {
+      return null;
+    }
+    return {
+      start: input.selectionStart,
+      end: input.selectionEnd,
+      direction: input.selectionDirection,
+    };
+  };
+
+  const restoreSearchFocus = (focusState) => {
+    if (!focusState) {
+      return;
+    }
+    const input = body.querySelector(SEARCH_INPUT_SELECTOR);
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
+    input.focus({ preventScroll: true });
+    input.setSelectionRange(focusState.start, focusState.end, focusState.direction);
+  };
+
   const observeLoadMore = () => {
     disconnectLoadMoreObserver();
     if (state.activeTab !== "all") {
@@ -226,7 +251,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
       resetSelection();
     }
     state.searchTerm = value;
-    renderBody();
+    sendBtn.disabled = true;
     window.clearTimeout(searchTimer);
     searchTimer = window.setTimeout(() => {
       if (state.activeTab !== "all") {
@@ -290,6 +315,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
   };
 
   const renderBody = ({ listScrollTop = null } = {}) => {
+    const searchFocus = getSearchFocus();
     body.innerHTML = "";
     try {
       sendBtn.disabled = sending || !state.selectedUser;
@@ -327,6 +353,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
       renderRelationContent();
     } finally {
       restoreListScroll(listScrollTop);
+      restoreSearchFocus(searchFocus);
     }
   };
 
