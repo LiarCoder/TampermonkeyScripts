@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 export const DialogFooter = ({ sending = false, canSend = false, onCancel, onSend = () => {} }) => (
@@ -25,12 +24,3 @@ export const CloseFooter = ({ onClose }) => (
     </button>
   </div>
 );
-
-export const createDialogFooter = ({ onCancel }) => {
-  const footer = renderToElement(<DialogFooter onCancel={onCancel} />);
-  const [cancelBtn, sendBtn] = footer.querySelectorAll("button");
-  return { footer, cancelBtn, sendBtn };
-};
-
-export const createCloseFooter = ({ onClose }) =>
-  renderToElement(<CloseFooter onClose={onClose} />);

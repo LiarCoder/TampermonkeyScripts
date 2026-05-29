@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 const relationOptions = [
@@ -23,6 +22,3 @@ export const RelationFilter = ({ activeRelation, onChange }) => (
     ))}
   </div>
 );
-
-export const createRelationFilter = ({ activeRelation, onChange }) =>
-  renderToElement(<RelationFilter activeRelation={activeRelation} onChange={onChange} />);

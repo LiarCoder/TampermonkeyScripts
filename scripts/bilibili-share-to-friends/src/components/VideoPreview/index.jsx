@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 const createCoverPlaceholder = (text) => {
@@ -37,5 +36,3 @@ export const VideoPreview = ({ video }) => (
     </div>
   </div>
 );
-
-export const createVideoPreview = (video) => renderToElement(<VideoPreview video={video} />);

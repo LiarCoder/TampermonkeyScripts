@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import { UserListItem } from "../UserListItem/index.jsx";
 import "./style.css";
 
@@ -49,5 +48,3 @@ export const UserList = ({
     ) : null}
   </div>
 );
-
-export const createUserList = (props) => renderToElement(<UserList {...props} />);
