@@ -9,6 +9,7 @@
     "build": "pnpm --filter ./scripts/* build",
     "build:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build",
     "dev:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends dev",
+    "test": "pnpm -r test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint ."
