@@ -3,13 +3,13 @@ import { createElement } from "@tampermonkey-scripts/shared";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
-export const createUserListItem = ({ user, onSelect }) => {
+export const createUserListItem = ({ user, selected = false, onSelect }) => {
   const button = createElement({
     tagName: "button",
     attributes: {
       class: `${SCRIPT_ID}-person`,
       type: "button",
-      "aria-selected": "false",
+      "aria-selected": String(selected),
     },
     children: [
       createElement({

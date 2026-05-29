@@ -1,0 +1,21 @@
+.bili-share-to-friends-relation-filter {
+  display: flex;
+  gap: 18px;
+  padding: 10px 16px 2px;
+  color: #18191c;
+}
+
+.bili-share-to-friends-relation-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-relation-option input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #00aeec;
+}

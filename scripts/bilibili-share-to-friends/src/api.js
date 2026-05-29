@@ -5,6 +5,7 @@ import {
   SESSION_CACHE_KEY,
   SESSION_CACHE_TTL,
   SESSION_LIMIT,
+  RELATION_PAGE_SIZE,
   SCRIPT_ID,
   mixinKeyEncTab,
 } from "./constants.js";
@@ -252,7 +253,7 @@ const md5 = (input) => {
   const wordToHex = (value) => {
     let output = "";
     for (let count = 0; count <= 3; count++) {
-      output += (`0${((value >>> (count * 8)) & 255).toString(16)}`).slice(-2);
+      output += `0${((value >>> (count * 8)) & 255).toString(16)}`.slice(-2);
     }
     return output;
   };
@@ -358,12 +359,7 @@ const writeSessionCache = (sessions) => {
 
 const getSessionAccountInfo = (session, accountInfoMap = {}) => {
   const talkerId = String(session.talker_id || "");
-  return (
-    session.account_info ||
-    accountInfoMap[talkerId] ||
-    accountInfoMap[Number(talkerId)] ||
-    {}
-  );
+  return session.account_info || accountInfoMap[talkerId] || accountInfoMap[Number(talkerId)] || {};
 };
 
 const normalizeSession = (session, accountInfoMap = {}) => {
@@ -378,6 +374,19 @@ const normalizeSession = (session, accountInfoMap = {}) => {
     avatar: normalizeImageUrl(account.pic || account.pic_url || account.face),
     lastMessage: session.last_msg?.content || "",
     unreadCount: Number(session.unread_count || 0),
+  };
+};
+
+const normalizeRelationUser = (user) => {
+  const mid = Number(user.mid);
+  if (!mid) {
+    return null;
+  }
+  return {
+    mid,
+    name: user.uname || user.name || `UID ${mid}`,
+    avatar: normalizeImageUrl(user.face),
+    meta: `UID ${mid}`,
   };
 };
 
@@ -411,9 +420,7 @@ const enrichSessionsWithUserInfo = async (sessions) => {
   // 分批请求，避免打开弹窗时瞬间打出过多用户资料请求。
   for (let index = 0; index < sessionsNeedUserInfo.length; index += 4) {
     const batch = sessionsNeedUserInfo.slice(index, index + 4);
-    const batchResults = await Promise.allSettled(
-      batch.map((session) => getUserInfo(session.mid))
-    );
+    const batchResults = await Promise.allSettled(batch.map((session) => getUserInfo(session.mid)));
     userInfoResults.push(...batchResults);
   }
   const userInfoMap = new Map();
@@ -460,6 +467,44 @@ export const getRecentSessions = async (forceRefresh = false) => {
   return sessions;
 };
 
+const getRelationUsers = async ({ action, url, mid, page, pageSize }) => {
+  const result = await httpRequest({
+    url: `${url}?${buildQuery({
+      vmid: mid,
+      pn: page,
+      ps: pageSize,
+      order: "desc",
+      order_type: "attention",
+    })}`,
+  });
+  const data = assertSuccess(result, action);
+  const users = (data.list || []).map(normalizeRelationUser).filter(Boolean);
+  const total = Number(data.total || 0);
+  return {
+    users,
+    total,
+    hasMore: total ? page * pageSize < total : users.length >= pageSize,
+  };
+};
+
+export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
+  getRelationUsers({
+    action: "获取我的关注",
+    url: "https://api.bilibili.com/x/relation/followings",
+    mid,
+    page,
+    pageSize,
+  });
+
+export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
+  getRelationUsers({
+    action: "获取我的粉丝",
+    url: "https://api.bilibili.com/x/relation/followers",
+    mid,
+    page,
+    pageSize,
+  });
+
 const getDevId = () => {
   const cachedDevId = localStorage.getItem(DEV_ID_KEY);
   if (cachedDevId) {
@@ -467,9 +512,7 @@ const getDevId = () => {
   }
   const devId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (name) => {
     const randomInt = (Math.random() * 16) | 0;
-    return (name === "x" ? randomInt : (randomInt & 3) | 8)
-      .toString(16)
-      .toUpperCase();
+    return (name === "x" ? randomInt : (randomInt & 3) | 8).toString(16).toUpperCase();
   });
   localStorage.setItem(DEV_ID_KEY, devId);
   return devId;

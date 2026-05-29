@@ -1,0 +1,28 @@
+.bili-share-to-friends-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 0;
+  background: #fff;
+}
+
+.bili-share-to-friends-tab {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #61666d;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-tab:hover {
+  color: #00aeec;
+}
+
+.bili-share-to-friends-tab[aria-selected="true"] {
+  color: #00aeec;
+  border-color: #b8e8f8;
+  background: #f6fbff;
+  font-weight: 600;
+}
