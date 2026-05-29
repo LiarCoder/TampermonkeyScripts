@@ -1,8 +1,3 @@
-/GIFPlayer/reference/*
-
-/JueJinMarkdownFormatter/TestDocs/*
-/scripts/juejin-markdown-formatter/legacy/TestDocs/*
-
 *.assets/
 
 .idea/
