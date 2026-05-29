@@ -1,5 +1,7 @@
 .bili-share-to-friends-body {
+  display: flex;
+  flex-direction: column;
   min-height: 180px;
   max-height: 360px;
-  overflow: auto;
+  overflow: hidden;
 }

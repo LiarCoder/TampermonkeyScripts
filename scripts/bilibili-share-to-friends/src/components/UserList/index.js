@@ -43,6 +43,10 @@ export const createUserList = ({
     list.appendChild(createElement({ tagName: "li", children: [item] }));
   });
   return createElement({
+    attributes: {
+      class: `${SCRIPT_ID}-list-scroll`,
+      "data-bili-share-to-friends-list-scroll": "true",
+    },
     children: [
       list,
       footer,

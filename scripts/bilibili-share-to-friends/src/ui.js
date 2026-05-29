@@ -191,8 +191,9 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
     if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
       return;
     }
-    const sentinel = body.querySelector("[data-bili-share-to-friends-list-sentinel]");
-    if (!sentinel) {
+    const scrollRoot = body.querySelector("[data-bili-share-to-friends-list-scroll]");
+    const sentinel = scrollRoot?.querySelector("[data-bili-share-to-friends-list-sentinel]");
+    if (!scrollRoot || !sentinel) {
       return;
     }
     loadMoreObserver = new IntersectionObserver(
@@ -201,7 +202,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
           loadRelationUsers(state.activeRelation);
         }
       },
-      { root: body, threshold: 0.1 }
+      { root: scrollRoot, threshold: 0.1 }
     );
     loadMoreObserver.observe(sentinel);
   };
