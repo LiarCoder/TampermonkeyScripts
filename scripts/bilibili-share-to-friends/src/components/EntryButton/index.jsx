@@ -1,6 +1,5 @@
-import { render } from "preact";
-
 import { SCRIPT_ID } from "../../constants.js";
+import { renderToElement } from "../../render.js";
 import "./style.css";
 
 const EntryButton = ({ onClick }) => (
@@ -23,12 +22,7 @@ const EntryButton = ({ onClick }) => (
           strokeWidth="1.8"
           strokeLinejoin="round"
         />
-        <path
-          d="M8 7.5h8M8 11h5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
+        <path d="M8 7.5h8M8 11h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     </span>
     <span className={`${SCRIPT_ID}-entry-text`}>B站好友</span>
@@ -36,7 +30,5 @@ const EntryButton = ({ onClick }) => (
 );
 
 export const createEntryButton = ({ onClick }) => {
-  const container = document.createElement("div");
-  render(<EntryButton onClick={onClick} />, container);
-  return container.firstElementChild;
+  return renderToElement(EntryButton({ onClick }));
 };

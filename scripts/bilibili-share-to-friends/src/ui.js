@@ -14,15 +14,15 @@ import {
   createDialog,
   createDialogHeader,
   setDialogContent,
-} from "./components/Dialog/index.js";
-import { createDialogFooter, createCloseFooter } from "./components/DialogFooter/index.js";
+} from "./components/Dialog/index.jsx";
+import { createDialogFooter, createCloseFooter } from "./components/DialogFooter/index.jsx";
 import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.jsx";
-import { createRecipientTabs } from "./components/RecipientTabs/index.js";
-import { createRelationFilter } from "./components/RelationFilter/index.js";
-import { createSearchBox } from "./components/SearchBox/index.js";
-import { createState } from "./components/StateView/index.js";
-import { createUserList } from "./components/UserList/index.js";
-import { createVideoPreview } from "./components/VideoPreview/index.js";
+import { createRecipientTabs } from "./components/RecipientTabs/index.jsx";
+import { createRelationFilter } from "./components/RelationFilter/index.jsx";
+import { createSearchBox } from "./components/SearchBox/index.jsx";
+import { createState } from "./components/StateView/index.jsx";
+import { createUserList } from "./components/UserList/index.jsx";
+import { createVideoPreview } from "./components/VideoPreview/index.jsx";
 import { SCRIPT_ID } from "./constants.js";
 
 const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
