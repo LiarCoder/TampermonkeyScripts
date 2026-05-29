@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.1.10
+// @version      0.1.11
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以私信分享卡片发送给最近私信联系人
 // @author       LiarCoder
 // @match        https://www.bilibili.com/video/*
@@ -22,15 +22,7 @@
   const SESSION_CACHE_TTL = 5 * 60 * 1000;
   const SESSION_LIMIT = 20;
 
-  const SHARE_METHOD_LABELS = [
-    "动态",
-    "微信",
-    "QQ",
-    "QQ空间",
-    "微博",
-    "贴吧",
-    "嵌入代码",
-  ];
+  const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
 
   const mixinKeyEncTab = [
     46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5,
@@ -1233,43 +1225,8 @@
       ],
     });
 
-  const normalizeText = (text) => text.replace(/\s+/g, "");
-
-  const getShareMethodCount = (element) => {
-    const text = normalizeText(element.innerText || "");
-    return SHARE_METHOD_LABELS.filter((label) => text.includes(label)).length;
-  };
-
   const findShareMethodContainer = () => {
-    // 以“嵌入代码”为锚点定位分享方式列表，避免误插到底部工具栏分享按钮附近。
-    const embedLabel = Array.from(document.querySelectorAll("button, a, div, span"))
-      .filter((element) => normalizeText(element.innerText || "") === "嵌入代码")
-      .sort((a, b) => a.getBoundingClientRect().width - b.getBoundingClientRect().width)[0];
-
-    if (!embedLabel) {
-      return null;
-    }
-
-    for (
-      let element = embedLabel.parentElement;
-      element && element !== document.body;
-      element = element.parentElement
-    ) {
-      const directShareMethodCount = Array.from(element.children).filter(
-        (child) => getShareMethodCount(child) >= 1
-      ).length;
-      if (directShareMethodCount >= 5) {
-        return element;
-      }
-    }
-
-    return null;
-  };
-
-  const findDirectShareMethodItem = (container, label) => {
-    return Array.from(container.children).find((child) =>
-      normalizeText(child.innerText || "").includes(label)
-    );
+    return document.querySelector(SHARE_BUTTONS_SELECTOR);
   };
 
   const injectEntry = () => {
@@ -1288,12 +1245,7 @@
       return;
     }
     const entry = createEntryButton();
-    const embedItem = findDirectShareMethodItem(container, "嵌入代码");
-    if (embedItem) {
-      embedItem.insertAdjacentElement("afterend", entry);
-    } else {
-      container.appendChild(entry);
-    }
+    container.appendChild(entry);
   };
 
   const handleRouteChange = () => {
