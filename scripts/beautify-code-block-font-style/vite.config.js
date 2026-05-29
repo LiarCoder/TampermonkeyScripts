@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "BeautifyCodeBlockFontStyle.user.js",
-        metaFileName: "BeautifyCodeBlockFontStyle.meta.js",
+        fileName: "beautify-code-block-font-style.user.js",
+        metaFileName: "beautify-code-block-font-style.meta.js",
         autoGrant: false,
       },
     }),

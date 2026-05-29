@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "BilibiliShareToFriends.user.js",
-        metaFileName: "BilibiliShareToFriends.meta.js",
+        fileName: "bilibili-share-to-friends.user.js",
+        metaFileName: "bilibili-share-to-friends.meta.js",
         autoGrant: false,
       },
     }),

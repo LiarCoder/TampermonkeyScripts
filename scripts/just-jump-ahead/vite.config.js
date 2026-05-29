@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "JustJumpAhead.user.js",
-        metaFileName: "JustJumpAhead.meta.js",
+        fileName: "just-jump-ahead.user.js",
+        metaFileName: "just-jump-ahead.meta.js",
         autoGrant: false,
       },
     }),

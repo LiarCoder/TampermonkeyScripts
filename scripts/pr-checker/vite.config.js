@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "PRChecker.user.js",
-        metaFileName: "PRChecker.meta.js",
+        fileName: "pr-checker.user.js",
+        metaFileName: "pr-checker.meta.js",
         autoGrant: false,
       },
     }),

@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "CopyTitleAndLocation.user.js",
-        metaFileName: "CopyTitleAndLocation.meta.js",
+        fileName: "copy-title-and-location.user.js",
+        metaFileName: "copy-title-and-location.meta.js",
         autoGrant: false,
       },
     }),

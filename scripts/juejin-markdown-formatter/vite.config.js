@@ -19,8 +19,8 @@ export default defineConfig({
         prefix: "dev:",
       },
       build: {
-        fileName: "JueJinMarkdownFormatter.user.js",
-        metaFileName: "JueJinMarkdownFormatter.meta.js",
+        fileName: "juejin-markdown-formatter.user.js",
+        metaFileName: "juejin-markdown-formatter.meta.js",
         autoGrant: false,
       },
     }),
