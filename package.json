@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.16.1",
   "scripts": {
     "dev": "pnpm --filter ./scripts/* dev",
-    "build": "pnpm --filter ./scripts/* build",
+    "build": "pnpm --workspace-concurrency=1 --filter ./scripts/* build",
     "build:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build",
     "dev:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends dev",
     "shell:bilibili": "pnpm --filter @tampermonkey-scripts/bilibili-share-to-friends build && node tools/generate-local-shell.js scripts/bilibili-share-to-friends",
