@@ -294,6 +294,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
           state.activeRelation === "followers" && keyword
             ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
             : "",
+        onCompositionStart: () => window.clearTimeout(searchTimer),
         onInput: scheduleSearch,
       })
     );
