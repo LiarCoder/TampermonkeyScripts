@@ -416,6 +416,7 @@ const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", e
   setDialogContent(
     dialog,
     createElement({
+      attributes: { class: `${SCRIPT_ID}-dialog-content` },
       children: [header, createVideoPreview(video), body, footer],
     })
   );

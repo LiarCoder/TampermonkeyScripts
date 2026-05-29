@@ -58,3 +58,10 @@
 .bili-share-to-friends-close:hover {
   background: #f1f2f3;
 }
+
+.bili-share-to-friends-dialog-content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
