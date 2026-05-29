@@ -16,7 +16,7 @@ import {
   setDialogContent,
 } from "./components/Dialog/index.js";
 import { createDialogFooter, createCloseFooter } from "./components/DialogFooter/index.js";
-import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.js";
+import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.jsx";
 import { createRecipientTabs } from "./components/RecipientTabs/index.js";
 import { createRelationFilter } from "./components/RelationFilter/index.js";
 import { createSearchBox } from "./components/SearchBox/index.js";
