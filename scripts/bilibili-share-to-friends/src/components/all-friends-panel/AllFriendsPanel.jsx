@@ -272,18 +272,6 @@ export const AllFriendsPanel = ({
   }
 
   const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
-  const userList = (
-    <UserList
-      users={displayUsers}
-      selectedMid={selectedMid}
-      hasMore={displayState.hasMore}
-      loadingMore={displayLoading.loadingMore}
-      moreError={displayState.moreError}
-      showFooter
-      onRetry={() => loadRelationUsers(activeRelation)}
-      onSelect={onSelect}
-    />
-  );
   const renderListContent = () => {
     if (displayLoading.loading) {
       return <StateView text="正在读取用户列表..." />;
@@ -294,7 +282,18 @@ export const AllFriendsPanel = ({
     if (displayUsers.length === 0) {
       return <StateView text={emptyText} />;
     }
-    return userList;
+    return (
+      <UserList
+        users={displayUsers}
+        selectedMid={selectedMid}
+        hasMore={displayState.hasMore}
+        loadingMore={displayLoading.loadingMore}
+        moreError={displayState.moreError}
+        showFooter
+        onRetry={() => loadRelationUsers(activeRelation)}
+        onSelect={onSelect}
+      />
+    );
   };
 
   return (
