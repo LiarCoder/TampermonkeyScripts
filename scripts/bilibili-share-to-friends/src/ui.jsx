@@ -337,29 +337,7 @@ export const ShareDialog = ({
     showFooter = false,
     onRetry = () => {},
   }) => {
-    if (users.length === 0) {
-      return (
-        <>
-          <StateView text={emptyText} />
-          {showFooter ? (
-            <UserList
-              users={users}
-              selectedMid={selectedUser?.mid}
-              hasMore={hasMore}
-              loadingMore={loadingMore}
-              moreError={moreError}
-              showFooter
-              onRetry={onRetry}
-              onSelect={(_button, user) => {
-                setSendError("");
-                setSelectedUser(user);
-              }}
-            />
-          ) : null}
-        </>
-      );
-    }
-    return (
+    const userList = (
       <UserList
         users={users}
         selectedMid={selectedUser?.mid}
@@ -374,6 +352,16 @@ export const ShareDialog = ({
         }}
       />
     );
+
+    if (users.length === 0) {
+      return (
+        <>
+          <StateView text={emptyText} />
+          {showFooter ? userList : null}
+        </>
+      );
+    }
+    return userList;
   };
 
   const renderRelationContent = () => {
