@@ -18,7 +18,7 @@ export default defineConfig({
       entry: "src/main.js",
       userscript,
       server: {
-        prefix: "dev:",
+        prefix: `dev:${userscript.name}`,
       },
       build: {
         fileName: "bilibili-share-to-friends.user.js",
