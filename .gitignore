@@ -2,9 +2,10 @@
 
 .idea/
 node_modules/
-dist/
-**/dist/
-**/dist/*.local.user.js
+/dist/
+**/dist/*
+!**/dist/*.user.js
+**/dist/dev/
 .vite/
 *.local
 

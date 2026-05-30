@@ -1,3 +1,9 @@
+import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
+
+import packageJson from "../package.json";
+
+const rawScriptUrl = buildRawScriptUrl(packageJson.scriptName);
+
 export const userscript = {
   name: "JustJumpAhead",
   namespace: "http://tampermonkey.net/",
@@ -5,6 +11,8 @@ export const userscript = {
   description:
     "自动完成掘金、简书、知乎、百度贴吧、PC端QQ、CSDN、Gitee的跳转询问界面的点击工作，实现自动跳转",
   author: "LiarCoder",
+  updateURL: rawScriptUrl,
+  downloadURL: rawScriptUrl,
   match: [
     "*://link.juejin.cn/*",
     "*://link.zhihu.com/*",

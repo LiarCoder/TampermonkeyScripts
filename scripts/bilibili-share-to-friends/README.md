@@ -4,22 +4,22 @@
 
 ## 预览
 
-<details>
-<summary>原分享列表中追加一个“B站好友”分享方式（点击展开）</summary>
+<details open>
+<summary>原分享列表中追加一个“B站好友”分享方式（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/fd5b090d-9ac7-4d2b-b9fe-f2c25c3c788a" alt="增加分享入口" style="max-width: 100%;" />
 
 </details>
 
 <details>
-<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开）</summary>
+<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/040ececb-5af2-4388-8d8d-015e5287d584" alt="选择接收人" style="max-width: 100%;" />
 
 </details>
 
 <details>
-<summary>支持昵称搜索、滚动分页加载（点击展开）</summary>
+<summary>支持昵称搜索、滚动分页加载（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/89cd35a0-3256-48f4-b8c7-df3e0a4cc43c" alt="昵称搜索、滚动分页加载" style="max-width: 100%;" />
 
@@ -55,7 +55,7 @@ pnpm shell:bilibili
 开发同步有两种方式：
 
 1. 推荐先运行 `pnpm dev:bilibili`，按 `vite-plugin-monkey` 打开的安装页安装开发版脚本。之后本地代码变更会通过 Vite dev server 加载，通常不需要再复制粘贴到 Tampermonkey 编辑器。
-2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dist/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm watch:bilibili`，刷新目标页面即可加载本地 `dist/bilibili-share-to-friends.user.js`。
+2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dist/dev/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm watch:bilibili`，刷新目标页面即可加载本地 `dist/bilibili-share-to-friends.user.js`。
 
 ## 鸣谢
 

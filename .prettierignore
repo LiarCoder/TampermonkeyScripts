@@ -1,0 +1,2 @@
+# Vite / vite-plugin-monkey 构建产物；以 pnpm build 输出为准，避免与 Prettier 互相改写
+**/dist/*.user.js

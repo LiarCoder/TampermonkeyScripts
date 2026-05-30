@@ -9,6 +9,7 @@
     "build:watch": "vite build --watch",
     "preview": "vite preview --host 127.0.0.1"
   },
+  "scriptName": "bilibili-share-to-friends",
   "dependencies": {
     "@tampermonkey-scripts/shared": "workspace:*",
     "preact": "10.29.2"

@@ -9,6 +9,7 @@
     "build:watch": "vite build --watch",
     "preview": "vite preview --host 127.0.0.1"
   },
+  "scriptName": "pr-checker",
   "dependencies": {
     "@tampermonkey-scripts/shared": "workspace:*"
   },
