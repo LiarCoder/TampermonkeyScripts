@@ -7,7 +7,7 @@ const relationOptions = [
 ];
 
 /**
- * Renders the following/follower relation switch.
+ * 渲染关注/粉丝关系切换控件。
  */
 export const RelationFilter = ({ activeRelation, onChange }) => (
   <div className={`${SCRIPT_ID}-relation-filter`}>

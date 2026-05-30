@@ -4,7 +4,7 @@ import "./style.css";
 const isLinkTarget = (target) => target instanceof Element && Boolean(target.closest("a"));
 
 /**
- * Renders one selectable user row with a profile link.
+ * 渲染带用户主页链接的单个可选择用户行。
  */
 export const UserListItem = ({ user, selected = false, onSelect }) => {
   const handleSelect = (event) => {

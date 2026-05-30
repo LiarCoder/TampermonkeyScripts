@@ -1,9 +1,9 @@
 /**
- * Adds or updates a style tag, falling back to GM_addStyle when available.
+ * 添加或更新样式标签；可用时优先使用 GM_addStyle。
  *
- * @param {string} css CSS text to inject.
- * @param {object} [options] Injection options.
- * @returns {HTMLElement | unknown} Injected style node or GM_addStyle result.
+ * @param {string} css 要注入的 CSS 文本。
+ * @param {object} [options] 注入配置。
+ * @returns {HTMLElement | unknown} 注入后的样式节点或 GM_addStyle 返回值。
  */
 export const addStyle = (
   css,

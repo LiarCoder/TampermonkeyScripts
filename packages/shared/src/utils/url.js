@@ -1,8 +1,8 @@
 /**
- * Normalizes image URLs for browser display.
+ * 归一化图片地址，便于浏览器展示。
  *
- * @param {string} url Raw image URL returned by a page or API.
- * @returns {string} HTTPS image URL, or an empty string for empty input.
+ * @param {string} url 页面或接口返回的原始图片地址。
+ * @returns {string} HTTPS 图片地址；输入为空时返回空字符串。
  */
 export const normalizeImageUrl = (url) => {
   if (!url) {

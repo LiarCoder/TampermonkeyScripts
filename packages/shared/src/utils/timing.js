@@ -1,9 +1,9 @@
 /**
- * Creates a debounced function with a cancel method.
+ * 创建带取消方法的防抖函数。
  *
- * @param {Function} callback Function to run after the delay.
- * @param {number} delay Delay in milliseconds.
- * @returns {Function & { cancel: () => void }} Debounced function.
+ * @param {Function} callback 延迟后执行的函数。
+ * @param {number} delay 延迟毫秒数。
+ * @returns {Function & { cancel: () => void }} 防抖后的函数。
  */
 export const debounce = (callback, delay) => {
   let timer = null;

@@ -4,7 +4,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Renders the entry button injected into Bilibili's native share panel.
+ * 渲染注入到 B 站原生分享面板中的入口按钮。
  */
 const EntryButton = ({ onClick }) => (
   <button
@@ -34,7 +34,7 @@ const EntryButton = ({ onClick }) => (
 );
 
 /**
- * Creates a DOM button element by rendering the Preact entry button once.
+ * 通过一次性渲染 Preact 入口按钮创建 DOM 按钮元素。
  */
 export const createEntryButton = ({ onClick }) => {
   const container = document.createElement("div");

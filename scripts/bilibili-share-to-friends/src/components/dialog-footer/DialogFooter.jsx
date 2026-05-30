@@ -5,7 +5,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Renders close/cancel/send actions and owns the send request state.
+ * 渲染关闭、取消和发送操作，并维护发送请求状态。
  */
 export const DialogFooter = ({
   video,

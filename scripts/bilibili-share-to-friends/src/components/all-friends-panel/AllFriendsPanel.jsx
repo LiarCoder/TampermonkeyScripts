@@ -30,7 +30,7 @@ const getPageLoadingState = (state) => ({
 });
 
 /**
- * Renders the following/follower picker with search and paginated loading.
+ * 渲染带搜索和分页加载的关注/粉丝选择面板。
  */
 export const AllFriendsPanel = ({
   active,

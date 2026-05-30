@@ -19,9 +19,9 @@ import {
 let navCache = null;
 
 /**
- * Reads the current video BV id from the Bilibili video page URL.
+ * 从当前 B 站视频页地址读取 BV 号。
  *
- * @returns {string} BV id, or an empty string outside a video page.
+ * @returns {string} BV 号；不在视频页时返回空字符串。
  */
 export const getBvidFromLocation = () => {
   const match = location.href.match(/\/video\/(BV[0-9A-Za-z]+)/);
@@ -29,11 +29,11 @@ export const getBvidFromLocation = () => {
 };
 
 /**
- * Ensures a Bilibili API response is successful and returns its data payload.
+ * 校验 B 站接口响应是否成功，并返回数据字段。
  *
- * @param {object} result Bilibili API response.
- * @param {string} action User-facing action name for error messages.
- * @returns {unknown} Response data payload.
+ * @param {object} result B 站接口响应。
+ * @param {string} action 用于错误提示的操作名称。
+ * @returns {unknown} 响应中的数据字段。
  */
 const assertSuccess = (result, action) => {
   if (!result || result.code !== 0) {
@@ -44,10 +44,10 @@ const assertSuccess = (result, action) => {
 };
 
 /**
- * Builds the form body required by Bilibili private message sending API.
+ * 构造 B 站发送私信接口所需的表单数据。
  *
- * @param {object} options Message form options.
- * @returns {URLSearchParams} Encoded private message form body.
+ * @param {object} options 私信表单配置。
+ * @returns {URLSearchParams} 编码后的私信表单数据。
  */
 const createSendMessageForm = ({
   nav,
@@ -78,10 +78,10 @@ const createSendMessageForm = ({
   });
 
 /**
- * Sends an already encoded private message form to one Bilibili receiver.
+ * 将已编码的私信表单发送给指定 B 站用户。
  *
- * @param {object} options Private message request options.
- * @returns {Promise<unknown>} Bilibili send message response data.
+ * @param {object} options 私信请求配置。
+ * @returns {Promise<unknown>} B 站发送私信接口返回数据。
  */
 const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
   const query = signWbi(
@@ -107,11 +107,11 @@ const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
 };
 
 /**
- * Creates the WBI mixin key from Bilibili image keys.
+ * 根据 B 站图片密钥生成 WBI 混合密钥。
  *
- * @param {string} imgKey WBI image key.
- * @param {string} subKey WBI sub image key.
- * @returns {string} 32-character mixin key.
+ * @param {string} imgKey WBI 图片密钥。
+ * @param {string} subKey WBI 子图片密钥。
+ * @returns {string} 32 位混合密钥。
  */
 const getMixinKey = (imgKey, subKey) =>
   mixinKeyEncTab
@@ -120,11 +120,11 @@ const getMixinKey = (imgKey, subKey) =>
     .slice(0, 32);
 
 /**
- * Signs Bilibili web API params with WBI fields when the nav response exposes keys.
+ * 当导航接口响应提供密钥时，为 B 站网页接口参数补充 WBI 签名字段。
  *
- * @param {Record<string, string | number>} params Unsigned query params.
- * @param {object} wbiImg WBI image metadata from the nav API.
- * @returns {Record<string, string | number>} Signed params, or original params when keys are absent.
+ * @param {Record<string, string | number>} params 未签名的查询参数。
+ * @param {object} wbiImg 导航接口返回的 WBI 图片信息。
+ * @returns {Record<string, string | number>} 签名后的参数；缺少密钥时返回原参数。
  */
 const signWbi = (params, wbiImg) => {
   if (!wbiImg?.img_url || !wbiImg?.sub_url) {
@@ -151,9 +151,9 @@ const signWbi = (params, wbiImg) => {
 };
 
 /**
- * Loads and caches the current Bilibili navigation/login payload.
+ * 加载并缓存当前 B 站导航和登录信息。
  *
- * @returns {Promise<object>} Bilibili nav API data.
+ * @returns {Promise<object>} B 站导航接口数据。
  */
 const getNav = async () => {
   if (navCache) {
@@ -168,9 +168,9 @@ const getNav = async () => {
 };
 
 /**
- * Verifies that the user is logged in and has a CSRF token for private messages.
+ * 校验用户已登录，并且具备发送私信所需的 CSRF 令牌。
  *
- * @returns {Promise<{ nav: object, csrf: string }>} Login payload and CSRF token.
+ * @returns {Promise<{ nav: object, csrf: string }>} 登录信息和 CSRF 令牌。
  */
 export const assertLogin = async () => {
   const nav = await getNav();
@@ -185,9 +185,9 @@ export const assertLogin = async () => {
 };
 
 /**
- * Loads the current video metadata needed for text sharing.
+ * 加载文本分享所需的当前视频信息。
  *
- * @returns {Promise<object>} Normalized video metadata.
+ * @returns {Promise<object>} 归一化后的视频信息。
  */
 export const getVideoInfo = async () => {
   const bvid = getBvidFromLocation();
@@ -209,9 +209,9 @@ export const getVideoInfo = async () => {
 };
 
 /**
- * Reads recent session contacts from localStorage when the TTL is still valid.
+ * 在缓存仍有效时，从本地存储读取最近私信联系人。
  *
- * @returns {Array<object> | null} Cached sessions or null when unavailable.
+ * @returns {Array<object> | null} 缓存的会话；不可用时返回空值。
  */
 const readSessionCache = () => {
   try {
@@ -226,9 +226,9 @@ const readSessionCache = () => {
 };
 
 /**
- * Stores recent session contacts in localStorage with a creation timestamp.
+ * 将最近私信联系人和创建时间写入本地存储。
  *
- * @param {Array<object>} sessions Normalized recent session contacts.
+ * @param {Array<object>} sessions 归一化后的最近私信联系人。
  */
 const writeSessionCache = (sessions) => {
   localStorage.setItem(
@@ -241,11 +241,11 @@ const writeSessionCache = (sessions) => {
 };
 
 /**
- * Resolves account metadata for a session from inline or companion account info.
+ * 从会话内联信息或伴随账号信息中解析账号资料。
  *
- * @param {object} session Raw Bilibili session item.
- * @param {object} accountInfoMap Account info map returned by the session API.
- * @returns {object} Matching account metadata.
+ * @param {object} session B 站原始会话项。
+ * @param {object} accountInfoMap 会话接口返回的账号信息映射。
+ * @returns {object} 匹配到的账号资料。
  */
 const getSessionAccountInfo = (session, accountInfoMap = {}) => {
   const talkerId = String(session.talker_id || "");
@@ -253,11 +253,11 @@ const getSessionAccountInfo = (session, accountInfoMap = {}) => {
 };
 
 /**
- * Converts a Bilibili IM session item to a selectable user entry.
+ * 将 B 站私信会话项转换为可选择的用户项。
  *
- * @param {object} session Raw Bilibili session item.
- * @param {object} accountInfoMap Account info map returned by the session API.
- * @returns {object | null} Normalized user entry, or null for unsupported sessions.
+ * @param {object} session B 站原始会话项。
+ * @param {object} accountInfoMap 会话接口返回的账号信息映射。
+ * @returns {object | null} 归一化后的用户项；不支持的会话返回 null。
  */
 const normalizeSession = (session, accountInfoMap = {}) => {
   const account = getSessionAccountInfo(session, accountInfoMap);
@@ -275,10 +275,10 @@ const normalizeSession = (session, accountInfoMap = {}) => {
 };
 
 /**
- * Converts a relation API user item to a selectable user entry.
+ * 将关系接口用户项转换为可选择的用户项。
  *
- * @param {object} user Raw Bilibili relation user.
- * @returns {object | null} Normalized user entry, or null when the UID is missing.
+ * @param {object} user B 站原始关系用户。
+ * @returns {object | null} 归一化后的用户项；缺少 UID 时返回 null。
  */
 const normalizeRelationUser = (user) => {
   const mid = Number(user.mid);
@@ -294,10 +294,10 @@ const normalizeRelationUser = (user) => {
 };
 
 /**
- * Loads public profile information for one Bilibili UID.
+ * 加载指定 B 站 UID 的公开用户资料。
  *
- * @param {number} mid Bilibili user id.
- * @returns {Promise<object>} Normalized user profile.
+ * @param {number} mid B 站用户 id。
+ * @returns {Promise<object>} 归一化后的用户资料。
  */
 const getUserInfo = async (mid) => {
   const nav = await getNav();
@@ -318,10 +318,10 @@ const getUserInfo = async (mid) => {
 };
 
 /**
- * Fills recent sessions that only include UID with profile name and avatar data.
+ * 为仅包含 UID 的最近会话补齐昵称和头像。
  *
- * @param {Array<object>} sessions Normalized recent sessions.
- * @returns {Promise<Array<object>>} Enriched recent sessions.
+ * @param {Array<object>} sessions 归一化后的最近会话。
+ * @returns {Promise<Array<object>>} 补齐用户资料后的最近会话。
  */
 const enrichSessionsWithUserInfo = async (sessions) => {
   // 最近私信接口经常只返回 talker_id，这里按 UID 补齐昵称和头像。
@@ -358,10 +358,10 @@ const enrichSessionsWithUserInfo = async (sessions) => {
 };
 
 /**
- * Loads recent private message contacts, optionally bypassing the session cache.
+ * 加载最近私信联系人，可选择跳过会话缓存。
  *
- * @param {boolean} [forceRefresh=false] Whether to ignore cached sessions.
- * @returns {Promise<Array<object>>} Recent private message contacts.
+ * @param {boolean} [forceRefresh=false] 是否忽略缓存会话。
+ * @returns {Promise<Array<object>>} 最近私信联系人。
  */
 export const getRecentSessions = async (forceRefresh = false) => {
   if (!forceRefresh) {
@@ -389,10 +389,10 @@ export const getRecentSessions = async (forceRefresh = false) => {
 };
 
 /**
- * Loads one page of following or follower users from a Bilibili relation API.
+ * 从 B 站关系接口加载一页关注或粉丝用户。
  *
- * @param {object} options Relation API request options.
- * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Relation page.
+ * @param {object} options 关系接口请求配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 关系用户分页数据。
  */
 const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams = {} }) => {
   const result = await httpRequest({
@@ -416,10 +416,10 @@ const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams 
 };
 
 /**
- * Loads one page of users followed by the current account.
+ * 加载当前账号关注用户的一页数据。
  *
- * @param {object} options Pagination options.
- * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Following page.
+ * @param {object} options 分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 关注用户分页数据。
  */
 export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
@@ -431,10 +431,10 @@ export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) 
   });
 
 /**
- * Searches users followed by the current account through Bilibili's relation search API.
+ * 通过 B 站关系搜索接口搜索当前账号关注的用户。
  *
- * @param {object} options Search and pagination options.
- * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Search page.
+ * @param {object} options 搜索和分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 搜索分页数据。
  */
 export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
@@ -449,10 +449,10 @@ export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_P
   });
 
 /**
- * Loads one page of users following the current account.
+ * 加载当前账号粉丝的一页数据。
  *
- * @param {object} options Pagination options.
- * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Follower page.
+ * @param {object} options 分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 粉丝分页数据。
  */
 export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
@@ -464,9 +464,9 @@ export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =
   });
 
 /**
- * Reads or creates the persistent Bilibili IM device id.
+ * 读取或创建持久化的 B 站私信设备 id。
  *
- * @returns {string} Device id used by the send message API.
+ * @returns {string} 发送私信接口使用的设备 id。
  */
 const getDevId = () => {
   const cachedDevId = localStorage.getItem(DEV_ID_KEY);
@@ -482,10 +482,10 @@ const getDevId = () => {
 };
 
 /**
- * Sends the current video as a plain text private message.
+ * 将当前视频作为纯文本私信发送。
  *
- * @param {object} options Send options.
- * @returns {Promise<unknown>} Bilibili send message response data.
+ * @param {object} options 发送配置。
+ * @returns {Promise<unknown>} B 站发送私信接口返回数据。
  */
 export const sendVideoText = async ({ nav, csrf, video, receiver }) => {
   const devId = getDevId();

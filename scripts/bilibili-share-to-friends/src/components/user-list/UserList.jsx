@@ -3,7 +3,7 @@ import { UserListItem } from "../user-list-item/UserListItem.jsx";
 import "./style.css";
 
 /**
- * Renders the relation list footer for pagination state.
+ * 渲染关系用户列表的分页状态底部区域。
  */
 export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
   <div className={`${SCRIPT_ID}-list-footer`}>
@@ -18,7 +18,7 @@ export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => 
 );
 
 /**
- * Renders selectable Bilibili users with optional infinite-scroll footer.
+ * 渲染可选择的 B 站用户列表，并可附带滚动分页底部区域。
  */
 export const UserList = ({
   users,

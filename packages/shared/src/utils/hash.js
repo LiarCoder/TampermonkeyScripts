@@ -1,8 +1,8 @@
 /**
- * Calculates the MD5 digest for a string.
+ * 计算字符串的 MD5 摘要。
  *
- * @param {string} input Text to hash.
- * @returns {string} Lowercase hexadecimal MD5 digest.
+ * @param {string} input 要计算摘要的文本。
+ * @returns {string} 小写十六进制 MD5 摘要。
  */
 export const md5 = (input) => {
   const rotateLeft = (value, shift) => (value << shift) | (value >>> (32 - shift));

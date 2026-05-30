@@ -1,8 +1,8 @@
 /**
- * Builds a URL query string while omitting empty values.
+ * 构建 URL 查询字符串，并跳过空值参数。
  *
- * @param {Record<string, string | number | boolean | null | undefined>} params Query parameters.
- * @returns {string} Encoded query string.
+ * @param {Record<string, string | number | boolean | null | undefined>} params 查询参数。
+ * @returns {string} 编码后的查询字符串。
  */
 export const buildQuery = (params) => {
   const query = new URLSearchParams();

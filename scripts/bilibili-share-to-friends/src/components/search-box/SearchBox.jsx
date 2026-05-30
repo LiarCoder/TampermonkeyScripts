@@ -4,7 +4,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Renders an IME-safe search input for filtering relation users.
+ * 渲染兼容输入法组合输入的关系用户搜索框。
  */
 export const SearchBox = ({
   value,

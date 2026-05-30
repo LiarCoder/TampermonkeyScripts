@@ -7,7 +7,7 @@ const tabs = [
 ];
 
 /**
- * Renders the recipient source tabs in the share dialog.
+ * 渲染分享弹窗中的接收人来源标签页。
  */
 export const RecipientTabs = ({ activeTab, onChange }) => (
   <div className={`${SCRIPT_ID}-tabs`}>

@@ -1,12 +1,12 @@
 /**
- * Sends a Tampermonkey GM_xmlhttpRequest and parses the JSON response body.
+ * 发送 Tampermonkey GM_xmlhttpRequest 请求，并解析 JSON 响应体。
  *
- * @param {object} options Request options.
- * @param {string} options.url Request URL.
- * @param {string} [options.method="GET"] HTTP method.
- * @param {string | FormData | URLSearchParams | null} [options.data=null] Request body.
- * @param {Record<string, string>} [options.headers={}] Request headers.
- * @returns {Promise<unknown>} Parsed JSON response.
+ * @param {object} options 请求配置。
+ * @param {string} options.url 请求地址。
+ * @param {string} [options.method="GET"] HTTP 方法。
+ * @param {string | FormData | URLSearchParams | null} [options.data=null] 请求体。
+ * @param {Record<string, string>} [options.headers={}] 请求头。
+ * @returns {Promise<unknown>} 解析后的 JSON 响应。
  */
 export const httpRequest = ({ method = "GET", url, data = null, headers = {} }) => {
   return new Promise((resolve, reject) => {

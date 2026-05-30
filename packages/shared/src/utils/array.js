@@ -1,8 +1,8 @@
 /**
- * Returns only truthy entries when the input is an array.
+ * 当输入是数组时，仅返回其中的真值项。
  *
- * @param {unknown} items Value that may contain an array.
- * @returns {Array<unknown>} Truthy array entries, or an empty array for non-arrays.
+ * @param {unknown} items 可能是数组的值。
+ * @returns {Array<unknown>} 真值数组项；非数组时返回空数组。
  */
 export const compact = (items) => {
   if (!Array.isArray(items)) {

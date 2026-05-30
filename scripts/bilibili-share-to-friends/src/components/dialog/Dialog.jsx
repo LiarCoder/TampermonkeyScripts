@@ -4,7 +4,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Unmounts and removes an existing share dialog node.
+ * 卸载并移除已有分享弹窗节点。
  */
 export const closeDialog = (dialog) => {
   if (!dialog) {
@@ -22,7 +22,7 @@ export const closeDialog = (dialog) => {
 };
 
 /**
- * Creates a fresh native dialog container for the share UI.
+ * 创建新的原生弹窗容器，用于承载分享界面。
  */
 export const createDialog = () => {
   closeDialog(document.getElementById(`${SCRIPT_ID}-dialog`));

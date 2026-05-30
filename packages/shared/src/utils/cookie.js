@@ -1,8 +1,8 @@
 /**
- * Reads and decodes a cookie value from the current document.
+ * 从当前文档读取并解码指定 cookie 值。
  *
- * @param {string} name Cookie name to read.
- * @returns {string} Decoded cookie value, or an empty string when it is missing.
+ * @param {string} name 要读取的 cookie 名称。
+ * @returns {string} 解码后的 cookie 值；不存在时返回空字符串。
  */
 export const getCookie = (name) => {
   const cookie = document.cookie

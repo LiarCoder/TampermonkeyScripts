@@ -4,7 +4,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Renders the current video cover with a fallback state.
+ * 渲染当前视频封面，并处理兜底状态。
  */
 export const VideoCover = ({ video }) => {
   const [loadFailed, setLoadFailed] = useState(false);
@@ -27,7 +27,7 @@ export const VideoCover = ({ video }) => {
 };
 
 /**
- * Renders the current video summary shown before sending.
+ * 渲染发送前展示的当前视频摘要。
  */
 export const VideoPreview = ({ video }) => (
   <div className={`${SCRIPT_ID}-video`}>

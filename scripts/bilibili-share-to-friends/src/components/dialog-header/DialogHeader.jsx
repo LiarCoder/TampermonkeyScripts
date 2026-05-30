@@ -2,7 +2,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 /**
- * Renders the share dialog title and close button.
+ * 渲染分享弹窗标题和关闭按钮。
  */
 export const DialogHeader = ({ title, onClose, disabled = false }) => (
   <div className={`${SCRIPT_ID}-header`}>
