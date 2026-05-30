@@ -43,8 +43,8 @@ pnpm test
 | JustJumpAhead            | `pnpm dev:jump-ahead` | `pnpm build:jump-ahead` | `pnpm watch:jump-ahead` | `pnpm shell:jump-ahead` |
 | PR三思器                 | `pnpm dev:pr-checker` | `pnpm build:pr-checker` | `pnpm watch:pr-checker` | `pnpm shell:pr-checker` |
 
-日常开发优先用对应的 `pnpm dev:*`。如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，再用对应的 `pnpm shell:*` 生成 `dist/*.local.user.js` 本地壳脚本，然后开对应的 `pnpm watch:*` 持续更新 `dist/*.user.js`。
+日常开发优先用对应的 `pnpm dev:*`。如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，再用对应的 `pnpm shell:*` 生成 `dist/dev/*.local.user.js` 本地壳脚本，然后开对应的 `pnpm watch:*` 持续更新 `dist/*.user.js`。
 
-prod 构建默认不压缩混淆，生成的 `scripts/<name>/dist/*.user.js` 可读，便于调试和提交到 Greasy Fork。
+prod 构建默认不压缩混淆，生成的 `scripts/<name>/dist/*.user.js` 可读，便于调试、提交到 GitHub 或同步到 Greasy Fork；`dist/dev/*` 仅保留本地开发用 meta 和壳脚本，不提交。
 
 具体脚本的本地开发同步方式、调试步骤或注意事项放在对应子工程 README 中维护。

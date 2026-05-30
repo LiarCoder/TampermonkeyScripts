@@ -20,7 +20,7 @@ export default defineConfig({
       },
       build: {
         fileName: "juejin-markdown-formatter.user.js",
-        metaFileName: "juejin-markdown-formatter.meta.js",
+        metaFileName: "dev/juejin-markdown-formatter.meta.js",
         autoGrant: false,
       },
     }),

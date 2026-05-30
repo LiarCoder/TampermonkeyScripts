@@ -23,7 +23,8 @@ if (!distFile) {
 const distPath = path.join(distDir, distFile);
 const localRequireUrl = pathToFileURL(distPath).href;
 const shellName = distFile.replace(/\.user\.js$/, ".local.user.js");
-const shellPath = path.join(distDir, shellName);
+const devDir = path.join(distDir, "dev");
+const shellPath = path.join(devDir, shellName);
 
 const distContent = await fs.readFile(distPath, "utf8");
 const headerStart = distContent.indexOf("// ==UserScript==");
@@ -44,6 +45,7 @@ lines.push("// ==/UserScript==");
 lines.push("");
 lines.push("// Local development shell. The built script is loaded through @require.");
 
+await fs.mkdir(devDir, { recursive: true });
 await fs.writeFile(shellPath, `${lines.join("\n")}\n`, "utf8");
 
 console.log(`Generated ${path.relative(root, shellPath)}`);

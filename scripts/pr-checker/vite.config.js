@@ -20,7 +20,7 @@ export default defineConfig({
       },
       build: {
         fileName: "pr-checker.user.js",
-        metaFileName: "pr-checker.meta.js",
+        metaFileName: "dev/pr-checker.meta.js",
         autoGrant: false,
       },
     }),

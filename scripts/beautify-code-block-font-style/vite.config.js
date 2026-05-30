@@ -20,7 +20,7 @@ export default defineConfig({
       },
       build: {
         fileName: "beautify-code-block-font-style.user.js",
-        metaFileName: "beautify-code-block-font-style.meta.js",
+        metaFileName: "dev/beautify-code-block-font-style.meta.js",
         autoGrant: false,
       },
     }),

@@ -22,7 +22,7 @@ export default defineConfig({
       },
       build: {
         fileName: "bilibili-share-to-friends.user.js",
-        metaFileName: "bilibili-share-to-friends.meta.js",
+        metaFileName: "dev/bilibili-share-to-friends.meta.js",
         autoGrant: false,
       },
     }),

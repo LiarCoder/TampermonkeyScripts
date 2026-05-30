@@ -20,7 +20,7 @@ export default defineConfig({
       },
       build: {
         fileName: "copy-title-and-location.user.js",
-        metaFileName: "copy-title-and-location.meta.js",
+        metaFileName: "dev/copy-title-and-location.meta.js",
         autoGrant: false,
       },
     }),
