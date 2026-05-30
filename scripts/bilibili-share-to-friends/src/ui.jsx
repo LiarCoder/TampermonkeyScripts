@@ -13,7 +13,7 @@ import {
   StateView,
   VideoPreview,
 } from "./components/index.js";
-import { assertLogin, getVideoInfo, sendVideoText } from "./api.js";
+import { assertLogin, getVideoInfo } from "./api.js";
 import { SCRIPT_ID } from "./constants.js";
 
 export const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
@@ -33,31 +33,6 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     setSelectedUser(null);
     setSendError("");
   }, []);
-
-  const handleSend = async () => {
-    if (!selectedUser || sending) {
-      return;
-    }
-    setSending(true);
-    setSendError("");
-    try {
-      const login = await assertLogin();
-      await sendVideoText({
-        nav: login.nav,
-        csrf: login.csrf,
-        video,
-        receiver: selectedUser,
-      });
-      setResult({
-        message: `已将视频链接发送给 ${selectedUser.name}。`,
-        isError: false,
-      });
-    } catch (sendErrorResult) {
-      setSendError(sendErrorResult.message);
-    } finally {
-      setSending(false);
-    }
-  };
 
   const renderBody = () => {
     if (result) {
@@ -110,11 +85,13 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
       <VideoPreview video={video} />
       <div className={`${SCRIPT_ID}-body`}>{renderBody()}</div>
       <DialogFooter
+        video={video}
+        selectedUser={selectedUser}
         showCloseOnly={Boolean(result)}
-        sending={sending}
-        canSend={Boolean(selectedUser)}
         onClose={() => closeDialog(dialog)}
-        onSend={handleSend}
+        onSendingChange={setSending}
+        onSendSuccess={setResult}
+        onSendError={setSendError}
       />
     </div>
   );
