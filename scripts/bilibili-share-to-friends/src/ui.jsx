@@ -21,22 +21,45 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
   const [selectedUser, setSelectedUser] = useState(null);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
-  const [result, setResult] = useState(null);
+  const [sendResult, setSendResult] = useState(null);
 
   useEffect(() => {
     setSelectedUser(null);
     setSendError("");
-    setResult(null);
+    setSendResult(null);
   }, [video]);
+
+  const handleClose = useCallback(() => closeDialog(dialog), [dialog]);
 
   const resetSelection = useCallback(() => {
     setSelectedUser(null);
     setSendError("");
   }, []);
 
+  const handleTabChange = useCallback(
+    (tab) => {
+      if (activeTab === tab) {
+        return;
+      }
+      resetSelection();
+      setActiveTab(tab);
+    },
+    [activeTab, resetSelection]
+  );
+
+  const handleUserSelect = useCallback((_button, user) => {
+    setSendError("");
+    setSelectedUser(user);
+  }, []);
+
+  const handleSendSuccess = useCallback((nextResult) => {
+    setSendError("");
+    setSendResult(nextResult);
+  }, []);
+
   const renderBody = () => {
-    if (result) {
-      return <StateView text={result.message} isError={result.isError} />;
+    if (sendResult) {
+      return <StateView text={sendResult.message} isError={sendResult.isError} />;
     }
     if (status) {
       return <StateView text={status} />;
@@ -47,33 +70,18 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     return (
       <>
         {sendError ? <StateView text={sendError} isError /> : null}
-        <RecipientTabs
-          activeTab={activeTab}
-          onChange={(tab) => {
-            if (activeTab === tab) {
-              return;
-            }
-            resetSelection();
-            setActiveTab(tab);
-          }}
-        />
+        <RecipientTabs activeTab={activeTab} onChange={handleTabChange} />
         <RecentRecipientsPanel
           active={activeTab === "recent"}
           selectedMid={selectedUser?.mid}
-          onSelect={(_button, user) => {
-            setSendError("");
-            setSelectedUser(user);
-          }}
+          onSelect={handleUserSelect}
         />
         <AllFriendsPanel
           active={activeTab === "all"}
           mid={nav?.mid}
           selectedMid={selectedUser?.mid}
           onSelectionReset={resetSelection}
-          onSelect={(_button, user) => {
-            setSendError("");
-            setSelectedUser(user);
-          }}
+          onSelect={handleUserSelect}
         />
       </>
     );
@@ -81,16 +89,16 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
 
   return (
     <div className={`${SCRIPT_ID}-dialog-content`}>
-      <DialogHeader title="分享给 B站好友" disabled={sending} onClose={() => closeDialog(dialog)} />
+      <DialogHeader title="分享给 B站好友" disabled={sending} onClose={handleClose} />
       <VideoPreview video={video} />
       <div className={`${SCRIPT_ID}-body`}>{renderBody()}</div>
       <DialogFooter
         video={video}
         selectedUser={selectedUser}
-        showCloseOnly={Boolean(result)}
-        onClose={() => closeDialog(dialog)}
+        showCloseOnly={Boolean(sendResult)}
+        onClose={handleClose}
         onSendingChange={setSending}
-        onSendSuccess={setResult}
+        onSendSuccess={handleSendSuccess}
         onSendError={setSendError}
       />
     </div>
