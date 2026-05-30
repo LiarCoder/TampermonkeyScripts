@@ -4,7 +4,7 @@
 node_modules/
 dist/
 **/dist/
-**/dev/*.local.user.js
+**/dist/*.local.user.js
 .vite/
 *.local
 
