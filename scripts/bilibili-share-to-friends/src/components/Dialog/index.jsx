@@ -1,7 +1,6 @@
 import { render } from "preact";
 
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 export const closeDialog = (dialog) => {
@@ -30,30 +29,4 @@ export const createDialog = () => {
   });
   document.body.appendChild(dialog);
   return dialog;
-};
-
-export const setDialogContent = (dialog, child) => {
-  dialog.innerHTML = "";
-  dialog.appendChild(child);
-};
-
-export const DialogHeader = ({ title, onClose, disabled = false }) => (
-  <div className={`${SCRIPT_ID}-header`}>
-    <h3 className={`${SCRIPT_ID}-title`}>{title}</h3>
-    <button
-      className={`${SCRIPT_ID}-close`}
-      title="关闭"
-      type="button"
-      disabled={disabled}
-      onClick={onClose}
-    >
-      ×
-    </button>
-  </div>
-);
-
-export const createDialogHeader = ({ title, onClose }) => {
-  const header = renderToElement(DialogHeader({ title, onClose }));
-  const closeBtn = header.querySelector(`.${SCRIPT_ID}-close`);
-  return { header, closeBtn };
 };

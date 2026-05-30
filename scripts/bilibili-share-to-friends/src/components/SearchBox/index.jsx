@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 export const SearchBox = ({
@@ -35,9 +34,4 @@ export const SearchBox = ({
       {notice ? <div className={`${SCRIPT_ID}-search-notice`}>{notice}</div> : null}
     </div>
   );
-};
-
-export const createSearchBox = (props) => {
-  const composing = { value: false };
-  return renderToElement(SearchBox({ ...props, composing }));
 };

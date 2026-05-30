@@ -6,6 +6,7 @@ export const SESSION_LIMIT = 20;
 export const RELATION_PAGE_SIZE = 20;
 
 export const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
+export const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
 
 export const mixinKeyEncTab = [
   46, 47, 18, 2, 53, 8, 23, 32, 15, 50, 10, 31, 58, 3, 45, 35, 27, 43, 5, 49, 33, 9, 42, 19, 29, 28,

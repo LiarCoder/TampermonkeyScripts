@@ -1,5 +1,6 @@
+import { render } from "preact";
+
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 const EntryButton = ({ onClick }) => (
@@ -30,5 +31,7 @@ const EntryButton = ({ onClick }) => (
 );
 
 export const createEntryButton = ({ onClick }) => {
-  return renderToElement(EntryButton({ onClick }));
+  const container = document.createElement("div");
+  render(<EntryButton onClick={onClick} />, container);
+  return container.firstElementChild;
 };

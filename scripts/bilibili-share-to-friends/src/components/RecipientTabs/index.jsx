@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 const tabs = [
@@ -22,6 +21,3 @@ export const RecipientTabs = ({ activeTab, onChange }) => (
     ))}
   </div>
 );
-
-export const createRecipientTabs = ({ activeTab, onChange }) =>
-  renderToElement(RecipientTabs({ activeTab, onChange }));

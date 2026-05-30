@@ -1,5 +1,4 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { renderToElement } from "../../render.js";
 import "./style.css";
 
 export const UserListItem = ({ user, selected = false, onSelect }) => (
@@ -29,6 +28,3 @@ export const UserListItem = ({ user, selected = false, onSelect }) => (
     <div className={`${SCRIPT_ID}-check`} />
   </button>
 );
-
-export const createUserListItem = ({ user, selected = false, onSelect }) =>
-  renderToElement(<UserListItem user={user} selected={selected} onSelect={onSelect} />);
