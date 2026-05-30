@@ -9,6 +9,7 @@
 - “全部好友”支持选择“我的关注”或“我的粉丝”，并支持昵称搜索。
 - 关注搜索优先使用 B 站关注搜索接口；粉丝搜索仅筛选当前已加载用户，继续滚动可扩大筛选范围。
 - 用户列表支持滚动分页加载，加载失败时可重试。
+- 由于视频卡片的分享接口目前看起来无法在 PC 端调用，当前分享功能只支持分享纯文本，不能分享视频卡片。
 
 ## 目录
 
@@ -32,3 +33,7 @@ pnpm shell:bilibili
 
 1. 推荐先运行 `pnpm dev:bilibili`，按 `vite-plugin-monkey` 打开的安装页安装开发版脚本。之后本地代码变更会通过 Vite dev server 加载，通常不需要再复制粘贴到 Tampermonkey 编辑器。
 2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dist/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm watch:bilibili`，刷新目标页面即可加载本地 `dist/bilibili-share-to-friends.user.js`。
+
+## 鸣谢
+
+- [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)：提供 Bilibili Web API、私信接口和 WBI 签名相关资料。
