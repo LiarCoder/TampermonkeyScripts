@@ -1,12 +1,3 @@
-<!--
- * @Descripttion:
- * @version:
- * @Author: LiarCoder
- * @Date: 2021-09-29 19:17:01
- * @LastEditors: LiarCoder
- * @LastEditTime: 2021-12-11 23:46:05
--->
-
 # 自动继续访问页面
 
 ## 脚本安装地址

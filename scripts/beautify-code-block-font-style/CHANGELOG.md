@@ -1,12 +1,3 @@
-<!--
- * @Descripttion:
- * @version:
- * @Author: LiarCoder
- * @Date: 2021-09-25 19:57:26
- * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-25 19:57:26
--->
-
 # 改变网页代码块的字体样式
 
 一键美化主流网站代码块字体的油猴脚本。

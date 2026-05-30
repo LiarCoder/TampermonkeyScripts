@@ -1,12 +1,3 @@
-<!--
- * @Descripttion:
- * @version:
- * @Author: LiarCoder
- * @Date: 2021-09-01 16:23:57
- * @LastEditors: LiarCoder
- * @LastEditTime: 2021-09-03 19:52:51
--->
-
 # 掘金Markdown格式适配器更新日志
 
 ## V1.0
