@@ -2,6 +2,19 @@ import { render } from "preact";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 
 import {
+  closeDialog,
+  createDialog,
+  createEntryButton as createShareEntryButton,
+  DialogFooter,
+  DialogHeader,
+  RecipientTabs,
+  RelationFilter,
+  SearchBox,
+  StateView,
+  UserList,
+  VideoPreview,
+} from "./components/index.js";
+import {
   assertLogin,
   getFollowers,
   getFollowings,
@@ -10,16 +23,6 @@ import {
   searchFollowings,
   sendVideoText,
 } from "./api.js";
-import { closeDialog, createDialog } from "./components/Dialog/index.jsx";
-import { DialogFooter } from "./components/DialogFooter/index.jsx";
-import { DialogHeader } from "./components/DialogHeader/index.jsx";
-import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.jsx";
-import { RecipientTabs } from "./components/RecipientTabs/index.jsx";
-import { RelationFilter } from "./components/RelationFilter/index.jsx";
-import { SearchBox } from "./components/SearchBox/index.jsx";
-import { StateView } from "./components/StateView/index.jsx";
-import { UserList } from "./components/UserList/index.jsx";
-import { VideoPreview } from "./components/VideoPreview/index.jsx";
 import { LIST_SCROLL_SELECTOR, SCRIPT_ID } from "./constants.js";
 
 const createEmptyRelationState = () => ({
