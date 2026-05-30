@@ -18,9 +18,9 @@
 // ==/UserScript==
 
 (function () {
-  "use strict";
+  'use strict';
 
-  window.onload = function () {
+  window.onload = function() {
     let jumpBtn = null;
     let targetAddress = "";
     let currentAddress = location.toString();
@@ -47,4 +47,5 @@
       }
     }
   };
+
 })();

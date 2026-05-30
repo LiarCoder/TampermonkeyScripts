@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 (function () {
-  "use strict";
+  'use strict';
 
   function createEle(eleName, text, attrs) {
     let ele = document.createElement(eleName);
@@ -56,12 +56,12 @@
     id: "juejin-formatter-import-md-file",
     accept: ".md",
     type: "file",
-    style: "display: none",
+    style: "display: none"
   });
   const importLabel = createEle("label", "", {
     for: "juejin-formatter-import-md-file",
     class: "bytemd-toolbar-icon",
-    "data-title": "导入Markdown文档",
+    "data-title": "导入Markdown文档"
   });
   let tooltipStyle = `label[for="juejin-formatter-import-md-file"] {
       vertical-align: middle;
@@ -115,7 +115,7 @@
       opacity: 1;
     }`;
   const tooltipStyleTag = createEle("style", tooltipStyle, {
-    type: "text/css",
+    type: "text/css"
   });
   importLabel.innerHTML = `<?xml version="1.0" encoding="UTF-8"?>
     <svg width="12" height="12" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -136,42 +136,41 @@
       "#juejin-web-editor > div.edit-draft > div > header > input"
     );
     if (window.FileList && window.File && window.FileReader) {
-      document
-        .getElementById("juejin-formatter-import-md-file")
-        .addEventListener("change", (event) => {
-          const file = event.target.files[0];
-          const reader = new FileReader();
-          reader.addEventListener("load", (event2) => {
-            let content = event2.target.result;
-            content = replaceText(content, "==.*?==", "<mark>", "</mark>", "==", "==");
-            content = replaceText(
-              content,
-              "!\\[.*\\]\\(.*\\)",
-              '<div align="center"><img src="',
-              '"></div>',
-              "(",
-              ")"
-            );
-            content = replaceText(
-              content,
-              "<center>.*<\\/center>",
-              '<div align="center">',
-              "</div>",
-              "<center>",
-              "</center>"
-            );
-            navigator.clipboard.writeText(content);
-            let contentTitle = content.match(/#\s.*/g);
-            if (contentTitle) {
-              titleInput.value = contentTitle[0].substr(2) + " ";
-            } else {
-              titleInput.value = content.substring(0, 10) + " ";
-            }
-            titleInput.focus();
-            alert("文档处理完毕，删除标题尾部空格，然后在编辑区按下 Ctrl + V 粘贴内容");
-          });
-          reader.readAsText(file);
+      document.getElementById("juejin-formatter-import-md-file").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.addEventListener("load", (event2) => {
+          let content = event2.target.result;
+          content = replaceText(content, "==.*?==", "<mark>", "</mark>", "==", "==");
+          content = replaceText(
+            content,
+            "!\\[.*\\]\\(.*\\)",
+            '<div align="center"><img src="',
+            '"></div>',
+            "(",
+            ")"
+          );
+          content = replaceText(
+            content,
+            "<center>.*<\\/center>",
+            '<div align="center">',
+            "</div>",
+            "<center>",
+            "</center>"
+          );
+          navigator.clipboard.writeText(content);
+          let contentTitle = content.match(/#\s.*/g);
+          if (contentTitle) {
+            titleInput.value = contentTitle[0].substr(2) + " ";
+          } else {
+            titleInput.value = content.substring(0, 10) + " ";
+          }
+          titleInput.focus();
+          alert("文档处理完毕，删除标题尾部空格，然后在编辑区按下 Ctrl + V 粘贴内容");
         });
+        reader.readAsText(file);
+      });
     }
   }, 2e3);
+
 })();

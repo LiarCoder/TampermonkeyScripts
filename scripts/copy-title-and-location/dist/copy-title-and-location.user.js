@@ -12,10 +12,9 @@
 // ==/UserScript==
 
 (function () {
-  "use strict";
+  'use strict';
 
-  var _GM_addStyle = /* @__PURE__ */ (() =>
-    typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
+  var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
   function createEle(eleName, text, attrs) {
     const ele = document.createElement(eleName);
     ele.innerText = text;
@@ -62,17 +61,13 @@
       margin-bottom: 2px;
     }
   `;
-  const iconSVG =
-    '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const iconSVG = '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const btn = createEle("button", "", { id: "copy-title-and-location" });
   btn.innerHTML = "复制标题和地址" + iconSVG;
   const date = /* @__PURE__ */ new Date();
-  const timeStamp = `更新：${date.toLocaleDateString().replace("/", "年").replace("/", "月")}日${date.toLocaleTimeString(
-    "chinese",
-    {
-      hour12: false,
-    }
-  )}`;
+  const timeStamp = `更新：${date.toLocaleDateString().replace("/", "年").replace("/", "月")}日${date.toLocaleTimeString("chinese", {
+  hour12: false
+})}`;
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -103,7 +98,7 @@
           return `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
         }
         return address;
-      },
+      }
       // 可在此处添加其他网站的特殊处理规则
     };
     const domain = location.hostname;
@@ -113,10 +108,8 @@
         break;
       }
     }
-    return hasQuote
-      ? `
-> ${address}`
-      : address;
+    return hasQuote ? `
+> ${address}` : address;
   };
   btn.addEventListener("click", async (e) => {
     await copyToClipboard(timeStamp + getAddress());
@@ -134,4 +127,5 @@
       _GM_addStyle(btnStyle);
     }
   }
+
 })();

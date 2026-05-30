@@ -15,12 +15,10 @@
 // ==/UserScript==
 
 (function () {
-  "use strict";
+  'use strict';
 
-  var _GM_addStyle = /* @__PURE__ */ (() =>
-    typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
-  var _unsafeWindow = /* @__PURE__ */ (() =>
-    typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
+  var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
+  var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   const compact = (items) => {
     if (!Array.isArray(items)) {
       return [];
@@ -36,7 +34,7 @@
     attributes = {},
     dataset = {},
     children = [],
-    events = [],
+    events = []
   } = {}) => {
     const element = document.createElement(tagName);
     if (text) {
@@ -77,9 +75,11 @@
     text4Cancel = "取消",
     closeOnClickMask = false,
     content = () => [],
-    onOk = () => {},
-    onCancel = () => {},
-    onDialogExist = () => null,
+    onOk = () => {
+    },
+    onCancel = () => {
+    },
+    onDialogExist = () => null
   }) => {
     const existingDialog = document.getElementById(id);
     if (existingDialog) {
@@ -216,62 +216,60 @@
       tagName: "dialog",
       attributes: {
         id,
-        class: "pr-checker-dialog pr-checker-mask",
+        class: "pr-checker-dialog pr-checker-mask"
       },
       children: () => {
         return [
           // 创建标题
           createElement({
             text: title,
-            attributes: { class: "pr-checker-title" },
+            attributes: { class: "pr-checker-title" }
           }),
           // 创建内容
           createElement({
             attributes: { class: "pr-checker-content" },
-            children: (element) => content(element),
+            children: (element) => content(element)
           }),
           // 创建按钮组
           createElement({
             attributes: { id: "pr-checker-btns" },
             children: compact([
               // 取消按钮
-              text4Cancel &&
-                createElement({
-                  tagName: "button",
-                  text: text4Cancel,
-                  attributes: {
-                    class: "pr-checker-btn close-btn",
-                  },
-                  events: [
-                    {
-                      name: "click",
-                      handler: () => {
-                        closeDialogWithAnimation(onCancel);
-                      },
-                    },
-                  ],
-                }),
+              text4Cancel && createElement({
+                tagName: "button",
+                text: text4Cancel,
+                attributes: {
+                  class: "pr-checker-btn close-btn"
+                },
+                events: [
+                  {
+                    name: "click",
+                    handler: () => {
+                      closeDialogWithAnimation(onCancel);
+                    }
+                  }
+                ]
+              }),
               // 确认按钮
-              text4Ok &&
-                createElement({
-                  tagName: "button",
-                  text: text4Ok,
-                  attributes: {
-                    class: "pr-checker-btn ensure-btn",
-                  },
-                  events: [
-                    {
-                      name: "click",
-                      handler: () => {
-                        closeDialogWithAnimation(onOk);
-                      },
-                    },
-                  ],
-                }),
-            ]),
-          }),
+              text4Ok && createElement({
+                tagName: "button",
+                text: text4Ok,
+                attributes: {
+                  class: "pr-checker-btn ensure-btn"
+                },
+                events: [
+                  {
+                    name: "click",
+                    handler: () => {
+                      closeDialogWithAnimation(onOk);
+                    }
+                  }
+                ]
+              })
+            ])
+          })
         ];
-      },
+      }
     });
     document.body.appendChild(fragment);
     initDialogStyle();
@@ -330,9 +328,7 @@
     `;
     _GM_addStyle(prCheckerStyle);
     const MAX_FIND_COUNT = 50;
-    const USERNAME =
-      ((_a = document.querySelector("[data-username]")) == null ? void 0 : _a.dataset.username) ||
-      "";
+    const USERNAME = ((_a = document.querySelector("[data-username]")) == null ? void 0 : _a.dataset.username) || "";
     const CUSTOM_CHECK_ITEMS_KEY = `bitbucket.pr.checker.${USERNAME}`;
     const initPrChecker = () => {
       const addCustomCheckItems = (...checkItems) => {
@@ -349,8 +345,7 @@
       _unsafeWindow.PrChecker.clear = clearCustomCheckItems;
     };
     const getCheckItems = () => {
-      const customCheckItems =
-        JSON.parse(window.localStorage.getItem(`bitbucket.pr.checker.${USERNAME}`)) || [];
+      const customCheckItems = JSON.parse(window.localStorage.getItem(`bitbucket.pr.checker.${USERNAME}`)) || [];
       return [
         "copy的代码检查了吗？",
         "移动端漏了吗？",
@@ -359,7 +354,7 @@
         "任务号有没有关联错？",
         "目标分支提对了吗？",
         "国际化有没有处理好？",
-        ...customCheckItems,
+        ...customCheckItems
       ];
     };
     const createCheckItems = (parent) => {
@@ -380,8 +375,8 @@
             const createBtnWrapper = createElement({
               parent: null,
               attributes: {
-                class: "pr-checker-create-btn",
-              },
+                class: "pr-checker-create-btn"
+              }
             });
             createPrBtn.parentNode.insertBefore(createBtnWrapper, createPrBtn);
             createPrBtn.parentNode.removeChild(createPrBtn);
@@ -395,46 +390,44 @@
         }, 200);
       });
     };
-    findCreatePrBtn()
-      .then(({ createBtnWrapper, createPrBtn }) => {
-        initPrChecker();
-        createElement({
-          parent: createBtnWrapper,
-          attributes: { class: "pr-checker-mask-btn" },
-          events: [
-            {
-              name: "click",
-              handler: (e) => {
-                e.stopPropagation();
-                const dialog = createDialog({
-                  id: "bitbucket-pr-checker",
-                  closeOnClickMask: false,
-                  title: "创建PR前请检查以下几项！",
-                  text4Ok: "确认创建",
-                  text4Cancel: "还需调整",
-                  content: (dialog2) => {
-                    const checkItemsWrapper = createElement({
-                      parent: dialog2,
-                      tagName: "ol",
-                      attributes: { id: "pr-check-items" },
-                    });
-                    createCheckItems(checkItemsWrapper);
-                    return [checkItemsWrapper];
-                  },
-                  onOk: () => {
-                    createPrBtn.click();
-                  },
-                  onDialogExist: (existingDialog) => {
-                    return createCheckItems(existingDialog.querySelector("#pr-check-items"));
-                  },
-                });
-                dialog.showModal();
-              },
-            },
-          ],
-        });
-      })
-      .catch((err) => console.error(err));
+    findCreatePrBtn().then(({ createBtnWrapper, createPrBtn }) => {
+      initPrChecker();
+      createElement({
+        parent: createBtnWrapper,
+        attributes: { class: "pr-checker-mask-btn" },
+        events: [
+          {
+            name: "click",
+            handler: (e) => {
+              e.stopPropagation();
+              const dialog = createDialog({
+                id: "bitbucket-pr-checker",
+                closeOnClickMask: false,
+                title: "创建PR前请检查以下几项！",
+                text4Ok: "确认创建",
+                text4Cancel: "还需调整",
+                content: (dialog2) => {
+                  const checkItemsWrapper = createElement({
+                    parent: dialog2,
+                    tagName: "ol",
+                    attributes: { id: "pr-check-items" }
+                  });
+                  createCheckItems(checkItemsWrapper);
+                  return [checkItemsWrapper];
+                },
+                onOk: () => {
+                  createPrBtn.click();
+                },
+                onDialogExist: (existingDialog) => {
+                  return createCheckItems(existingDialog.querySelector("#pr-check-items"));
+                }
+              });
+              dialog.showModal();
+            }
+          }
+        ]
+      });
+    }).catch((err) => console.error(err));
   };
   const checkTargetBranch = () => {
     const targetBranchInput = document.getElementById("targetBranch-field");
@@ -449,8 +442,8 @@
       }
       const warningWrapper = document.querySelector(".pr-create-warning");
       const warningText = document.querySelector(".pr-create-warning-text");
-      const isCurrentTargetBranchIllegal = ILLEGAL_TARGET_BRANCH.some((illegalTargetBranch) =>
-        targetBranch.includes(illegalTargetBranch)
+      const isCurrentTargetBranchIllegal = ILLEGAL_TARGET_BRANCH.some(
+        (illegalTargetBranch) => targetBranch.includes(illegalTargetBranch)
       );
       setTimeout(
         () => {
@@ -478,10 +471,11 @@
     });
     observer.observe(targetBranchInput, {
       attributes: true,
-      attributeFilter: ["value"],
+      attributeFilter: ["value"]
     });
   };
   initCommonStyle();
   checkTargetBranch();
   checkPrBeforeCreate();
+
 })();
