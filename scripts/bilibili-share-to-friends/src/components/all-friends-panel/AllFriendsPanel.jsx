@@ -2,11 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { debounce } from "@tampermonkey-scripts/shared";
 
 import { getFollowers, getFollowings, searchFollowings } from "../../api.js";
-import { LIST_SCROLL_SELECTOR } from "../../constants.js";
+import { LIST_SCROLL_SELECTOR, SCRIPT_ID } from "../../constants.js";
 import { RelationFilter } from "../relation-filter/RelationFilter.jsx";
 import { SearchBox } from "../search-box/SearchBox.jsx";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
+import "./style.css";
 
 const createPageState = () => ({
   users: [],
@@ -301,7 +302,7 @@ export const AllFriendsPanel = ({
   };
 
   return (
-    <div ref={panelRef}>
+    <div className={`${SCRIPT_ID}-panel`} ref={panelRef}>
       <RelationFilter
         activeRelation={activeRelation}
         onChange={(relation) => {
