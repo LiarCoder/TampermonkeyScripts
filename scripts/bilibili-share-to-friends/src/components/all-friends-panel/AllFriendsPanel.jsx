@@ -7,45 +7,25 @@ import { SearchBox } from "../search-box/SearchBox.jsx";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
 
-const createEmptyRelationState = () => ({
+const createPageState = () => ({
   users: [],
   page: 0,
   hasMore: true,
-  loading: false,
-  loadingMore: false,
+  loadingPage: 0,
   moreError: "",
   error: "",
   loaded: false,
-  search: {
-    users: [],
-    page: 0,
-    hasMore: true,
-    loading: false,
-    loadingMore: false,
-    moreError: "",
-    error: "",
-    loaded: false,
-    keyword: "",
-  },
 });
 
 const createRelationsState = () => ({
-  following: createEmptyRelationState(),
-  followers: createEmptyRelationState(),
+  following: createPageState(),
+  followers: createPageState(),
 });
 
-const updateRelationDisplayState = (relations, relation, useSearch, updater) => {
-  const relationState = relations[relation];
-  return {
-    ...relations,
-    [relation]: useSearch
-      ? {
-          ...relationState,
-          search: updater(relationState.search),
-        }
-      : updater(relationState),
-  };
-};
+const getPageLoadingState = (state) => ({
+  loading: state.loadingPage > 0 && (state.loadingPage === 1 || !state.loaded),
+  loadingMore: state.loadingPage > 0 && state.loaded && state.loadingPage > 1,
+});
 
 export const AllFriendsPanel = ({
   active,
@@ -64,31 +44,36 @@ export const AllFriendsPanel = ({
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [relations, setRelations] = useState(createRelationsState);
+  const [followingSearch, setFollowingSearch] = useState(createPageState);
   const keyword = searchTerm.trim();
   const normalizedKeyword = keyword.toLowerCase();
+  const displaySource =
+    activeRelation === "following" && keyword ? "followingSearch" : activeRelation;
   const relationState = relations[activeRelation];
   const displayState = useMemo(() => {
-    if (activeRelation === "following" && keyword) {
-      return relationState.search;
+    if (displaySource === "followingSearch") {
+      return followingSearch;
     }
     return relationState;
-  }, [activeRelation, keyword, relationState]);
+  }, [displaySource, followingSearch, relationState]);
+  const displayLoading = useMemo(() => getPageLoadingState(displayState), [displayState]);
   const displayUsers = useMemo(() => {
     if (!normalizedKeyword) {
       return relationState.users;
     }
     if (activeRelation === "following") {
-      return relationState.search.users;
+      return followingSearch.users;
     }
     return relationState.users.filter((user) =>
       user.name.toLowerCase().includes(normalizedKeyword)
     );
-  }, [activeRelation, normalizedKeyword, relationState]);
+  }, [activeRelation, followingSearch.users, normalizedKeyword, relationState]);
 
   stateRef.current = {
     activeRelation,
     searchTerm,
     relations,
+    followingSearch,
     mid,
   };
 
@@ -103,6 +88,7 @@ export const AllFriendsPanel = ({
     setActiveRelation("following");
     setSearchTerm("");
     setRelations(createRelationsState());
+    setFollowingSearch(createPageState());
     onSelectionReset();
   }, [mid, onSelectionReset]);
 
@@ -123,10 +109,15 @@ export const AllFriendsPanel = ({
     []
   );
 
-  const setDisplayState = useCallback((relation, useSearch, updater) => {
-    setRelations((currentRelations) =>
-      updateRelationDisplayState(currentRelations, relation, useSearch, updater)
-    );
+  const setPageState = useCallback((source, updater) => {
+    if (source === "followingSearch") {
+      setFollowingSearch(updater);
+      return;
+    }
+    setRelations((currentRelations) => ({
+      ...currentRelations,
+      [source]: updater(currentRelations[source]),
+    }));
   }, []);
 
   const loadRelationUsers = useCallback(
@@ -134,15 +125,17 @@ export const AllFriendsPanel = ({
       const current = stateRef.current;
       const keyword = (keywordOverride ?? current.searchTerm).trim();
       const useSearch = relation === "following" && Boolean(keyword);
+      const source = useSearch ? "followingSearch" : relation;
       const relationState = current.relations[relation];
-      const displayState = useSearch ? relationState.search : relationState;
+      const displayState = useSearch ? current.followingSearch : relationState;
+      const loadingState = getPageLoadingState(displayState);
       const loadingKey = `${relation}:${useSearch ? keyword : "list"}`;
 
       if (
         !current.mid ||
         loadingKeysRef.current.has(loadingKey) ||
-        displayState.loading ||
-        displayState.loadingMore ||
+        loadingState.loading ||
+        loadingState.loadingMore ||
         (!reset && displayState.loaded && !displayState.hasMore)
       ) {
         return;
@@ -152,13 +145,11 @@ export const AllFriendsPanel = ({
       const listScrollTop = !reset && displayState.loaded ? getListScrollTop() : null;
       pendingScrollTopRef.current = listScrollTop;
       loadingKeysRef.current.add(loadingKey);
-      setDisplayState(relation, useSearch, (state) => ({
+      setPageState(source, (state) => ({
         ...state,
-        loading: reset || !state.loaded,
-        loadingMore: !(reset || !state.loaded),
+        loadingPage: nextPage,
         error: "",
         moreError: "",
-        keyword: useSearch ? keyword : state.keyword,
       }));
 
       try {
@@ -172,7 +163,7 @@ export const AllFriendsPanel = ({
           keyword,
           page: nextPage,
         });
-        setDisplayState(relation, useSearch, (state) => ({
+        setPageState(source, (state) => ({
           ...state,
           users: nextPage === 1 ? nextResult.users : [...state.users, ...nextResult.users],
           page: nextPage,
@@ -180,7 +171,7 @@ export const AllFriendsPanel = ({
           loaded: true,
         }));
       } catch (loadError) {
-        setDisplayState(relation, useSearch, (state) => {
+        setPageState(source, (state) => {
           if (useSearch && nextPage === 1) {
             return {
               ...state,
@@ -204,14 +195,13 @@ export const AllFriendsPanel = ({
         });
       } finally {
         loadingKeysRef.current.delete(loadingKey);
-        setDisplayState(relation, useSearch, (state) => ({
+        setPageState(source, (state) => ({
           ...state,
-          loading: false,
-          loadingMore: false,
+          loadingPage: 0,
         }));
       }
     },
-    [getListScrollTop, setDisplayState]
+    [getListScrollTop, setPageState]
   );
 
   useEffect(() => {
@@ -226,7 +216,7 @@ export const AllFriendsPanel = ({
     if (!active) {
       return;
     }
-    if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
+    if (!displayState.hasMore || displayLoading.loading || displayLoading.loadingMore) {
       return;
     }
     const scrollRoot = panelRef.current?.querySelector(LIST_SCROLL_SELECTOR);
@@ -245,7 +235,14 @@ export const AllFriendsPanel = ({
     observer.observe(sentinel);
     loadMoreObserverRef.current = observer;
     return () => observer.disconnect();
-  }, [active, activeRelation, displayState, loadRelationUsers]);
+  }, [
+    active,
+    activeRelation,
+    displayLoading.loading,
+    displayLoading.loadingMore,
+    displayState.hasMore,
+    loadRelationUsers,
+  ]);
 
   const resetSelection = () => {
     onSelectionReset();
@@ -280,7 +277,7 @@ export const AllFriendsPanel = ({
       users={displayUsers}
       selectedMid={selectedMid}
       hasMore={displayState.hasMore}
-      loadingMore={displayState.loadingMore}
+      loadingMore={displayLoading.loadingMore}
       moreError={displayState.moreError}
       showFooter
       onRetry={() => loadRelationUsers(activeRelation)}
@@ -288,7 +285,7 @@ export const AllFriendsPanel = ({
     />
   );
   const renderListContent = () => {
-    if (displayState.loading) {
+    if (displayLoading.loading) {
       return <StateView text="正在读取用户列表..." />;
     }
     if (displayState.error) {
