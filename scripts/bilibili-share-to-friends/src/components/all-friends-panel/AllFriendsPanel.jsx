@@ -292,12 +292,7 @@ export const AllFriendsPanel = ({
       return <StateView text={displayState.error} isError />;
     }
     if (displayUsers.length === 0) {
-      return (
-        <>
-          <StateView text={emptyText} />
-          {userList}
-        </>
-      );
+      return <StateView text={emptyText} />;
     }
     return userList;
   };
