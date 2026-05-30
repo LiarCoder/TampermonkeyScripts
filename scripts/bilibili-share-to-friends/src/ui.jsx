@@ -10,8 +10,9 @@ import {
   searchFollowings,
   sendVideoText,
 } from "./api.js";
-import { closeDialog, createDialog, DialogHeader } from "./components/Dialog/index.jsx";
-import { CloseFooter, DialogFooter } from "./components/DialogFooter/index.jsx";
+import { closeDialog, createDialog } from "./components/Dialog/index.jsx";
+import { DialogFooter } from "./components/DialogFooter/index.jsx";
+import { DialogHeader } from "./components/DialogHeader/index.jsx";
 import { createEntryButton as createShareEntryButton } from "./components/EntryButton/index.jsx";
 import { RecipientTabs } from "./components/RecipientTabs/index.jsx";
 import { RelationFilter } from "./components/RelationFilter/index.jsx";
@@ -19,9 +20,7 @@ import { SearchBox } from "./components/SearchBox/index.jsx";
 import { StateView } from "./components/StateView/index.jsx";
 import { UserList } from "./components/UserList/index.jsx";
 import { VideoPreview } from "./components/VideoPreview/index.jsx";
-import { SCRIPT_ID } from "./constants.js";
-
-const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
+import { LIST_SCROLL_SELECTOR, SCRIPT_ID } from "./constants.js";
 
 const createEmptyRelationState = () => ({
   users: [],
@@ -338,7 +337,29 @@ export const ShareDialog = ({
     showFooter = false,
     onRetry = () => {},
   }) => {
-    const userList = (
+    if (users.length === 0) {
+      return (
+        <>
+          <StateView text={emptyText} />
+          {showFooter ? (
+            <UserList
+              users={users}
+              selectedMid={selectedUser?.mid}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
+              moreError={moreError}
+              showFooter
+              onRetry={onRetry}
+              onSelect={(_button, user) => {
+                setSendError("");
+                setSelectedUser(user);
+              }}
+            />
+          ) : null}
+        </>
+      );
+    }
+    return (
       <UserList
         users={users}
         selectedMid={selectedUser?.mid}
@@ -353,16 +374,6 @@ export const ShareDialog = ({
         }}
       />
     );
-
-    if (users.length === 0) {
-      return (
-        <>
-          <StateView text={emptyText} />
-          {showFooter ? userList : null}
-        </>
-      );
-    }
-    return userList;
   };
 
   const renderRelationContent = () => {
@@ -455,16 +466,14 @@ export const ShareDialog = ({
       <div className={`${SCRIPT_ID}-body`} ref={bodyRef}>
         {renderBody()}
       </div>
-      {result ? (
-        <CloseFooter onClose={() => closeDialog(dialog)} />
-      ) : (
-        <DialogFooter
-          sending={sending}
-          canSend={Boolean(selectedUser)}
-          onCancel={() => closeDialog(dialog)}
-          onSend={handleSend}
-        />
-      )}
+      <DialogFooter
+        result={Boolean(result)}
+        sending={sending}
+        canSend={Boolean(selectedUser)}
+        onCancel={() => closeDialog(dialog)}
+        onClose={() => closeDialog(dialog)}
+        onSend={handleSend}
+      />
     </div>
   );
 };

@@ -1,16 +1,16 @@
+import { useState } from "preact/hooks";
+
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
-const createCoverPlaceholder = (text) => {
-  const placeholder = document.createElement("div");
-  placeholder.className = `${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`;
-  placeholder.innerText = text;
-  return placeholder;
-};
-
 export const VideoCover = ({ video }) => {
-  if (!video?.pic) {
-    return <div className={`${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`}>读取中</div>;
+  const [loadFailed, setLoadFailed] = useState(false);
+  if (!video?.pic || loadFailed) {
+    return (
+      <div className={`${SCRIPT_ID}-cover ${SCRIPT_ID}-cover-placeholder`}>
+        {loadFailed ? "封面加载失败" : "读取中"}
+      </div>
+    );
   }
   return (
     <img
@@ -18,9 +18,7 @@ export const VideoCover = ({ video }) => {
       src={video.pic}
       alt=""
       referrerPolicy="no-referrer"
-      onError={(event) => {
-        event.currentTarget.replaceWith(createCoverPlaceholder("封面加载失败"));
-      }}
+      onError={() => setLoadFailed(true)}
     />
   );
 };

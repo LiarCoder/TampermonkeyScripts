@@ -30,18 +30,3 @@ export const createDialog = () => {
   document.body.appendChild(dialog);
   return dialog;
 };
-
-export const DialogHeader = ({ title, onClose, disabled = false }) => (
-  <div className={`${SCRIPT_ID}-header`}>
-    <h3 className={`${SCRIPT_ID}-title`}>{title}</h3>
-    <button
-      className={`${SCRIPT_ID}-close`}
-      title="关闭"
-      type="button"
-      disabled={disabled}
-      onClick={onClose}
-    >
-      ×
-    </button>
-  </div>
-);
