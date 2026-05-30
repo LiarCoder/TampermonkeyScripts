@@ -6,6 +6,8 @@
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @license      MIT
 // @icon         https://code.fineres.com/projects/FX/avatar.png?s=64&v=1452596397000
+// @downloadURL  https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/pr-checker/dist/pr-checker.user.js
+// @updateURL    https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/pr-checker/dist/pr-checker.user.js
 // @match        https://code.fineres.com/*/pull-requests?create*
 // @grant        GM_addStyle
 // @grant        unsafeWindow

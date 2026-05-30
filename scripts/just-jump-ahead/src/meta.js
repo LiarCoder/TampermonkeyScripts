@@ -1,3 +1,6 @@
+const rawBaseUrl =
+  "https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/just-jump-ahead/dist";
+
 export const userscript = {
   name: "JustJumpAhead",
   namespace: "http://tampermonkey.net/",
@@ -5,6 +8,8 @@ export const userscript = {
   description:
     "自动完成掘金、简书、知乎、百度贴吧、PC端QQ、CSDN、Gitee的跳转询问界面的点击工作，实现自动跳转",
   author: "LiarCoder",
+  updateURL: `${rawBaseUrl}/just-jump-ahead.user.js`,
+  downloadURL: `${rawBaseUrl}/just-jump-ahead.user.js`,
   match: [
     "*://link.juejin.cn/*",
     "*://link.zhihu.com/*",
