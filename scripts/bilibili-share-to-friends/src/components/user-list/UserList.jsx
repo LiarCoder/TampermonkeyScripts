@@ -1,5 +1,5 @@
 import { SCRIPT_ID } from "../../constants.js";
-import { UserListItem } from "../UserListItem/index.jsx";
+import { UserListItem } from "../user-list-item/UserListItem.jsx";
 import "./style.css";
 
 export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
