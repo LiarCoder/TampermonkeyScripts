@@ -2,6 +2,29 @@
 
 在 Bilibili 视频播放页分享面板中新增“分享给 B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户。
 
+## 预览
+
+<details>
+<summary>原分享列表中追加一个“B站好友”分享方式（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/fd5b090d-9ac7-4d2b-b9fe-f2c25c3c788a" alt="增加分享入口" style="max-width: 100%;" />
+
+</details>
+
+<details>
+<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/040ececb-5af2-4388-8d8d-015e5287d584" alt="选择接收人" style="max-width: 100%;" />
+
+</details>
+
+<details>
+<summary>支持昵称搜索、滚动分页加载（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/89cd35a0-3256-48f4-b8c7-df3e0a4cc43c" alt="昵称搜索、滚动分页加载" style="max-width: 100%;" />
+
+</details>
+
 ## 功能
 
 - 在原生分享面板中追加“B站好友”分享方式。
