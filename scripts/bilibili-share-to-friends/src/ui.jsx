@@ -455,10 +455,9 @@ export const ShareDialog = ({
         {renderBody()}
       </div>
       <DialogFooter
-        result={Boolean(result)}
+        showCloseOnly={Boolean(result)}
         sending={sending}
         canSend={Boolean(selectedUser)}
-        onCancel={() => closeDialog(dialog)}
         onClose={() => closeDialog(dialog)}
         onSend={handleSend}
       />

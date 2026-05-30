@@ -4,12 +4,11 @@ import "./style.css";
 export const DialogFooter = ({
   sending = false,
   canSend = false,
-  result = false,
-  onCancel,
+  showCloseOnly = false,
   onClose,
   onSend = () => {},
 }) => {
-  if (result) {
+  if (showCloseOnly) {
     return (
       <div className={`${SCRIPT_ID}-footer`}>
         <button
@@ -25,7 +24,7 @@ export const DialogFooter = ({
 
   return (
     <div className={`${SCRIPT_ID}-footer`}>
-      <button className={`${SCRIPT_ID}-btn`} type="button" disabled={sending} onClick={onCancel}>
+      <button className={`${SCRIPT_ID}-btn`} type="button" disabled={sending} onClick={onClose}>
         取消
       </button>
       <button
