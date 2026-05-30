@@ -287,6 +287,23 @@ export const AllFriendsPanel = ({
       onSelect={onSelect}
     />
   );
+  const renderListContent = () => {
+    if (displayState.loading) {
+      return <StateView text="正在读取用户列表..." />;
+    }
+    if (displayState.error) {
+      return <StateView text={displayState.error} isError />;
+    }
+    if (displayUsers.length === 0) {
+      return (
+        <>
+          <StateView text={emptyText} />
+          {userList}
+        </>
+      );
+    }
+    return userList;
+  };
 
   return (
     <div ref={panelRef}>
@@ -312,18 +329,7 @@ export const AllFriendsPanel = ({
         onCompositionStart={() => window.clearTimeout(searchTimerRef.current)}
         onInput={scheduleSearch}
       />
-      {displayState.loading ? (
-        <StateView text="正在读取用户列表..." />
-      ) : displayState.error ? (
-        <StateView text={displayState.error} isError />
-      ) : displayUsers.length === 0 ? (
-        <>
-          <StateView text={emptyText} />
-          {userList}
-        </>
-      ) : (
-        userList
-      )}
+      {renderListContent()}
     </div>
   );
 };
