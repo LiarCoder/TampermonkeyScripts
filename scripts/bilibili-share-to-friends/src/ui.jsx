@@ -1,7 +1,8 @@
 import { render } from "preact";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 
 import {
+  AllFriendsPanel,
   closeDialog,
   createDialog,
   createEntryButton as createShareEntryButton,
@@ -9,107 +10,18 @@ import {
   DialogHeader,
   RecentRecipientsPanel,
   RecipientTabs,
-  RelationFilter,
-  SearchBox,
   StateView,
-  UserList,
   VideoPreview,
 } from "./components/index.js";
-import {
-  assertLogin,
-  getFollowers,
-  getFollowings,
-  getVideoInfo,
-  searchFollowings,
-  sendVideoText,
-} from "./api.js";
-import { LIST_SCROLL_SELECTOR, SCRIPT_ID } from "./constants.js";
-
-const createEmptyRelationState = () => ({
-  users: [],
-  page: 0,
-  hasMore: true,
-  loading: false,
-  loadingMore: false,
-  moreError: "",
-  error: "",
-  loaded: false,
-  search: {
-    users: [],
-    page: 0,
-    hasMore: true,
-    loading: false,
-    loadingMore: false,
-    moreError: "",
-    error: "",
-    loaded: false,
-    keyword: "",
-  },
-});
-
-const createRelationsState = () => ({
-  following: createEmptyRelationState(),
-  followers: createEmptyRelationState(),
-});
-
-const getRelationDisplayState = (relations, relation, searchTerm) => {
-  const relationState = relations[relation];
-  const keyword = searchTerm.trim();
-  if (relation === "following" && keyword) {
-    return relationState.search;
-  }
-  return relationState;
-};
-
-const getRelationDisplayUsers = (relations, relation, searchTerm) => {
-  const relationState = relations[relation];
-  const keyword = searchTerm.trim().toLowerCase();
-  if (!keyword) {
-    return relationState.users;
-  }
-  if (relation === "following") {
-    return relationState.search.users;
-  }
-  return relationState.users.filter((user) => user.name.toLowerCase().includes(keyword));
-};
-
-const updateRelationDisplayState = (relations, relation, useSearch, updater) => {
-  const relationState = relations[relation];
-  return {
-    ...relations,
-    [relation]: useSearch
-      ? {
-          ...relationState,
-          search: updater(relationState.search),
-        }
-      : updater(relationState),
-  };
-};
+import { assertLogin, getVideoInfo, sendVideoText } from "./api.js";
+import { SCRIPT_ID } from "./constants.js";
 
 export const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
-  const bodyRef = useRef(null);
-  const stateRef = useRef(null);
-  const searchTimerRef = useRef(null);
-  const loadMoreObserverRef = useRef(null);
-  const loadingKeysRef = useRef(new Set());
-  const pendingScrollTopRef = useRef(null);
-  const searchComposingRef = useRef({ value: false });
   const [activeTab, setActiveTab] = useState("recent");
-  const [activeRelation, setActiveRelation] = useState("following");
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [relations, setRelations] = useState(createRelationsState);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [result, setResult] = useState(null);
-
-  stateRef.current = {
-    activeTab,
-    activeRelation,
-    searchTerm,
-    relations,
-    nav,
-  };
 
   useEffect(() => {
     setSelectedUser(null);
@@ -117,175 +29,10 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     setResult(null);
   }, [video]);
 
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(searchTimerRef.current);
-      loadMoreObserverRef.current?.disconnect();
-    };
-  }, []);
-
-  useLayoutEffect(() => {
-    const scrollTop = pendingScrollTopRef.current;
-    if (scrollTop === null) {
-      return;
-    }
-    pendingScrollTopRef.current = null;
-    const scrollRoot = bodyRef.current?.querySelector(LIST_SCROLL_SELECTOR);
-    if (scrollRoot) {
-      scrollRoot.scrollTop = scrollTop;
-    }
-  }, [relations]);
-
-  const resetSelection = () => {
+  const resetSelection = useCallback(() => {
     setSelectedUser(null);
     setSendError("");
-  };
-
-  const getListScrollTop = useCallback(
-    () => bodyRef.current?.querySelector(LIST_SCROLL_SELECTOR)?.scrollTop ?? 0,
-    []
-  );
-
-  const setDisplayState = useCallback((relation, useSearch, updater) => {
-    setRelations((currentRelations) =>
-      updateRelationDisplayState(currentRelations, relation, useSearch, updater)
-    );
   }, []);
-
-  const loadRelationUsers = useCallback(
-    async (relation, { reset = false, keywordOverride = null } = {}) => {
-      const current = stateRef.current;
-      const keyword = (keywordOverride ?? current.searchTerm).trim();
-      const useSearch = relation === "following" && Boolean(keyword);
-      const relationState = current.relations[relation];
-      const displayState = useSearch ? relationState.search : relationState;
-      const loadingKey = `${relation}:${useSearch ? keyword : "list"}`;
-
-      if (
-        !current.nav ||
-        loadingKeysRef.current.has(loadingKey) ||
-        displayState.loading ||
-        displayState.loadingMore ||
-        (!reset && displayState.loaded && !displayState.hasMore)
-      ) {
-        return;
-      }
-
-      const nextPage = reset ? 1 : displayState.page + 1;
-      const listScrollTop = !reset && displayState.loaded ? getListScrollTop() : null;
-      pendingScrollTopRef.current = listScrollTop;
-      loadingKeysRef.current.add(loadingKey);
-      setDisplayState(relation, useSearch, (state) => ({
-        ...state,
-        loading: reset || !state.loaded,
-        loadingMore: !(reset || !state.loaded),
-        error: "",
-        moreError: "",
-        keyword: useSearch ? keyword : state.keyword,
-      }));
-
-      try {
-        const loader = useSearch
-          ? searchFollowings
-          : relation === "following"
-            ? getFollowings
-            : getFollowers;
-        const nextResult = await loader({
-          mid: current.nav.mid,
-          keyword,
-          page: nextPage,
-        });
-        setDisplayState(relation, useSearch, (state) => ({
-          ...state,
-          users: nextPage === 1 ? nextResult.users : [...state.users, ...nextResult.users],
-          page: nextPage,
-          hasMore: nextResult.hasMore,
-          loaded: true,
-        }));
-      } catch (loadError) {
-        setDisplayState(relation, useSearch, (state) => {
-          if (useSearch && nextPage === 1) {
-            return {
-              ...state,
-              users: relationState.users.filter((user) =>
-                user.name.toLowerCase().includes(keyword.toLowerCase())
-              ),
-              hasMore: false,
-              loaded: true,
-            };
-          }
-          if (nextPage === 1) {
-            return {
-              ...state,
-              error: loadError.message,
-            };
-          }
-          return {
-            ...state,
-            moreError: loadError.message,
-          };
-        });
-      } finally {
-        loadingKeysRef.current.delete(loadingKey);
-        setDisplayState(relation, useSearch, (state) => ({
-          ...state,
-          loading: false,
-          loadingMore: false,
-        }));
-      }
-    },
-    [getListScrollTop, setDisplayState]
-  );
-
-  useEffect(() => {
-    loadMoreObserverRef.current?.disconnect();
-    loadMoreObserverRef.current = null;
-    if (activeTab !== "all") {
-      return;
-    }
-    const displayState = getRelationDisplayState(relations, activeRelation, searchTerm);
-    if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
-      return;
-    }
-    const scrollRoot = bodyRef.current?.querySelector(LIST_SCROLL_SELECTOR);
-    const sentinel = scrollRoot?.querySelector("[data-bili-share-to-friends-list-sentinel]");
-    if (!scrollRoot || !sentinel) {
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          loadRelationUsers(activeRelation);
-        }
-      },
-      { root: scrollRoot, threshold: 0.1 }
-    );
-    observer.observe(sentinel);
-    loadMoreObserverRef.current = observer;
-    return () => observer.disconnect();
-  }, [activeRelation, activeTab, loadRelationUsers, relations, searchTerm]);
-
-  const scheduleSearch = (value) => {
-    const previousKeyword = searchTerm.trim();
-    const nextKeyword = value.trim();
-    setSearchTerm(value);
-    if (previousKeyword === nextKeyword) {
-      return;
-    }
-    if (previousKeyword || nextKeyword) {
-      resetSelection();
-    }
-    window.clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = window.setTimeout(() => {
-      const current = stateRef.current;
-      if (current.activeTab !== "all") {
-        return;
-      }
-      if (current.activeRelation === "following" && nextKeyword) {
-        loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
-      }
-    }, 300);
-  };
 
   const handleSend = async () => {
     if (!selectedUser || sending) {
@@ -312,89 +59,6 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     }
   };
 
-  const renderUsers = ({
-    users,
-    emptyText,
-    hasMore = false,
-    loadingMore = false,
-    moreError = "",
-    showFooter = false,
-    onRetry = () => {},
-  }) => {
-    const userList = (
-      <UserList
-        users={users}
-        selectedMid={selectedUser?.mid}
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        moreError={moreError}
-        showFooter={showFooter}
-        onRetry={onRetry}
-        onSelect={(_button, user) => {
-          setSendError("");
-          setSelectedUser(user);
-        }}
-      />
-    );
-
-    if (users.length === 0) {
-      return (
-        <>
-          <StateView text={emptyText} />
-          {showFooter ? userList : null}
-        </>
-      );
-    }
-    return userList;
-  };
-
-  const renderRelationContent = () => {
-    const keyword = searchTerm.trim();
-    const displayState = getRelationDisplayState(relations, activeRelation, searchTerm);
-
-    return (
-      <>
-        <RelationFilter
-          activeRelation={activeRelation}
-          onChange={(relation) => {
-            if (activeRelation === relation) {
-              return;
-            }
-            resetSelection();
-            setActiveRelation(relation);
-            loadRelationUsers(relation);
-          }}
-        />
-        <SearchBox
-          value={searchTerm}
-          notice={
-            activeRelation === "followers" && keyword
-              ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
-              : ""
-          }
-          composing={searchComposingRef.current}
-          onCompositionStart={() => window.clearTimeout(searchTimerRef.current)}
-          onInput={scheduleSearch}
-        />
-        {displayState.loading ? (
-          <StateView text="正在读取用户列表..." />
-        ) : displayState.error ? (
-          <StateView text={displayState.error} isError />
-        ) : (
-          renderUsers({
-            users: getRelationDisplayUsers(relations, activeRelation, searchTerm),
-            emptyText: activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。",
-            hasMore: displayState.hasMore,
-            loadingMore: displayState.loadingMore,
-            moreError: displayState.moreError,
-            showFooter: true,
-            onRetry: () => loadRelationUsers(activeRelation),
-          })
-        )}
-      </>
-    );
-  };
-
   const renderBody = () => {
     if (result) {
       return <StateView text={result.message} isError={result.isError} />;
@@ -416,9 +80,6 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
             }
             resetSelection();
             setActiveTab(tab);
-            if (tab === "all") {
-              loadRelationUsers(activeRelation);
-            }
           }}
         />
         <RecentRecipientsPanel
@@ -429,7 +90,16 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
             setSelectedUser(user);
           }}
         />
-        {activeTab === "all" ? renderRelationContent() : null}
+        <AllFriendsPanel
+          active={activeTab === "all"}
+          mid={nav?.mid}
+          selectedMid={selectedUser?.mid}
+          onSelectionReset={resetSelection}
+          onSelect={(_button, user) => {
+            setSendError("");
+            setSelectedUser(user);
+          }}
+        />
       </>
     );
   };
@@ -438,9 +108,7 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     <div className={`${SCRIPT_ID}-dialog-content`}>
       <DialogHeader title="分享给 B站好友" disabled={sending} onClose={() => closeDialog(dialog)} />
       <VideoPreview video={video} />
-      <div className={`${SCRIPT_ID}-body`} ref={bodyRef}>
-        {renderBody()}
-      </div>
+      <div className={`${SCRIPT_ID}-body`}>{renderBody()}</div>
       <DialogFooter
         showCloseOnly={Boolean(result)}
         sending={sending}
