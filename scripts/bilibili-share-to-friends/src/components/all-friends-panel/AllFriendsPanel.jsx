@@ -272,44 +272,26 @@ export const AllFriendsPanel = ({
     }, 300);
   };
 
-  const renderUsers = ({
-    users,
-    emptyText,
-    hasMore = false,
-    loadingMore = false,
-    moreError = "",
-    onRetry = () => {},
-  }) => {
-    const userList = (
-      <UserList
-        users={users}
-        selectedMid={selectedMid}
-        hasMore={hasMore}
-        loadingMore={loadingMore}
-        moreError={moreError}
-        showFooter
-        onRetry={onRetry}
-        onSelect={onSelect}
-      />
-    );
-
-    if (users.length === 0) {
-      return (
-        <>
-          <StateView text={emptyText} />
-          {userList}
-        </>
-      );
-    }
-    return userList;
-  };
-
   if (!active) {
     return null;
   }
 
   const keyword = searchTerm.trim();
   const displayState = getRelationDisplayState(relations, activeRelation, searchTerm);
+  const displayUsers = getRelationDisplayUsers(relations, activeRelation, searchTerm);
+  const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
+  const userList = (
+    <UserList
+      users={displayUsers}
+      selectedMid={selectedMid}
+      hasMore={displayState.hasMore}
+      loadingMore={displayState.loadingMore}
+      moreError={displayState.moreError}
+      showFooter
+      onRetry={() => loadRelationUsers(activeRelation)}
+      onSelect={onSelect}
+    />
+  );
 
   return (
     <div ref={panelRef}>
@@ -339,15 +321,13 @@ export const AllFriendsPanel = ({
         <StateView text="正在读取用户列表..." />
       ) : displayState.error ? (
         <StateView text={displayState.error} isError />
+      ) : displayUsers.length === 0 ? (
+        <>
+          <StateView text={emptyText} />
+          {userList}
+        </>
       ) : (
-        renderUsers({
-          users: getRelationDisplayUsers(relations, activeRelation, searchTerm),
-          emptyText: activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。",
-          hasMore: displayState.hasMore,
-          loadingMore: displayState.loadingMore,
-          moreError: displayState.moreError,
-          onRetry: () => loadRelationUsers(activeRelation),
-        })
+        userList
       )}
     </div>
   );
