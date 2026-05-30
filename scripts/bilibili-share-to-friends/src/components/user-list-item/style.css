@@ -3,6 +3,7 @@
   grid-template-columns: 36px 1fr auto;
   align-items: center;
   gap: 9px;
+  box-sizing: border-box;
   width: 100%;
   padding: 8px 14px;
   border: 0;
@@ -25,13 +26,26 @@
   background: #e3e5e7;
 }
 
-.bili-share-to-friends-name {
+.bili-share-to-friends-person-main {
   min-width: 0;
+}
+
+.bili-share-to-friends-name {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
   font-size: 14px;
   color: #18191c;
+  text-decoration: none;
+  vertical-align: top;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.bili-share-to-friends-name:hover,
+.bili-share-to-friends-name:focus-visible {
+  color: #00aeec;
 }
 
 .bili-share-to-friends-meta {
