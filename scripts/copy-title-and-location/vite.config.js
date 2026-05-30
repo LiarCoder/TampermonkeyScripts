@@ -1,7 +1,10 @@
 import { defineConfig } from "vite";
 import monkey from "vite-plugin-monkey";
 
+import packageJson from "./package.json";
 import { userscript } from "./src/meta.js";
+
+const scriptName = packageJson.scriptName;
 
 export default defineConfig({
   build: {
@@ -19,8 +22,8 @@ export default defineConfig({
         prefix: `dev:${userscript.name}`,
       },
       build: {
-        fileName: "copy-title-and-location.user.js",
-        metaFileName: "dev/copy-title-and-location.meta.js",
+        fileName: `${scriptName}.user.js`,
+        metaFileName: `dev/${scriptName}.meta.js`,
         autoGrant: false,
       },
     }),
