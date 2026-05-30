@@ -13,7 +13,7 @@ export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) 
   });
 
   useEffect(() => {
-    if (!active || recent.loaded || recent.loading) {
+    if (!active || recent.loaded) {
       return;
     }
 
@@ -51,7 +51,7 @@ export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) 
     return () => {
       canceled = true;
     };
-  }, [active, recent.loaded, recent.loading]);
+  }, [active, recent.loaded]);
 
   if (!active) {
     return null;

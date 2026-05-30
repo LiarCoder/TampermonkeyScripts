@@ -16,7 +16,7 @@ export default defineConfig({
       entry: "src/main.js",
       userscript,
       server: {
-        prefix: "dev:",
+        prefix: `dev:${userscript.name}`,
       },
       build: {
         fileName: "beautify-code-block-font-style.user.js",
