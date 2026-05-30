@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 
 import { getFollowers, getFollowings, searchFollowings } from "../../api.js";
 import { LIST_SCROLL_SELECTOR } from "../../constants.js";
@@ -34,27 +34,6 @@ const createRelationsState = () => ({
   followers: createEmptyRelationState(),
 });
 
-const getRelationDisplayState = (relations, relation, searchTerm) => {
-  const relationState = relations[relation];
-  const keyword = searchTerm.trim();
-  if (relation === "following" && keyword) {
-    return relationState.search;
-  }
-  return relationState;
-};
-
-const getRelationDisplayUsers = (relations, relation, searchTerm) => {
-  const relationState = relations[relation];
-  const keyword = searchTerm.trim().toLowerCase();
-  if (!keyword) {
-    return relationState.users;
-  }
-  if (relation === "following") {
-    return relationState.search.users;
-  }
-  return relationState.users.filter((user) => user.name.toLowerCase().includes(keyword));
-};
-
 const updateRelationDisplayState = (relations, relation, useSearch, updater) => {
   const relationState = relations[relation];
   return {
@@ -85,6 +64,26 @@ export const AllFriendsPanel = ({
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [relations, setRelations] = useState(createRelationsState);
+  const keyword = searchTerm.trim();
+  const normalizedKeyword = keyword.toLowerCase();
+  const relationState = relations[activeRelation];
+  const displayState = useMemo(() => {
+    if (activeRelation === "following" && keyword) {
+      return relationState.search;
+    }
+    return relationState;
+  }, [activeRelation, keyword, relationState]);
+  const displayUsers = useMemo(() => {
+    if (!normalizedKeyword) {
+      return relationState.users;
+    }
+    if (activeRelation === "following") {
+      return relationState.search.users;
+    }
+    return relationState.users.filter((user) =>
+      user.name.toLowerCase().includes(normalizedKeyword)
+    );
+  }, [activeRelation, normalizedKeyword, relationState]);
 
   stateRef.current = {
     activeRelation,
@@ -227,7 +226,6 @@ export const AllFriendsPanel = ({
     if (!active) {
       return;
     }
-    const displayState = getRelationDisplayState(relations, activeRelation, searchTerm);
     if (!displayState.hasMore || displayState.loading || displayState.loadingMore) {
       return;
     }
@@ -247,7 +245,7 @@ export const AllFriendsPanel = ({
     observer.observe(sentinel);
     loadMoreObserverRef.current = observer;
     return () => observer.disconnect();
-  }, [active, activeRelation, loadRelationUsers, relations, searchTerm]);
+  }, [active, activeRelation, displayState, loadRelationUsers]);
 
   const resetSelection = () => {
     onSelectionReset();
@@ -276,9 +274,6 @@ export const AllFriendsPanel = ({
     return null;
   }
 
-  const keyword = searchTerm.trim();
-  const displayState = getRelationDisplayState(relations, activeRelation, searchTerm);
-  const displayUsers = getRelationDisplayUsers(relations, activeRelation, searchTerm);
   const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
   const userList = (
     <UserList
