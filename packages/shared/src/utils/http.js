@@ -6,11 +6,18 @@
  * @param {string} [options.method="GET"] HTTP 方法。
  * @param {string | FormData | URLSearchParams | null} [options.data=null] 请求体。
  * @param {Record<string, string>} [options.headers={}] 请求头。
+ * @param {Function} [options.request=globalThis.GM_xmlhttpRequest] 请求函数。
  * @returns {Promise<unknown>} 解析后的 JSON 响应。
  */
-export const httpRequest = ({ method = "GET", url, data = null, headers = {} }) => {
+export const httpRequest = ({
+  method = "GET",
+  url,
+  data = null,
+  headers = {},
+  request = globalThis.GM_xmlhttpRequest,
+}) => {
   return new Promise((resolve, reject) => {
-    GM_xmlhttpRequest({
+    request({
       method,
       url,
       data,

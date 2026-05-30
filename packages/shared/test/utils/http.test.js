@@ -38,6 +38,18 @@ test("请求工具会传递请求配置并解析响应", async () => {
   );
 });
 
+test("请求工具支持显式传入请求函数", async () => {
+  const result = await httpRequest({
+    url: "https://example.com/api",
+    request: (options) => {
+      assert.equal(options.url, "https://example.com/api");
+      options.onload({ responseText: '{"ok":true}' });
+    },
+  });
+
+  assert.deepEqual(result, { ok: true });
+});
+
 test("请求工具默认使用读取方法、空请求体和空请求头", async () => {
   await withRequest(
     (options) => {

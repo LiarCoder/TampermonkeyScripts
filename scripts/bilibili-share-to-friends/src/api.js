@@ -1,7 +1,9 @@
+import { GM_xmlhttpRequest } from "$";
+
 import {
   buildQuery,
   getCookie,
-  httpRequest,
+  httpRequest as sharedHttpRequest,
   md5,
   normalizeImageUrl,
 } from "@tampermonkey-scripts/shared";
@@ -17,6 +19,12 @@ import {
 } from "./constants.js";
 
 let navCache = null;
+
+const httpRequest = (options) =>
+  sharedHttpRequest({
+    ...options,
+    request: GM_xmlhttpRequest,
+  });
 
 /**
  * 从当前 B 站视频页地址读取 BV 号。
