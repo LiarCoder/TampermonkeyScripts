@@ -38,6 +38,10 @@ importers:
   packages/shared: {}
 
   scripts/beautify-code-block-font-style:
+    dependencies:
+      "@tampermonkey-scripts/shared":
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       vite:
         specifier: 6.4.1
@@ -66,6 +70,10 @@ importers:
         version: 6.0.1(postcss@8.5.15)(vite@6.4.1(@types/node@25.9.1)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.9.0))
 
   scripts/copy-title-and-location:
+    dependencies:
+      "@tampermonkey-scripts/shared":
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       vite:
         specifier: 6.4.1
@@ -75,6 +83,10 @@ importers:
         version: 6.0.1(postcss@8.5.15)(vite@6.4.1(@types/node@25.9.1)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.9.0))
 
   scripts/juejin-markdown-formatter:
+    dependencies:
+      "@tampermonkey-scripts/shared":
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       vite:
         specifier: 6.4.1
@@ -84,6 +96,10 @@ importers:
         version: 6.0.1(postcss@8.5.15)(vite@6.4.1(@types/node@25.9.1)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.9.0))
 
   scripts/just-jump-ahead:
+    dependencies:
+      "@tampermonkey-scripts/shared":
+        specifier: workspace:*
+        version: link:../../packages/shared
     devDependencies:
       vite:
         specifier: 6.4.1
