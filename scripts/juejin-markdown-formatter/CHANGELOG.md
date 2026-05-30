@@ -1,11 +1,12 @@
 <!--
- * @Descripttion: 
- * @version: 
+ * @Descripttion:
+ * @version:
  * @Author: LiarCoder
  * @Date: 2021-09-01 16:23:57
  * @LastEditors: LiarCoder
  * @LastEditTime: 2021-09-03 19:52:51
 -->
+
 # 掘金Markdown格式适配器更新日志
 
 ## V1.0
@@ -27,6 +28,7 @@
 4、将上述处理过的文档内容写入用户剪切板。然后需要用户在编辑区激活的状态下 <mark>手动</mark> 按下 <kbd>Ctrl + V</kbd> 以将处理过的文档内容粘贴到编辑区。
 
 5、V1.0预览效果
+
 <div align="center"><img src="https://i.loli.net/2021/08/30/XcaNdptg2TuZnIk.gif"/></div>
 
 ## V2.0
@@ -58,6 +60,7 @@
 4、内容处理完之后增加一个提示弹框，引导用户自行按下 <kbd>Ctrl + V</kbd> 以将处理过的文档内容粘贴到编辑区。
 
 5、V3.0效果预览
+
 <div align="center"><img src="https://i.loli.net/2021/09/02/Rf3t9vxPNgderkJ.gif"/></div>
 
 2021年9月2日00:56:24，上述功能都已实现！且效果与预期一致！
@@ -109,4 +112,3 @@
 更新内容：
 
 1、修改了正则匹配的规则，跳过由 ` 包裹的文本。（2021年9月5日14:33:38尚未实现）
-
