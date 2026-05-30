@@ -1,6 +1,9 @@
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Renders the share dialog title and close button.
+ */
 export const DialogHeader = ({ title, onClose, disabled = false }) => (
   <div className={`${SCRIPT_ID}-header`}>
     <h3 className={`${SCRIPT_ID}-title`}>{title}</h3>

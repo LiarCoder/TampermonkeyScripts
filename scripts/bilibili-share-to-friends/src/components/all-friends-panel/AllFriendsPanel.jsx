@@ -29,6 +29,9 @@ const getPageLoadingState = (state) => ({
   loadingMore: state.loadingPage > 0 && state.loaded && state.loadingPage > 1,
 });
 
+/**
+ * Renders the following/follower picker with search and paginated loading.
+ */
 export const AllFriendsPanel = ({
   active,
   mid,

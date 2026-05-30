@@ -3,6 +3,9 @@ import { render } from "preact";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Unmounts and removes an existing share dialog node.
+ */
 export const closeDialog = (dialog) => {
   if (!dialog) {
     return;
@@ -18,6 +21,9 @@ export const closeDialog = (dialog) => {
   }
 };
 
+/**
+ * Creates a fresh native dialog container for the share UI.
+ */
 export const createDialog = () => {
   closeDialog(document.getElementById(`${SCRIPT_ID}-dialog`));
   const dialog = document.createElement("dialog");

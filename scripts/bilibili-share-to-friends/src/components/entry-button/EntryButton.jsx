@@ -3,6 +3,9 @@ import { render } from "preact";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Renders the entry button injected into Bilibili's native share panel.
+ */
 const EntryButton = ({ onClick }) => (
   <button
     className={`${SCRIPT_ID}-entry`}
@@ -30,6 +33,9 @@ const EntryButton = ({ onClick }) => (
   </button>
 );
 
+/**
+ * Creates a DOM button element by rendering the Preact entry button once.
+ */
 export const createEntryButton = ({ onClick }) => {
   const container = document.createElement("div");
   render(<EntryButton onClick={onClick} />, container);

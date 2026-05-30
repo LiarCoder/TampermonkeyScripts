@@ -3,6 +3,9 @@ import "./style.css";
 
 const isLinkTarget = (target) => target instanceof Element && Boolean(target.closest("a"));
 
+/**
+ * Renders one selectable user row with a profile link.
+ */
 export const UserListItem = ({ user, selected = false, onSelect }) => {
   const handleSelect = (event) => {
     if (isLinkTarget(event.target)) {

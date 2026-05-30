@@ -18,11 +18,23 @@ import {
 
 let navCache = null;
 
+/**
+ * Reads the current video BV id from the Bilibili video page URL.
+ *
+ * @returns {string} BV id, or an empty string outside a video page.
+ */
 export const getBvidFromLocation = () => {
   const match = location.href.match(/\/video\/(BV[0-9A-Za-z]+)/);
   return match ? match[1] : "";
 };
 
+/**
+ * Ensures a Bilibili API response is successful and returns its data payload.
+ *
+ * @param {object} result Bilibili API response.
+ * @param {string} action User-facing action name for error messages.
+ * @returns {unknown} Response data payload.
+ */
 const assertSuccess = (result, action) => {
   if (!result || result.code !== 0) {
     const message = result?.message || result?.msg || "未知错误";
@@ -31,6 +43,12 @@ const assertSuccess = (result, action) => {
   return result.data;
 };
 
+/**
+ * Builds the form body required by Bilibili private message sending API.
+ *
+ * @param {object} options Message form options.
+ * @returns {URLSearchParams} Encoded private message form body.
+ */
 const createSendMessageForm = ({
   nav,
   csrf,
@@ -59,6 +77,12 @@ const createSendMessageForm = ({
     csrf_token: csrf,
   });
 
+/**
+ * Sends an already encoded private message form to one Bilibili receiver.
+ *
+ * @param {object} options Private message request options.
+ * @returns {Promise<unknown>} Bilibili send message response data.
+ */
 const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
   const query = signWbi(
     {
@@ -82,13 +106,26 @@ const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
   return assertSuccess(result, action);
 };
 
+/**
+ * Creates the WBI mixin key from Bilibili image keys.
+ *
+ * @param {string} imgKey WBI image key.
+ * @param {string} subKey WBI sub image key.
+ * @returns {string} 32-character mixin key.
+ */
 const getMixinKey = (imgKey, subKey) =>
   mixinKeyEncTab
     .map((index) => `${imgKey}${subKey}`[index])
     .join("")
     .slice(0, 32);
 
-// 部分 B 站 Web API 需要 WBI 签名；私信补用户资料接口会用到。
+/**
+ * Signs Bilibili web API params with WBI fields when the nav response exposes keys.
+ *
+ * @param {Record<string, string | number>} params Unsigned query params.
+ * @param {object} wbiImg WBI image metadata from the nav API.
+ * @returns {Record<string, string | number>} Signed params, or original params when keys are absent.
+ */
 const signWbi = (params, wbiImg) => {
   if (!wbiImg?.img_url || !wbiImg?.sub_url) {
     return params;
@@ -113,6 +150,11 @@ const signWbi = (params, wbiImg) => {
   };
 };
 
+/**
+ * Loads and caches the current Bilibili navigation/login payload.
+ *
+ * @returns {Promise<object>} Bilibili nav API data.
+ */
 const getNav = async () => {
   if (navCache) {
     return navCache;
@@ -125,6 +167,11 @@ const getNav = async () => {
   return data;
 };
 
+/**
+ * Verifies that the user is logged in and has a CSRF token for private messages.
+ *
+ * @returns {Promise<{ nav: object, csrf: string }>} Login payload and CSRF token.
+ */
 export const assertLogin = async () => {
   const nav = await getNav();
   const csrf = getCookie("bili_jct");
@@ -137,6 +184,11 @@ export const assertLogin = async () => {
   return { nav, csrf };
 };
 
+/**
+ * Loads the current video metadata needed for text sharing.
+ *
+ * @returns {Promise<object>} Normalized video metadata.
+ */
 export const getVideoInfo = async () => {
   const bvid = getBvidFromLocation();
   if (!bvid) {
@@ -156,6 +208,11 @@ export const getVideoInfo = async () => {
   };
 };
 
+/**
+ * Reads recent session contacts from localStorage when the TTL is still valid.
+ *
+ * @returns {Array<object> | null} Cached sessions or null when unavailable.
+ */
 const readSessionCache = () => {
   try {
     const cache = JSON.parse(localStorage.getItem(SESSION_CACHE_KEY) || "null");
@@ -168,6 +225,11 @@ const readSessionCache = () => {
   return null;
 };
 
+/**
+ * Stores recent session contacts in localStorage with a creation timestamp.
+ *
+ * @param {Array<object>} sessions Normalized recent session contacts.
+ */
 const writeSessionCache = (sessions) => {
   localStorage.setItem(
     SESSION_CACHE_KEY,
@@ -178,11 +240,25 @@ const writeSessionCache = (sessions) => {
   );
 };
 
+/**
+ * Resolves account metadata for a session from inline or companion account info.
+ *
+ * @param {object} session Raw Bilibili session item.
+ * @param {object} accountInfoMap Account info map returned by the session API.
+ * @returns {object} Matching account metadata.
+ */
 const getSessionAccountInfo = (session, accountInfoMap = {}) => {
   const talkerId = String(session.talker_id || "");
   return session.account_info || accountInfoMap[talkerId] || accountInfoMap[Number(talkerId)] || {};
 };
 
+/**
+ * Converts a Bilibili IM session item to a selectable user entry.
+ *
+ * @param {object} session Raw Bilibili session item.
+ * @param {object} accountInfoMap Account info map returned by the session API.
+ * @returns {object | null} Normalized user entry, or null for unsupported sessions.
+ */
 const normalizeSession = (session, accountInfoMap = {}) => {
   const account = getSessionAccountInfo(session, accountInfoMap);
   const mid = Number(session.talker_id || account.mid);
@@ -198,6 +274,12 @@ const normalizeSession = (session, accountInfoMap = {}) => {
   };
 };
 
+/**
+ * Converts a relation API user item to a selectable user entry.
+ *
+ * @param {object} user Raw Bilibili relation user.
+ * @returns {object | null} Normalized user entry, or null when the UID is missing.
+ */
 const normalizeRelationUser = (user) => {
   const mid = Number(user.mid);
   if (!mid) {
@@ -211,6 +293,12 @@ const normalizeRelationUser = (user) => {
   };
 };
 
+/**
+ * Loads public profile information for one Bilibili UID.
+ *
+ * @param {number} mid Bilibili user id.
+ * @returns {Promise<object>} Normalized user profile.
+ */
 const getUserInfo = async (mid) => {
   const nav = await getNav();
   const signedParams = signWbi({ mid }, nav.wbi_img);
@@ -229,6 +317,12 @@ const getUserInfo = async (mid) => {
   };
 };
 
+/**
+ * Fills recent sessions that only include UID with profile name and avatar data.
+ *
+ * @param {Array<object>} sessions Normalized recent sessions.
+ * @returns {Promise<Array<object>>} Enriched recent sessions.
+ */
 const enrichSessionsWithUserInfo = async (sessions) => {
   // 最近私信接口经常只返回 talker_id，这里按 UID 补齐昵称和头像。
   const sessionsNeedUserInfo = sessions.filter(
@@ -263,6 +357,12 @@ const enrichSessionsWithUserInfo = async (sessions) => {
   });
 };
 
+/**
+ * Loads recent private message contacts, optionally bypassing the session cache.
+ *
+ * @param {boolean} [forceRefresh=false] Whether to ignore cached sessions.
+ * @returns {Promise<Array<object>>} Recent private message contacts.
+ */
 export const getRecentSessions = async (forceRefresh = false) => {
   if (!forceRefresh) {
     const cachedSessions = readSessionCache();
@@ -288,6 +388,12 @@ export const getRecentSessions = async (forceRefresh = false) => {
   return sessions;
 };
 
+/**
+ * Loads one page of following or follower users from a Bilibili relation API.
+ *
+ * @param {object} options Relation API request options.
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Relation page.
+ */
 const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams = {} }) => {
   const result = await httpRequest({
     url: `${url}?${buildQuery({
@@ -309,6 +415,12 @@ const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams 
   };
 };
 
+/**
+ * Loads one page of users followed by the current account.
+ *
+ * @param {object} options Pagination options.
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Following page.
+ */
 export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "获取我的关注",
@@ -318,6 +430,12 @@ export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) 
     pageSize,
   });
 
+/**
+ * Searches users followed by the current account through Bilibili's relation search API.
+ *
+ * @param {object} options Search and pagination options.
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Search page.
+ */
 export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "搜索我的关注",
@@ -330,6 +448,12 @@ export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_P
     },
   });
 
+/**
+ * Loads one page of users following the current account.
+ *
+ * @param {object} options Pagination options.
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} Follower page.
+ */
 export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "获取我的粉丝",
@@ -339,6 +463,11 @@ export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =
     pageSize,
   });
 
+/**
+ * Reads or creates the persistent Bilibili IM device id.
+ *
+ * @returns {string} Device id used by the send message API.
+ */
 const getDevId = () => {
   const cachedDevId = localStorage.getItem(DEV_ID_KEY);
   if (cachedDevId) {
@@ -352,6 +481,12 @@ const getDevId = () => {
   return devId;
 };
 
+/**
+ * Sends the current video as a plain text private message.
+ *
+ * @param {object} options Send options.
+ * @returns {Promise<unknown>} Bilibili send message response data.
+ */
 export const sendVideoText = async ({ nav, csrf, video, receiver }) => {
   const devId = getDevId();
   const timestamp = Math.round(Date.now() / 1000);

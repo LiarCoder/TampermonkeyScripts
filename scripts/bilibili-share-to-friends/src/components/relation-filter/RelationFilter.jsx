@@ -6,6 +6,9 @@ const relationOptions = [
   { value: "followers", label: "我的粉丝" },
 ];
 
+/**
+ * Renders the following/follower relation switch.
+ */
 export const RelationFilter = ({ activeRelation, onChange }) => (
   <div className={`${SCRIPT_ID}-relation-filter`}>
     {relationOptions.map((option) => (

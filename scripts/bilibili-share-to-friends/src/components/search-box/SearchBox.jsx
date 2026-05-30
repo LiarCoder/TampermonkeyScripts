@@ -3,6 +3,9 @@ import { useEffect, useLayoutEffect, useRef } from "preact/hooks";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Renders an IME-safe search input for filtering relation users.
+ */
 export const SearchBox = ({
   value,
   placeholder = "搜索用户昵称",

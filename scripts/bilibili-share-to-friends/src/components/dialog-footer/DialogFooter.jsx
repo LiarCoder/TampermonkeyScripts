@@ -4,6 +4,9 @@ import { assertLogin, sendVideoText } from "../../api.js";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Renders close/cancel/send actions and owns the send request state.
+ */
 export const DialogFooter = ({
   video,
   selectedUser,

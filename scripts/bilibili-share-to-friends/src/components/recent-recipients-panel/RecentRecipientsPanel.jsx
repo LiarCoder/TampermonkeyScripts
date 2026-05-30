@@ -4,6 +4,9 @@ import { getRecentSessions } from "../../api.js";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
 
+/**
+ * Renders recently contacted private message recipients.
+ */
 export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) => {
   const [recent, setRecent] = useState({
     users: [],

@@ -3,6 +3,9 @@ import { useState } from "preact/hooks";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * Renders the current video cover with a fallback state.
+ */
 export const VideoCover = ({ video }) => {
   const [loadFailed, setLoadFailed] = useState(false);
   if (!video?.pic || loadFailed) {
@@ -23,6 +26,9 @@ export const VideoCover = ({ video }) => {
   );
 };
 
+/**
+ * Renders the current video summary shown before sending.
+ */
 export const VideoPreview = ({ video }) => (
   <div className={`${SCRIPT_ID}-video`}>
     <VideoCover video={video} />

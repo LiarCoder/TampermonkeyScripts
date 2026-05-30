@@ -2,6 +2,9 @@ import { SCRIPT_ID } from "../../constants.js";
 import { UserListItem } from "../user-list-item/UserListItem.jsx";
 import "./style.css";
 
+/**
+ * Renders the relation list footer for pagination state.
+ */
 export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
   <div className={`${SCRIPT_ID}-list-footer`}>
     {moreError ? (
@@ -14,6 +17,9 @@ export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => 
   </div>
 );
 
+/**
+ * Renders selectable Bilibili users with optional infinite-scroll footer.
+ */
 export const UserList = ({
   users,
   selectedMid = null,

@@ -6,6 +6,9 @@ const tabs = [
   { value: "all", label: "全部好友" },
 ];
 
+/**
+ * Renders the recipient source tabs in the share dialog.
+ */
 export const RecipientTabs = ({ activeTab, onChange }) => (
   <div className={`${SCRIPT_ID}-tabs`}>
     {tabs.map((tab) => (
