@@ -4,22 +4,22 @@
 
 ## 预览
 
-<details>
-<summary>原分享列表中追加一个“B站好友”分享方式（点击展开）</summary>
+<details open>
+<summary>原分享列表中追加一个“B站好友”分享方式（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/fd5b090d-9ac7-4d2b-b9fe-f2c25c3c788a" alt="增加分享入口" style="max-width: 100%;" />
 
 </details>
 
 <details>
-<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开）</summary>
+<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/040ececb-5af2-4388-8d8d-015e5287d584" alt="选择接收人" style="max-width: 100%;" />
 
 </details>
 
 <details>
-<summary>支持昵称搜索、滚动分页加载（点击展开）</summary>
+<summary>支持昵称搜索、滚动分页加载（点击展开或收起）</summary>
 
 <img src="https://github.com/user-attachments/assets/89cd35a0-3256-48f4-b8c7-df3e0a4cc43c" alt="昵称搜索、滚动分页加载" style="max-width: 100%;" />
 
