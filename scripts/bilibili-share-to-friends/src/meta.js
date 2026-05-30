@@ -1,7 +1,9 @@
+import packageJson from "../package.json";
+
 export const userscript = {
   name: "B站视频分享给好友",
   namespace: "http://tampermonkey.net/",
-  version: "0.4.1",
+  version: packageJson.version,
   description:
     "在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户",
   author: "LiarCoder",
