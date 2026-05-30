@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
+import { debounce } from "@tampermonkey-scripts/shared";
 
 import { getFollowers, getFollowings, searchFollowings } from "../../api.js";
 import { LIST_SCROLL_SELECTOR } from "../../constants.js";
@@ -36,11 +37,11 @@ export const AllFriendsPanel = ({
 }) => {
   const panelRef = useRef(null);
   const stateRef = useRef(null);
-  const searchTimerRef = useRef(null);
   const loadMoreObserverRef = useRef(null);
   const loadingKeysRef = useRef(new Set());
   const pendingScrollTopRef = useRef(null);
   const searchComposingRef = useRef({ value: false });
+  const debouncedSearchRef = useRef(null);
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [relations, setRelations] = useState(createRelationsState);
@@ -79,7 +80,7 @@ export const AllFriendsPanel = ({
 
   useEffect(() => {
     return () => {
-      window.clearTimeout(searchTimerRef.current);
+      debouncedSearchRef.current?.cancel();
       loadMoreObserverRef.current?.disconnect();
     };
   }, []);
@@ -204,6 +205,15 @@ export const AllFriendsPanel = ({
     [getListScrollTop, setPageState]
   );
 
+  if (!debouncedSearchRef.current) {
+    debouncedSearchRef.current = debounce((nextKeyword) => {
+      const current = stateRef.current;
+      if (current.activeRelation === "following" && nextKeyword) {
+        loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
+      }
+    }, 300);
+  }
+
   useEffect(() => {
     if (active) {
       loadRelationUsers(activeRelation);
@@ -258,13 +268,7 @@ export const AllFriendsPanel = ({
     if (previousKeyword || nextKeyword) {
       resetSelection();
     }
-    window.clearTimeout(searchTimerRef.current);
-    searchTimerRef.current = window.setTimeout(() => {
-      const current = stateRef.current;
-      if (current.activeRelation === "following" && nextKeyword) {
-        loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
-      }
-    }, 300);
+    debouncedSearchRef.current(nextKeyword);
   };
 
   if (!active) {
@@ -317,7 +321,7 @@ export const AllFriendsPanel = ({
             : ""
         }
         composing={searchComposingRef.current}
-        onCompositionStart={() => window.clearTimeout(searchTimerRef.current)}
+        onCompositionStart={() => debouncedSearchRef.current?.cancel()}
         onInput={scheduleSearch}
       />
       {renderListContent()}
