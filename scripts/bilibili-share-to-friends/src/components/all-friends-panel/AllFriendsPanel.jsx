@@ -41,8 +41,6 @@ export const AllFriendsPanel = ({
   const loadMoreObserverRef = useRef(null);
   const loadingKeysRef = useRef(new Set());
   const pendingScrollTopRef = useRef(null);
-  const searchComposingRef = useRef({ value: false });
-  const debouncedSearchRef = useRef(null);
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [relations, setRelations] = useState(createRelationsState);
@@ -78,13 +76,6 @@ export const AllFriendsPanel = ({
     followingSearch,
     mid,
   };
-
-  useEffect(() => {
-    return () => {
-      debouncedSearchRef.current?.cancel();
-      loadMoreObserverRef.current?.disconnect();
-    };
-  }, []);
 
   useEffect(() => {
     setActiveRelation("following");
@@ -206,14 +197,24 @@ export const AllFriendsPanel = ({
     [getListScrollTop, setPageState]
   );
 
-  if (!debouncedSearchRef.current) {
-    debouncedSearchRef.current = debounce((nextKeyword) => {
-      const current = stateRef.current;
-      if (current.activeRelation === "following" && nextKeyword) {
-        loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
-      }
-    }, 300);
-  }
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((nextKeyword) => {
+        const current = stateRef.current;
+        if (current.activeRelation === "following" && nextKeyword) {
+          loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
+        }
+      }, 300),
+    [loadRelationUsers]
+  );
+
+  useEffect(() => {
+    return () => loadMoreObserverRef.current?.disconnect();
+  }, []);
+
+  useEffect(() => {
+    return () => debouncedSearch.cancel();
+  }, [debouncedSearch]);
 
   useEffect(() => {
     if (active) {
@@ -259,7 +260,7 @@ export const AllFriendsPanel = ({
     onSelectionReset();
   };
 
-  const scheduleSearch = (value) => {
+  const scheduleSearch = (value, { immediate = false } = {}) => {
     const previousKeyword = searchTerm.trim();
     const nextKeyword = value.trim();
     setSearchTerm(value);
@@ -269,7 +270,15 @@ export const AllFriendsPanel = ({
     if (previousKeyword || nextKeyword) {
       resetSelection();
     }
-    debouncedSearchRef.current(nextKeyword);
+    if (immediate) {
+      debouncedSearch.cancel();
+      const current = stateRef.current;
+      if (current.activeRelation === "following" && nextKeyword) {
+        loadRelationUsers("following", { reset: true, keywordOverride: nextKeyword });
+      }
+      return;
+    }
+    debouncedSearch(nextKeyword);
   };
 
   if (!active) {
@@ -321,8 +330,7 @@ export const AllFriendsPanel = ({
             ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
             : ""
         }
-        composing={searchComposingRef.current}
-        onCompositionStart={() => debouncedSearchRef.current?.cancel()}
+        onCompositionStart={() => debouncedSearch.cancel()}
         onInput={scheduleSearch}
       />
       {renderListContent()}
