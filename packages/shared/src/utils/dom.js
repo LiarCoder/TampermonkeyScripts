@@ -1,5 +1,11 @@
 import { compact } from "./array.js";
 
+/**
+ * 创建 DOM 元素，并应用常见属性、子节点和事件。
+ *
+ * @param {object} options 元素创建配置。
+ * @returns {HTMLElement} 创建后的元素。
+ */
 export const createElement = ({
   parent = null,
   tagName = "div",
@@ -51,6 +57,13 @@ export const createElement = ({
   return element;
 };
 
+/**
+ * 轮询等待元素出现，直到命中元素或超时。
+ *
+ * @param {string} selector 要查询的 CSS 选择器。
+ * @param {object} [options] 轮询配置。
+ * @returns {Promise<Element>} 匹配到的元素。
+ */
 export const waitForElement = (
   selector,
   { root = document, timeout = 10000, interval = 100 } = {}

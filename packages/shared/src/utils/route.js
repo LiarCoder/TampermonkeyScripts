@@ -1,3 +1,10 @@
+/**
+ * 订阅由浏览器历史记录、前进后退或哈希变化触发的单页应用地址变化。
+ *
+ * @param {(event: { url: string, previousUrl: string }) => void} handler 地址变化处理函数。
+ * @param {object} [options] 订阅配置。
+ * @returns {() => void} 清理函数。
+ */
 export const onUrlChange = (handler, { fireImmediately = false } = {}) => {
   let currentUrl = location.href;
 

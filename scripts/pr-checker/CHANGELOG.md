@@ -25,10 +25,10 @@
 1. 将公共样式抽离出来，方便复用。
 2. 优化：将创建 dialog 的逻辑抽离成一个函数，方便复用。
 3. 优化 createElement 函数，
-     a. 支持传入一个函数作为子元素。
-     b. 支持传入一个事件对象作为事件处理函数。
+   a. 支持传入一个函数作为子元素。
+   b. 支持传入一个事件对象作为事件处理函数。
 4. 遮罩支持配置 closeOnClickMask 参数，控制点击遮罩是否关闭 dialog。
-     a. 默认可通过点击遮罩层关闭dialog。
+   a. 默认可通过点击遮罩层关闭dialog。
 5. dialog显示增加渐显渐隐动画效果
 
 ### v1.2.2 (2025-02-16 12:34:34)
@@ -54,5 +54,5 @@
 
 1. 新增：在bitbucket中点击创建PR按钮时，会弹出一个dialog，里面有若干项检查项用来提醒用户。
 2. 新增：脚本支持一些简单的自定义扩展功能：
-     1. 脚本支持在浏览器控制台，通过 window.PrChecker.add('xxx') 的方式添加自定义check项
-     2. 脚本支持通过 window.PrChecker.clear() 的方式清除所有自定义check项
+   1. 脚本支持在浏览器控制台，通过 window.PrChecker.add('xxx') 的方式添加自定义check项
+   2. 脚本支持通过 window.PrChecker.clear() 的方式清除所有自定义check项

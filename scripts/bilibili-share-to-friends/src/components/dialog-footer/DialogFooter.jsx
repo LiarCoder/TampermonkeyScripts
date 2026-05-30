@@ -4,6 +4,9 @@ import { assertLogin, sendVideoText } from "../../api.js";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * 渲染关闭、取消和发送操作，并维护发送请求状态。
+ */
 export const DialogFooter = ({
   video,
   selectedUser,

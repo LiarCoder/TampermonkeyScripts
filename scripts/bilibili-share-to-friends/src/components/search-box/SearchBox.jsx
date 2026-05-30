@@ -3,6 +3,9 @@ import { useEffect, useLayoutEffect, useRef } from "preact/hooks";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * 渲染兼容输入法组合输入的关系用户搜索框。
+ */
 export const SearchBox = ({
   value,
   placeholder = "搜索用户昵称",

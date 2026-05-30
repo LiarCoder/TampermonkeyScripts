@@ -1,3 +1,9 @@
+/**
+ * 创建支持可选命名空间的 JSON 存储封装。
+ *
+ * @param {object} [options] 存储配置。
+ * @returns {{ get: Function, set: Function, remove: Function }} JSON 存储适配器。
+ */
 export const createJsonStorage = ({ namespace, storage = window.localStorage } = {}) => {
   const resolveKey = (key) => (namespace ? `${namespace}.${key}` : key);
 
@@ -22,6 +28,12 @@ export const createJsonStorage = ({ namespace, storage = window.localStorage } =
   };
 };
 
+/**
+ * 创建基于 JSON 存储的 TTL 缓存。
+ *
+ * @param {object} [options] 缓存配置。
+ * @returns {{ get: Function, set: Function, remove: Function }} TTL 缓存适配器。
+ */
 export const createTtlCache = ({ namespace, ttl, storage = window.localStorage } = {}) => {
   const jsonStorage = createJsonStorage({ namespace, storage });
 

@@ -6,6 +6,9 @@ const tabs = [
   { value: "all", label: "全部好友" },
 ];
 
+/**
+ * 渲染分享弹窗中的接收人来源标签页。
+ */
 export const RecipientTabs = ({ activeTab, onChange }) => (
   <div className={`${SCRIPT_ID}-tabs`}>
     {tabs.map((tab) => (

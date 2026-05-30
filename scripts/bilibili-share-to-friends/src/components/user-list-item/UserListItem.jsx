@@ -3,6 +3,9 @@ import "./style.css";
 
 const isLinkTarget = (target) => target instanceof Element && Boolean(target.closest("a"));
 
+/**
+ * 渲染带用户主页链接的单个可选择用户行。
+ */
 export const UserListItem = ({ user, selected = false, onSelect }) => {
   const handleSelect = (event) => {
     if (isLinkTarget(event.target)) {

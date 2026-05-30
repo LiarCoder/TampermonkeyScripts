@@ -29,6 +29,9 @@ const getPageLoadingState = (state) => ({
   loadingMore: state.loadingPage > 0 && state.loaded && state.loadingPage > 1,
 });
 
+/**
+ * 渲染带搜索和分页加载的关注/粉丝选择面板。
+ */
 export const AllFriendsPanel = ({
   active,
   mid,

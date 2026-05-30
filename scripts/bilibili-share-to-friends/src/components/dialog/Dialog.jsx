@@ -3,6 +3,9 @@ import { render } from "preact";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * 卸载并移除已有分享弹窗节点。
+ */
 export const closeDialog = (dialog) => {
   if (!dialog) {
     return;
@@ -18,6 +21,9 @@ export const closeDialog = (dialog) => {
   }
 };
 
+/**
+ * 创建新的原生弹窗容器，用于承载分享界面。
+ */
 export const createDialog = () => {
   closeDialog(document.getElementById(`${SCRIPT_ID}-dialog`));
   const dialog = document.createElement("dialog");

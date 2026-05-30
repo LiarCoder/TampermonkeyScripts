@@ -2,6 +2,29 @@
 
 在 Bilibili 视频播放页分享面板中新增“分享给 B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户。
 
+## 预览
+
+<details>
+<summary>原分享列表中追加一个“B站好友”分享方式（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/fd5b090d-9ac7-4d2b-b9fe-f2c25c3c788a" alt="增加分享入口" style="max-width: 100%;" />
+
+</details>
+
+<details>
+<summary>可以从最近聊天、我的关注或我的粉丝中选择接收人（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/040ececb-5af2-4388-8d8d-015e5287d584" alt="选择接收人" style="max-width: 100%;" />
+
+</details>
+
+<details>
+<summary>支持昵称搜索、滚动分页加载（点击展开）</summary>
+
+<img src="https://github.com/user-attachments/assets/89cd35a0-3256-48f4-b8c7-df3e0a4cc43c" alt="昵称搜索、滚动分页加载" style="max-width: 100%;" />
+
+</details>
+
 ## 功能
 
 - 在原生分享面板中追加“B站好友”分享方式。
@@ -9,6 +32,7 @@
 - “全部好友”支持选择“我的关注”或“我的粉丝”，并支持昵称搜索。
 - 关注搜索优先使用 B 站关注搜索接口；粉丝搜索仅筛选当前已加载用户，继续滚动可扩大筛选范围。
 - 用户列表支持滚动分页加载，加载失败时可重试。
+- 由于视频卡片的分享接口目前看起来无法在 PC 端调用，当前分享功能只支持分享纯文本，不能分享视频卡片。
 
 ## 目录
 
@@ -31,4 +55,8 @@ pnpm shell:bilibili
 开发同步有两种方式：
 
 1. 推荐先运行 `pnpm dev:bilibili`，按 `vite-plugin-monkey` 打开的安装页安装开发版脚本。之后本地代码变更会通过 Vite dev server 加载，通常不需要再复制粘贴到 Tampermonkey 编辑器。
-2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dev/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm watch:bilibili`，刷新目标页面即可加载本地 `dist/bilibili-share-to-friends.user.js`。
+2. 如果目标页面 CSP 或浏览器环境导致 dev server 注入不可用，运行 `pnpm shell:bilibili` 生成 `scripts/bilibili-share-to-friends/dist/*.local.user.js`。在 Tampermonkey 安装这个壳脚本，并在 Chrome/Edge 扩展详情中打开 Tampermonkey 的 “Allow access to file URLs”。之后配合 `pnpm watch:bilibili`，刷新目标页面即可加载本地 `dist/bilibili-share-to-friends.user.js`。
+
+## 鸣谢
+
+- [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)：提供 Bilibili Web API、私信接口和 WBI 签名相关资料。

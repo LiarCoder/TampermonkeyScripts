@@ -1,15 +1,7 @@
-<!--
- * @Descripttion: 
- * @version: 
- * @Author: LiarCoder
- * @Date: 2021-09-29 19:17:01
- * @LastEditors: LiarCoder
- * @LastEditTime: 2021-12-11 23:46:05
--->
-
 # 自动继续访问页面
 
 ## 脚本安装地址
+
 > 参考：[greasyfork：JustJumpAhead](https://greasyfork.org/zh-CN/scripts/433155-justjumpahead)
 
 ## 前言
@@ -65,6 +57,7 @@
 1、对网页的适配正则进行了一点小小的修改，用来应对有些拦截页面的协议可以是http也可能是https协议的情况。
 
 ## 有关参考
+
 > 更新：2021年9月30日15:27:05
 
 > 参考：[Map - JavaScript | MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Map)

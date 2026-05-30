@@ -1,6 +1,14 @@
 import { GM_xmlhttpRequest } from "$";
 
 import {
+  buildQuery,
+  getCookie,
+  httpRequest as sharedHttpRequest,
+  md5,
+  normalizeImageUrl,
+} from "@tampermonkey-scripts/shared";
+
+import {
   DEV_ID_KEY,
   SESSION_CACHE_KEY,
   SESSION_CACHE_TTL,
@@ -12,66 +20,29 @@ import {
 
 let navCache = null;
 
-const getCookie = (name) => {
-  const cookie = document.cookie
-    .split(";")
-    .map((item) => item.trim())
-    .find((item) => item.startsWith(`${name}=`));
-  return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : "";
-};
+const httpRequest = (options) =>
+  sharedHttpRequest({
+    ...options,
+    request: GM_xmlhttpRequest,
+  });
 
+/**
+ * 从当前 B 站视频页地址读取 BV 号。
+ *
+ * @returns {string} BV 号；不在视频页时返回空字符串。
+ */
 export const getBvidFromLocation = () => {
   const match = location.href.match(/\/video\/(BV[0-9A-Za-z]+)/);
   return match ? match[1] : "";
 };
 
-const normalizeImageUrl = (url) => {
-  if (!url) {
-    return "";
-  }
-  if (url.startsWith("//")) {
-    return `https:${url}`;
-  }
-  if (url.startsWith("http://")) {
-    return `https://${url.slice("http://".length)}`;
-  }
-  return url;
-};
-
-const buildQuery = (params) => {
-  const query = new URLSearchParams();
-  Object.keys(params).forEach((key) => {
-    const value = params[key];
-    if (value !== undefined && value !== null && value !== "") {
-      query.set(key, value);
-    }
-  });
-  return query.toString();
-};
-
-const httpRequest = ({ method = "GET", url, data = null, headers = {} }) => {
-  return new Promise((resolve, reject) => {
-    GM_xmlhttpRequest({
-      method,
-      url,
-      data,
-      headers,
-      withCredentials: true,
-      timeout: 15000,
-      onload: (response) => {
-        try {
-          const result = JSON.parse(response.responseText);
-          resolve(result);
-        } catch (error) {
-          reject(new Error(`响应解析失败：${error.message}`));
-        }
-      },
-      onerror: () => reject(new Error("网络请求失败")),
-      ontimeout: () => reject(new Error("网络请求超时")),
-    });
-  });
-};
-
+/**
+ * 校验 B 站接口响应是否成功，并返回数据字段。
+ *
+ * @param {object} result B 站接口响应。
+ * @param {string} action 用于错误提示的操作名称。
+ * @returns {unknown} 响应中的数据字段。
+ */
 const assertSuccess = (result, action) => {
   if (!result || result.code !== 0) {
     const message = result?.message || result?.msg || "未知错误";
@@ -80,6 +51,12 @@ const assertSuccess = (result, action) => {
   return result.data;
 };
 
+/**
+ * 构造 B 站发送私信接口所需的表单数据。
+ *
+ * @param {object} options 私信表单配置。
+ * @returns {URLSearchParams} 编码后的私信表单数据。
+ */
 const createSendMessageForm = ({
   nav,
   csrf,
@@ -108,6 +85,12 @@ const createSendMessageForm = ({
     csrf_token: csrf,
   });
 
+/**
+ * 将已编码的私信表单发送给指定 B 站用户。
+ *
+ * @param {object} options 私信请求配置。
+ * @returns {Promise<unknown>} B 站发送私信接口返回数据。
+ */
 const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
   const query = signWbi(
     {
@@ -131,143 +114,26 @@ const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
   return assertSuccess(result, action);
 };
 
-const md5 = (input) => {
-  const rotateLeft = (value, shift) => (value << shift) | (value >>> (32 - shift));
-  const addUnsigned = (x, y) => {
-    const x4 = x & 0x40000000;
-    const y4 = y & 0x40000000;
-    const x8 = x & 0x80000000;
-    const y8 = y & 0x80000000;
-    const result = (x & 0x3fffffff) + (y & 0x3fffffff);
-    if (x4 & y4) {
-      return result ^ 0x80000000 ^ x8 ^ y8;
-    }
-    if (x4 | y4) {
-      if (result & 0x40000000) {
-        return result ^ 0xc0000000 ^ x8 ^ y8;
-      }
-      return result ^ 0x40000000 ^ x8 ^ y8;
-    }
-    return result ^ x8 ^ y8;
-  };
-  const f = (x, y, z) => (x & y) | (~x & z);
-  const g = (x, y, z) => (x & z) | (y & ~z);
-  const h = (x, y, z) => x ^ y ^ z;
-  const i = (x, y, z) => y ^ (x | ~z);
-  const round = (fn, a, b, c, d, x, s, ac) =>
-    addUnsigned(rotateLeft(addUnsigned(addUnsigned(a, fn(b, c, d)), addUnsigned(x, ac)), s), b);
-  const utf8 = unescape(encodeURIComponent(input));
-  const words = [];
-  const length = utf8.length;
-  for (let index = 0; index < length; index++) {
-    words[index >> 2] |= utf8.charCodeAt(index) << ((index % 4) * 8);
-  }
-  words[length >> 2] |= 0x80 << ((length % 4) * 8);
-  words[(((length + 8) >> 6) + 1) * 16 - 2] = length * 8;
-
-  let a = 0x67452301;
-  let b = 0xefcdab89;
-  let c = 0x98badcfe;
-  let d = 0x10325476;
-
-  for (let k = 0; k < words.length; k += 16) {
-    const aa = a;
-    const bb = b;
-    const cc = c;
-    const dd = d;
-
-    a = round(f, a, b, c, d, words[k + 0], 7, 0xd76aa478);
-    d = round(f, d, a, b, c, words[k + 1], 12, 0xe8c7b756);
-    c = round(f, c, d, a, b, words[k + 2], 17, 0x242070db);
-    b = round(f, b, c, d, a, words[k + 3], 22, 0xc1bdceee);
-    a = round(f, a, b, c, d, words[k + 4], 7, 0xf57c0faf);
-    d = round(f, d, a, b, c, words[k + 5], 12, 0x4787c62a);
-    c = round(f, c, d, a, b, words[k + 6], 17, 0xa8304613);
-    b = round(f, b, c, d, a, words[k + 7], 22, 0xfd469501);
-    a = round(f, a, b, c, d, words[k + 8], 7, 0x698098d8);
-    d = round(f, d, a, b, c, words[k + 9], 12, 0x8b44f7af);
-    c = round(f, c, d, a, b, words[k + 10], 17, 0xffff5bb1);
-    b = round(f, b, c, d, a, words[k + 11], 22, 0x895cd7be);
-    a = round(f, a, b, c, d, words[k + 12], 7, 0x6b901122);
-    d = round(f, d, a, b, c, words[k + 13], 12, 0xfd987193);
-    c = round(f, c, d, a, b, words[k + 14], 17, 0xa679438e);
-    b = round(f, b, c, d, a, words[k + 15], 22, 0x49b40821);
-
-    a = round(g, a, b, c, d, words[k + 1], 5, 0xf61e2562);
-    d = round(g, d, a, b, c, words[k + 6], 9, 0xc040b340);
-    c = round(g, c, d, a, b, words[k + 11], 14, 0x265e5a51);
-    b = round(g, b, c, d, a, words[k + 0], 20, 0xe9b6c7aa);
-    a = round(g, a, b, c, d, words[k + 5], 5, 0xd62f105d);
-    d = round(g, d, a, b, c, words[k + 10], 9, 0x2441453);
-    c = round(g, c, d, a, b, words[k + 15], 14, 0xd8a1e681);
-    b = round(g, b, c, d, a, words[k + 4], 20, 0xe7d3fbc8);
-    a = round(g, a, b, c, d, words[k + 9], 5, 0x21e1cde6);
-    d = round(g, d, a, b, c, words[k + 14], 9, 0xc33707d6);
-    c = round(g, c, d, a, b, words[k + 3], 14, 0xf4d50d87);
-    b = round(g, b, c, d, a, words[k + 8], 20, 0x455a14ed);
-    a = round(g, a, b, c, d, words[k + 13], 5, 0xa9e3e905);
-    d = round(g, d, a, b, c, words[k + 2], 9, 0xfcefa3f8);
-    c = round(g, c, d, a, b, words[k + 7], 14, 0x676f02d9);
-    b = round(g, b, c, d, a, words[k + 12], 20, 0x8d2a4c8a);
-
-    a = round(h, a, b, c, d, words[k + 5], 4, 0xfffa3942);
-    d = round(h, d, a, b, c, words[k + 8], 11, 0x8771f681);
-    c = round(h, c, d, a, b, words[k + 11], 16, 0x6d9d6122);
-    b = round(h, b, c, d, a, words[k + 14], 23, 0xfde5380c);
-    a = round(h, a, b, c, d, words[k + 1], 4, 0xa4beea44);
-    d = round(h, d, a, b, c, words[k + 4], 11, 0x4bdecfa9);
-    c = round(h, c, d, a, b, words[k + 7], 16, 0xf6bb4b60);
-    b = round(h, b, c, d, a, words[k + 10], 23, 0xbebfbc70);
-    a = round(h, a, b, c, d, words[k + 13], 4, 0x289b7ec6);
-    d = round(h, d, a, b, c, words[k + 0], 11, 0xeaa127fa);
-    c = round(h, c, d, a, b, words[k + 3], 16, 0xd4ef3085);
-    b = round(h, b, c, d, a, words[k + 6], 23, 0x4881d05);
-    a = round(h, a, b, c, d, words[k + 9], 4, 0xd9d4d039);
-    d = round(h, d, a, b, c, words[k + 12], 11, 0xe6db99e5);
-    c = round(h, c, d, a, b, words[k + 15], 16, 0x1fa27cf8);
-    b = round(h, b, c, d, a, words[k + 2], 23, 0xc4ac5665);
-
-    a = round(i, a, b, c, d, words[k + 0], 6, 0xf4292244);
-    d = round(i, d, a, b, c, words[k + 7], 10, 0x432aff97);
-    c = round(i, c, d, a, b, words[k + 14], 15, 0xab9423a7);
-    b = round(i, b, c, d, a, words[k + 5], 21, 0xfc93a039);
-    a = round(i, a, b, c, d, words[k + 12], 6, 0x655b59c3);
-    d = round(i, d, a, b, c, words[k + 3], 10, 0x8f0ccc92);
-    c = round(i, c, d, a, b, words[k + 10], 15, 0xffeff47d);
-    b = round(i, b, c, d, a, words[k + 1], 21, 0x85845dd1);
-    a = round(i, a, b, c, d, words[k + 8], 6, 0x6fa87e4f);
-    d = round(i, d, a, b, c, words[k + 15], 10, 0xfe2ce6e0);
-    c = round(i, c, d, a, b, words[k + 6], 15, 0xa3014314);
-    b = round(i, b, c, d, a, words[k + 13], 21, 0x4e0811a1);
-    a = round(i, a, b, c, d, words[k + 4], 6, 0xf7537e82);
-    d = round(i, d, a, b, c, words[k + 11], 10, 0xbd3af235);
-    c = round(i, c, d, a, b, words[k + 2], 15, 0x2ad7d2bb);
-    b = round(i, b, c, d, a, words[k + 9], 21, 0xeb86d391);
-
-    a = addUnsigned(a, aa);
-    b = addUnsigned(b, bb);
-    c = addUnsigned(c, cc);
-    d = addUnsigned(d, dd);
-  }
-
-  const wordToHex = (value) => {
-    let output = "";
-    for (let count = 0; count <= 3; count++) {
-      output += `0${((value >>> (count * 8)) & 255).toString(16)}`.slice(-2);
-    }
-    return output;
-  };
-
-  return `${wordToHex(a)}${wordToHex(b)}${wordToHex(c)}${wordToHex(d)}`;
-};
-
+/**
+ * 根据 B 站图片密钥生成 WBI 混合密钥。
+ *
+ * @param {string} imgKey WBI 图片密钥。
+ * @param {string} subKey WBI 子图片密钥。
+ * @returns {string} 32 位混合密钥。
+ */
 const getMixinKey = (imgKey, subKey) =>
   mixinKeyEncTab
     .map((index) => `${imgKey}${subKey}`[index])
     .join("")
     .slice(0, 32);
 
-// 部分 B 站 Web API 需要 WBI 签名；私信补用户资料接口会用到。
+/**
+ * 当导航接口响应提供密钥时，为 B 站网页接口参数补充 WBI 签名字段。
+ *
+ * @param {Record<string, string | number>} params 未签名的查询参数。
+ * @param {object} wbiImg 导航接口返回的 WBI 图片信息。
+ * @returns {Record<string, string | number>} 签名后的参数；缺少密钥时返回原参数。
+ */
 const signWbi = (params, wbiImg) => {
   if (!wbiImg?.img_url || !wbiImg?.sub_url) {
     return params;
@@ -292,6 +158,11 @@ const signWbi = (params, wbiImg) => {
   };
 };
 
+/**
+ * 加载并缓存当前 B 站导航和登录信息。
+ *
+ * @returns {Promise<object>} B 站导航接口数据。
+ */
 const getNav = async () => {
   if (navCache) {
     return navCache;
@@ -304,6 +175,11 @@ const getNav = async () => {
   return data;
 };
 
+/**
+ * 校验用户已登录，并且具备发送私信所需的 CSRF 令牌。
+ *
+ * @returns {Promise<{ nav: object, csrf: string }>} 登录信息和 CSRF 令牌。
+ */
 export const assertLogin = async () => {
   const nav = await getNav();
   const csrf = getCookie("bili_jct");
@@ -316,6 +192,11 @@ export const assertLogin = async () => {
   return { nav, csrf };
 };
 
+/**
+ * 加载文本分享所需的当前视频信息。
+ *
+ * @returns {Promise<object>} 归一化后的视频信息。
+ */
 export const getVideoInfo = async () => {
   const bvid = getBvidFromLocation();
   if (!bvid) {
@@ -335,6 +216,11 @@ export const getVideoInfo = async () => {
   };
 };
 
+/**
+ * 在缓存仍有效时，从本地存储读取最近私信联系人。
+ *
+ * @returns {Array<object> | null} 缓存的会话；不可用时返回空值。
+ */
 const readSessionCache = () => {
   try {
     const cache = JSON.parse(localStorage.getItem(SESSION_CACHE_KEY) || "null");
@@ -347,6 +233,11 @@ const readSessionCache = () => {
   return null;
 };
 
+/**
+ * 将最近私信联系人和创建时间写入本地存储。
+ *
+ * @param {Array<object>} sessions 归一化后的最近私信联系人。
+ */
 const writeSessionCache = (sessions) => {
   localStorage.setItem(
     SESSION_CACHE_KEY,
@@ -357,11 +248,25 @@ const writeSessionCache = (sessions) => {
   );
 };
 
+/**
+ * 从会话内联信息或伴随账号信息中解析账号资料。
+ *
+ * @param {object} session B 站原始会话项。
+ * @param {object} accountInfoMap 会话接口返回的账号信息映射。
+ * @returns {object} 匹配到的账号资料。
+ */
 const getSessionAccountInfo = (session, accountInfoMap = {}) => {
   const talkerId = String(session.talker_id || "");
   return session.account_info || accountInfoMap[talkerId] || accountInfoMap[Number(talkerId)] || {};
 };
 
+/**
+ * 将 B 站私信会话项转换为可选择的用户项。
+ *
+ * @param {object} session B 站原始会话项。
+ * @param {object} accountInfoMap 会话接口返回的账号信息映射。
+ * @returns {object | null} 归一化后的用户项；不支持的会话返回 null。
+ */
 const normalizeSession = (session, accountInfoMap = {}) => {
   const account = getSessionAccountInfo(session, accountInfoMap);
   const mid = Number(session.talker_id || account.mid);
@@ -377,6 +282,12 @@ const normalizeSession = (session, accountInfoMap = {}) => {
   };
 };
 
+/**
+ * 将关系接口用户项转换为可选择的用户项。
+ *
+ * @param {object} user B 站原始关系用户。
+ * @returns {object | null} 归一化后的用户项；缺少 UID 时返回 null。
+ */
 const normalizeRelationUser = (user) => {
   const mid = Number(user.mid);
   if (!mid) {
@@ -390,6 +301,12 @@ const normalizeRelationUser = (user) => {
   };
 };
 
+/**
+ * 加载指定 B 站 UID 的公开用户资料。
+ *
+ * @param {number} mid B 站用户 id。
+ * @returns {Promise<object>} 归一化后的用户资料。
+ */
 const getUserInfo = async (mid) => {
   const nav = await getNav();
   const signedParams = signWbi({ mid }, nav.wbi_img);
@@ -408,6 +325,12 @@ const getUserInfo = async (mid) => {
   };
 };
 
+/**
+ * 为仅包含 UID 的最近会话补齐昵称和头像。
+ *
+ * @param {Array<object>} sessions 归一化后的最近会话。
+ * @returns {Promise<Array<object>>} 补齐用户资料后的最近会话。
+ */
 const enrichSessionsWithUserInfo = async (sessions) => {
   // 最近私信接口经常只返回 talker_id，这里按 UID 补齐昵称和头像。
   const sessionsNeedUserInfo = sessions.filter(
@@ -442,6 +365,12 @@ const enrichSessionsWithUserInfo = async (sessions) => {
   });
 };
 
+/**
+ * 加载最近私信联系人，可选择跳过会话缓存。
+ *
+ * @param {boolean} [forceRefresh=false] 是否忽略缓存会话。
+ * @returns {Promise<Array<object>>} 最近私信联系人。
+ */
 export const getRecentSessions = async (forceRefresh = false) => {
   if (!forceRefresh) {
     const cachedSessions = readSessionCache();
@@ -467,6 +396,12 @@ export const getRecentSessions = async (forceRefresh = false) => {
   return sessions;
 };
 
+/**
+ * 从 B 站关系接口加载一页关注或粉丝用户。
+ *
+ * @param {object} options 关系接口请求配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 关系用户分页数据。
+ */
 const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams = {} }) => {
   const result = await httpRequest({
     url: `${url}?${buildQuery({
@@ -488,6 +423,12 @@ const getRelationUsers = async ({ action, url, mid, page, pageSize, extraParams 
   };
 };
 
+/**
+ * 加载当前账号关注用户的一页数据。
+ *
+ * @param {object} options 分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 关注用户分页数据。
+ */
 export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "获取我的关注",
@@ -497,6 +438,12 @@ export const getFollowings = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) 
     pageSize,
   });
 
+/**
+ * 通过 B 站关系搜索接口搜索当前账号关注的用户。
+ *
+ * @param {object} options 搜索和分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 搜索分页数据。
+ */
 export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "搜索我的关注",
@@ -509,6 +456,12 @@ export const searchFollowings = ({ mid, keyword, page = 1, pageSize = RELATION_P
     },
   });
 
+/**
+ * 加载当前账号粉丝的一页数据。
+ *
+ * @param {object} options 分页配置。
+ * @returns {Promise<{ users: Array<object>, total: number, hasMore: boolean }>} 粉丝分页数据。
+ */
 export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =>
   getRelationUsers({
     action: "获取我的粉丝",
@@ -518,6 +471,11 @@ export const getFollowers = ({ mid, page = 1, pageSize = RELATION_PAGE_SIZE }) =
     pageSize,
   });
 
+/**
+ * 读取或创建持久化的 B 站私信设备 id。
+ *
+ * @returns {string} 发送私信接口使用的设备 id。
+ */
 const getDevId = () => {
   const cachedDevId = localStorage.getItem(DEV_ID_KEY);
   if (cachedDevId) {
@@ -531,6 +489,12 @@ const getDevId = () => {
   return devId;
 };
 
+/**
+ * 将当前视频作为纯文本私信发送。
+ *
+ * @param {object} options 发送配置。
+ * @returns {Promise<unknown>} B 站发送私信接口返回数据。
+ */
 export const sendVideoText = async ({ nav, csrf, video, receiver }) => {
   const devId = getDevId();
   const timestamp = Math.round(Date.now() / 1000);

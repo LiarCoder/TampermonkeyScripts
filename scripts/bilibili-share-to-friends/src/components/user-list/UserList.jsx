@@ -2,6 +2,9 @@ import { SCRIPT_ID } from "../../constants.js";
 import { UserListItem } from "../user-list-item/UserListItem.jsx";
 import "./style.css";
 
+/**
+ * 渲染关系用户列表的分页状态底部区域。
+ */
 export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
   <div className={`${SCRIPT_ID}-list-footer`}>
     {moreError ? (
@@ -14,6 +17,9 @@ export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => 
   </div>
 );
 
+/**
+ * 渲染可选择的 B 站用户列表，并可附带滚动分页底部区域。
+ */
 export const UserList = ({
   users,
   selectedMid = null,

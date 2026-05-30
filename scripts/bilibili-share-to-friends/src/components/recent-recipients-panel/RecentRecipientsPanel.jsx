@@ -4,6 +4,9 @@ import { getRecentSessions } from "../../api.js";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
 
+/**
+ * 渲染最近私信联系人列表。
+ */
 export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) => {
   const [recent, setRecent] = useState({
     users: [],

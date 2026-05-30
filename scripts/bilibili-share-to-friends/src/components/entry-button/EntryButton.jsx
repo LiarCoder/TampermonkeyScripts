@@ -3,6 +3,9 @@ import { render } from "preact";
 import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
+/**
+ * 渲染注入到 B 站原生分享面板中的入口按钮。
+ */
 const EntryButton = ({ onClick }) => (
   <button
     className={`${SCRIPT_ID}-entry`}
@@ -30,6 +33,9 @@ const EntryButton = ({ onClick }) => (
   </button>
 );
 
+/**
+ * 通过一次性渲染 Preact 入口按钮创建 DOM 按钮元素。
+ */
 export const createEntryButton = ({ onClick }) => {
   const container = document.createElement("div");
   render(<EntryButton onClick={onClick} />, container);
