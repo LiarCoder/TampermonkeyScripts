@@ -1,3 +1,4 @@
+export * from "./all-friends-panel/AllFriendsPanel.jsx";
 export * from "./dialog/Dialog.jsx";
 export * from "./dialog-footer/DialogFooter.jsx";
 export * from "./dialog-header/DialogHeader.jsx";
