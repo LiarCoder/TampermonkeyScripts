@@ -15,8 +15,23 @@
 }
 
 .bili-share-to-friends-relation-option input {
-  width: 14px;
-  height: 14px;
+  appearance: none;
+  box-sizing: border-box;
+  width: 15px;
+  height: 15px;
   margin: 0;
-  accent-color: #00aeec;
+  border: 1px solid #c9ccd0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-relation-option input:checked {
+  border-color: #00aeec;
+  background: radial-gradient(circle at center, #00aeec 0 43%, transparent 45%);
+}
+
+.bili-share-to-friends-relation-option input:focus-visible {
+  outline: 2px solid rgba(0, 174, 236, 0.2);
+  outline-offset: 2px;
 }
