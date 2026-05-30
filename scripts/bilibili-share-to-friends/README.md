@@ -2,6 +2,11 @@
 
 在 Bilibili 视频播放页分享面板中新增“分享给 B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户。
 
+## 安装地址
+
+- [Greasy Fork](https://greasyfork.org/zh-CN/scripts/580430-b%E7%AB%99%E8%A7%86%E9%A2%91%E5%88%86%E4%BA%AB%E7%BB%99%E5%A5%BD%E5%8F%8B)
+- [GitHub](https://github.com/LiarCoder/TampermonkeyScripts/blob/main/scripts/bilibili-share-to-friends/dist/bilibili-share-to-friends.user.js)
+
 ## 预览
 
 <details open>
