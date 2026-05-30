@@ -1,3 +1,10 @@
+/**
+ * Subscribes to SPA URL changes caused by history, popstate, or hashchange.
+ *
+ * @param {(event: { url: string, previousUrl: string }) => void} handler Change handler.
+ * @param {object} [options] Subscription options.
+ * @returns {() => void} Cleanup function.
+ */
 export const onUrlChange = (handler, { fireImmediately = false } = {}) => {
   let currentUrl = location.href;
 

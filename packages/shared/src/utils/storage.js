@@ -1,3 +1,9 @@
+/**
+ * Creates a JSON storage wrapper with optional key namespace.
+ *
+ * @param {object} [options] Storage options.
+ * @returns {{ get: Function, set: Function, remove: Function }} JSON storage adapter.
+ */
 export const createJsonStorage = ({ namespace, storage = window.localStorage } = {}) => {
   const resolveKey = (key) => (namespace ? `${namespace}.${key}` : key);
 
@@ -22,6 +28,12 @@ export const createJsonStorage = ({ namespace, storage = window.localStorage } =
   };
 };
 
+/**
+ * Creates a TTL cache backed by JSON storage.
+ *
+ * @param {object} [options] Cache options.
+ * @returns {{ get: Function, set: Function, remove: Function }} TTL cache adapter.
+ */
 export const createTtlCache = ({ namespace, ttl, storage = window.localStorage } = {}) => {
   const jsonStorage = createJsonStorage({ namespace, storage });
 

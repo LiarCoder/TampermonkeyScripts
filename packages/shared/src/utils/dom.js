@@ -1,5 +1,11 @@
 import { compact } from "./array.js";
 
+/**
+ * Creates a DOM element and applies common attributes, children, and events.
+ *
+ * @param {object} options Element creation options.
+ * @returns {HTMLElement} Created element.
+ */
 export const createElement = ({
   parent = null,
   tagName = "div",
@@ -51,6 +57,13 @@ export const createElement = ({
   return element;
 };
 
+/**
+ * Polls for an element until it exists or the timeout is reached.
+ *
+ * @param {string} selector CSS selector to query.
+ * @param {object} [options] Polling options.
+ * @returns {Promise<Element>} Matched element.
+ */
 export const waitForElement = (
   selector,
   { root = document, timeout = 10000, interval = 100 } = {}
