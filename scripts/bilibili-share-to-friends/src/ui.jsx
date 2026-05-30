@@ -7,6 +7,7 @@ import {
   createEntryButton as createShareEntryButton,
   DialogFooter,
   DialogHeader,
+  RecentRecipientsPanel,
   RecipientTabs,
   RelationFilter,
   SearchBox,
@@ -18,7 +19,6 @@ import {
   assertLogin,
   getFollowers,
   getFollowings,
-  getRecentSessions,
   getVideoInfo,
   searchFollowings,
   sendVideoText,
@@ -86,14 +86,7 @@ const updateRelationDisplayState = (relations, relation, useSearch, updater) => 
   };
 };
 
-export const ShareDialog = ({
-  dialog,
-  video,
-  nav = null,
-  sessions = [],
-  status = "",
-  error = "",
-}) => {
+export const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
   const bodyRef = useRef(null);
   const stateRef = useRef(null);
   const searchTimerRef = useRef(null);
@@ -105,12 +98,6 @@ export const ShareDialog = ({
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [recent, setRecent] = useState({
-    users: sessions,
-    error: "",
-    loading: false,
-    loaded: sessions.length > 0,
-  });
   const [relations, setRelations] = useState(createRelationsState);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
@@ -125,16 +112,10 @@ export const ShareDialog = ({
   };
 
   useEffect(() => {
-    setRecent({
-      users: sessions,
-      error: "",
-      loading: false,
-      loaded: sessions.length > 0,
-    });
     setSelectedUser(null);
     setSendError("");
     setResult(null);
-  }, [sessions]);
+  }, [video]);
 
   useEffect(() => {
     return () => {
@@ -440,12 +421,15 @@ export const ShareDialog = ({
             }
           }}
         />
-        {activeTab === "recent"
-          ? renderUsers({
-              users: recent.users,
-              emptyText: "暂无最近私信联系人。",
-            })
-          : renderRelationContent()}
+        <RecentRecipientsPanel
+          active={activeTab === "recent"}
+          selectedMid={selectedUser?.mid}
+          onSelect={(_button, user) => {
+            setSendError("");
+            setSelectedUser(user);
+          }}
+        />
+        {activeTab === "all" ? renderRelationContent() : null}
       </>
     );
   };
@@ -468,16 +452,9 @@ export const ShareDialog = ({
   );
 };
 
-const renderDialog = ({ dialog, video, nav = null, sessions = [], status = "", error = "" }) => {
+const renderDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
   render(
-    <ShareDialog
-      dialog={dialog}
-      video={video}
-      nav={nav}
-      sessions={sessions}
-      status={status}
-      error={error}
-    />,
+    <ShareDialog dialog={dialog} video={video} nav={nav} status={status} error={error} />,
     dialog
   );
 };
@@ -492,7 +469,7 @@ const openShareDialog = async () => {
   renderDialog({
     dialog,
     video: fallbackVideo,
-    status: "正在读取视频和最近私信联系人...",
+    status: "正在读取视频信息...",
   });
   if (!dialog.open) {
     dialog.showModal();
@@ -501,11 +478,10 @@ const openShareDialog = async () => {
   try {
     const { nav } = await assertLogin();
     const video = await getVideoInfo();
-    const sessions = await getRecentSessions();
     if (!dialog.isConnected || !dialog.open) {
       return;
     }
-    renderDialog({ dialog, video, nav, sessions });
+    renderDialog({ dialog, video, nav });
   } catch (error) {
     if (!dialog.isConnected || !dialog.open) {
       return;
