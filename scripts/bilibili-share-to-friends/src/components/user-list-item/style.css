@@ -14,7 +14,7 @@
 }
 
 .bili-share-to-friends-person:hover,
-.bili-share-to-friends-person[aria-selected="true"] {
+.bili-share-to-friends-person[data-selected="true"] {
   background: #f6fbff;
 }
 
@@ -65,7 +65,7 @@
   border-radius: 50%;
 }
 
-.bili-share-to-friends-person[aria-selected="true"] .bili-share-to-friends-check {
+.bili-share-to-friends-person[data-selected="true"] .bili-share-to-friends-check {
   border-color: #00aeec;
   background: radial-gradient(circle at center, #00aeec 0 45%, transparent 47%);
 }
