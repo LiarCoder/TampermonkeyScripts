@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.4
+// @version      0.4.5
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -638,7 +638,7 @@
   const RELATION_PAGE_SIZE = 20;
   const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
   const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
-  const mixinKeyEncTab = [
+  const MIXIN_KEY_ENC_TAB = [
     46,
     47,
     18,
@@ -768,7 +768,7 @@
     });
     return assertSuccess(result, action);
   };
-  const getMixinKey = (imgKey, subKey) => mixinKeyEncTab.map((index) => `${imgKey}${subKey}`[index]).join("").slice(0, 32);
+  const getMixinKey = (imgKey, subKey) => MIXIN_KEY_ENC_TAB.map((index) => `${imgKey}${subKey}`[index]).join("").slice(0, 32);
   const signWbi = (params, wbiImg) => {
     if (!(wbiImg == null ? void 0 : wbiImg.img_url) || !(wbiImg == null ? void 0 : wbiImg.sub_url)) {
       return params;
@@ -1565,28 +1565,30 @@ https://www.bilibili.com/video/${video.bvid}`
       }
     );
   };
-  const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-footer`, children: moreError ? /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-list-retry`, type: "button", onClick: onRetry, children: [
+  const UserListFooter = ({ loadingMore, hasMore, moreError, footerText, onRetry }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-footer`, children: moreError ? /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-list-retry`, type: "button", onClick: onRetry, children: [
     moreError,
     "，点击重试"
-  ] }) : /* @__PURE__ */ u$1("div", { children: loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了" }) });
+  ] }) : /* @__PURE__ */ u$1("div", { children: footerText || (loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了") }) });
   const UserList = ({
     users,
     selectedMid = null,
     loadingMore = false,
     hasMore = false,
     moreError = "",
+    footerText = "",
     showFooter = false,
     onRetry = () => {
     },
     onSelect
   }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-scroll`, "data-bili-share-to-friends-list-scroll": "true", children: [
     /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(UserListItem, { user, selected: user.mid === selectedMid, onSelect }) }, user.mid)) }),
-    showFooter ? /* @__PURE__ */ u$1(
+    showFooter || footerText ? /* @__PURE__ */ u$1(
       UserListFooter,
       {
         loadingMore,
         hasMore,
         moreError,
+        footerText,
         onRetry
       }
     ) : null,
@@ -2094,7 +2096,15 @@ https://www.bilibili.com/video/${video.bvid}`
     if (recent.users.length === 0) {
       return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
     }
-    return /* @__PURE__ */ u$1(UserList, { users: recent.users, selectedMid, onSelect });
+    return /* @__PURE__ */ u$1(
+      UserList,
+      {
+        users: recent.users,
+        selectedMid,
+        footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
+        onSelect
+      }
+    );
   };
   const tabs = [
     { value: "recent", label: "最近聊天" },

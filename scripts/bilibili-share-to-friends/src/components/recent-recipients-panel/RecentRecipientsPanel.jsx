@@ -1,6 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { getRecentSessions } from "../../api.js";
+import { SESSION_LIMIT } from "../../constants.js";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
 
@@ -68,5 +69,12 @@ export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) 
   if (recent.users.length === 0) {
     return <StateView text="暂无最近私信联系人。" />;
   }
-  return <UserList users={recent.users} selectedMid={selectedMid} onSelect={onSelect} />;
+  return (
+    <UserList
+      users={recent.users}
+      selectedMid={selectedMid}
+      footerText={`最近聊天列表只展示 ${SESSION_LIMIT} 个`}
+      onSelect={onSelect}
+    />
+  );
 };
