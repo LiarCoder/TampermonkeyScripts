@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.3
+// @version      0.4.4
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -850,25 +850,6 @@
       })
     );
   };
-  const getSessionAccountInfo = (session, accountInfoMap = {}) => {
-    const talkerId = String(session.talker_id || "");
-    return session.account_info || accountInfoMap[talkerId] || accountInfoMap[Number(talkerId)] || {};
-  };
-  const normalizeSession = (session, accountInfoMap = {}) => {
-    var _a;
-    const account = getSessionAccountInfo(session, accountInfoMap);
-    const mid = Number(session.talker_id || account.mid);
-    if (!mid || Number(session.session_type) !== 1) {
-      return null;
-    }
-    return {
-      mid,
-      name: account.name || account.uname || `UID ${mid}`,
-      avatar: normalizeImageUrl(account.pic || account.pic_url || account.face),
-      lastMessage: ((_a = session.last_msg) == null ? void 0 : _a.content) || "",
-      unreadCount: Number(session.unread_count || 0)
-    };
-  };
   const normalizeRelationUser = (user) => {
     const mid = Number(user.mid);
     if (!mid) {
@@ -881,53 +862,43 @@
       meta: `UID ${mid}`
     };
   };
-  const getUserInfo = async (mid) => {
-    const nav = await getNav();
-    const signedParams = signWbi({ mid }, nav.wbi_img);
-    const result = await httpRequest({
-      url: `https://api.bilibili.com/x/space/wbi/acc/info?${buildQuery(signedParams)}`,
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        Referer: `https://space.bilibili.com/${mid}/`
+  const getRecentTalkerIds = (sessions) => {
+    const seen = /* @__PURE__ */ new Set();
+    const talkerIds = [];
+    for (const session of sessions) {
+      const talkerId = Number(session.talker_id);
+      if (Number(session.session_type) !== 1 || !talkerId || seen.has(talkerId)) {
+        continue;
       }
-    });
-    const data = assertSuccess(result, `获取用户 ${mid} 信息`);
-    return {
-      mid: Number(data.mid || mid),
-      name: data.name || data.uname || `UID ${mid}`,
-      avatar: normalizeImageUrl(data.face)
-    };
+      seen.add(talkerId);
+      talkerIds.push(talkerId);
+      if (talkerIds.length >= SESSION_LIMIT) {
+        break;
+      }
+    }
+    return talkerIds;
   };
-  const enrichSessionsWithUserInfo = async (sessions) => {
-    const sessionsNeedUserInfo = sessions.filter(
-      (session) => !session.avatar || session.name === `UID ${session.mid}`
+  const getUserCards = async (uids) => {
+    if (uids.length === 0) {
+      return [];
+    }
+    const result = await httpRequest({
+      url: `https://api.vc.bilibili.com/account/v1/user/cards?${buildQuery({
+      uids: uids.join(",")
+    })}`
+    });
+    const data = assertSuccess(result, "获取最近私信联系人资料");
+    const userMap = new Map(
+      (data || []).map((user) => [
+        Number(user.mid),
+        {
+          mid: Number(user.mid),
+          name: user.name,
+          avatar: normalizeImageUrl(user.face)
+        }
+      ])
     );
-    if (sessionsNeedUserInfo.length === 0) {
-      return sessions;
-    }
-    const userInfoResults = [];
-    for (let index = 0; index < sessionsNeedUserInfo.length; index += 4) {
-      const batch = sessionsNeedUserInfo.slice(index, index + 4);
-      const batchResults = await Promise.allSettled(batch.map((session) => getUserInfo(session.mid)));
-      userInfoResults.push(...batchResults);
-    }
-    const userInfoMap = /* @__PURE__ */ new Map();
-    userInfoResults.forEach((result) => {
-      if (result.status === "fulfilled") {
-        userInfoMap.set(result.value.mid, result.value);
-      }
-    });
-    return sessions.map((session) => {
-      const userInfo = userInfoMap.get(session.mid);
-      if (!userInfo) {
-        return session;
-      }
-      return {
-        ...session,
-        name: userInfo.name || session.name,
-        avatar: userInfo.avatar || session.avatar
-      };
-    });
+    return uids.map((uid) => userMap.get(uid)).filter(Boolean);
   };
   const getRecentSessions = async (forceRefresh = false) => {
     if (!forceRefresh) {
@@ -944,9 +915,7 @@
     })}`
     });
     const data = assertSuccess(result, "获取最近私信联系人");
-    const sessions = await enrichSessionsWithUserInfo(
-      (data.session_list || []).map((session) => normalizeSession(session, data.account_info || {})).filter(Boolean).slice(0, SESSION_LIMIT)
-    );
+    const sessions = await getUserCards(getRecentTalkerIds(data.session_list || []));
     writeSessionCache(sessions);
     return sessions;
   };

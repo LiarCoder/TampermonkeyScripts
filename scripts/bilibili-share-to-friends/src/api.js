@@ -249,40 +249,6 @@ const writeSessionCache = (sessions) => {
 };
 
 /**
- * 从会话内联信息或伴随账号信息中解析账号资料。
- *
- * @param {object} session B 站原始会话项。
- * @param {object} accountInfoMap 会话接口返回的账号信息映射。
- * @returns {object} 匹配到的账号资料。
- */
-const getSessionAccountInfo = (session, accountInfoMap = {}) => {
-  const talkerId = String(session.talker_id || "");
-  return session.account_info || accountInfoMap[talkerId] || accountInfoMap[Number(talkerId)] || {};
-};
-
-/**
- * 将 B 站私信会话项转换为可选择的用户项。
- *
- * @param {object} session B 站原始会话项。
- * @param {object} accountInfoMap 会话接口返回的账号信息映射。
- * @returns {object | null} 归一化后的用户项；不支持的会话返回 null。
- */
-const normalizeSession = (session, accountInfoMap = {}) => {
-  const account = getSessionAccountInfo(session, accountInfoMap);
-  const mid = Number(session.talker_id || account.mid);
-  if (!mid || Number(session.session_type) !== 1) {
-    return null;
-  }
-  return {
-    mid,
-    name: account.name || account.uname || `UID ${mid}`,
-    avatar: normalizeImageUrl(account.pic || account.pic_url || account.face),
-    lastMessage: session.last_msg?.content || "",
-    unreadCount: Number(session.unread_count || 0),
-  };
-};
-
-/**
  * 将关系接口用户项转换为可选择的用户项。
  *
  * @param {object} user B 站原始关系用户。
@@ -302,67 +268,62 @@ const normalizeRelationUser = (user) => {
 };
 
 /**
- * 加载指定 B 站 UID 的公开用户资料。
+ * 从最近私信会话中提取可展示的单聊联系人 UID。
  *
- * @param {number} mid B 站用户 id。
- * @returns {Promise<object>} 归一化后的用户资料。
+ * @param {Array<object>} sessions B 站原始会话列表。
+ * @returns {Array<number>} 按最近会话顺序排列的 UID 列表。
  */
-const getUserInfo = async (mid) => {
-  const nav = await getNav();
-  const signedParams = signWbi({ mid }, nav.wbi_img);
-  const result = await httpRequest({
-    url: `https://api.bilibili.com/x/space/wbi/acc/info?${buildQuery(signedParams)}`,
-    headers: {
-      Accept: "application/json, text/plain, */*",
-      Referer: `https://space.bilibili.com/${mid}/`,
-    },
-  });
-  const data = assertSuccess(result, `获取用户 ${mid} 信息`);
-  return {
-    mid: Number(data.mid || mid),
-    name: data.name || data.uname || `UID ${mid}`,
-    avatar: normalizeImageUrl(data.face),
-  };
+const getRecentTalkerIds = (sessions) => {
+  const seen = new Set();
+  const talkerIds = [];
+
+  for (const session of sessions) {
+    const talkerId = Number(session.talker_id);
+    // 只展示一对一私聊联系人，避免群聊、系统通知等非用户会话进入收件人列表。
+    if (Number(session.session_type) !== 1 || !talkerId || seen.has(talkerId)) {
+      continue;
+    }
+    seen.add(talkerId);
+    talkerIds.push(talkerId);
+    if (talkerIds.length >= SESSION_LIMIT) {
+      break;
+    }
+  }
+
+  return talkerIds;
 };
 
 /**
- * 为仅包含 UID 的最近会话补齐昵称和头像。
+ * 批量加载 B 站 UID 对应的账号资料。
  *
- * @param {Array<object>} sessions 归一化后的最近会话。
- * @returns {Promise<Array<object>>} 补齐用户资料后的最近会话。
+ * @param {Array<number>} uids B 站用户 id 列表。
+ * @returns {Promise<Array<object>>} 按输入 UID 顺序排列的用户资料。
  */
-const enrichSessionsWithUserInfo = async (sessions) => {
-  // 最近私信接口经常只返回 talker_id，这里按 UID 补齐昵称和头像。
-  const sessionsNeedUserInfo = sessions.filter(
-    (session) => !session.avatar || session.name === `UID ${session.mid}`
+const getUserCards = async (uids) => {
+  if (uids.length === 0) {
+    return [];
+  }
+
+  const result = await httpRequest({
+    url: `https://api.vc.bilibili.com/account/v1/user/cards?${buildQuery({
+      uids: uids.join(","),
+    })}`,
+  });
+  const data = assertSuccess(result, "获取最近私信联系人资料");
+
+  // cards 接口返回数组的顺序不保证稳定，按 mid 建表后再恢复最近会话顺序。
+  const userMap = new Map(
+    (data || []).map((user) => [
+      Number(user.mid),
+      {
+        mid: Number(user.mid),
+        name: user.name,
+        avatar: normalizeImageUrl(user.face),
+      },
+    ])
   );
-  if (sessionsNeedUserInfo.length === 0) {
-    return sessions;
-  }
-  const userInfoResults = [];
-  // 分批请求，避免打开弹窗时瞬间打出过多用户资料请求。
-  for (let index = 0; index < sessionsNeedUserInfo.length; index += 4) {
-    const batch = sessionsNeedUserInfo.slice(index, index + 4);
-    const batchResults = await Promise.allSettled(batch.map((session) => getUserInfo(session.mid)));
-    userInfoResults.push(...batchResults);
-  }
-  const userInfoMap = new Map();
-  userInfoResults.forEach((result) => {
-    if (result.status === "fulfilled") {
-      userInfoMap.set(result.value.mid, result.value);
-    }
-  });
-  return sessions.map((session) => {
-    const userInfo = userInfoMap.get(session.mid);
-    if (!userInfo) {
-      return session;
-    }
-    return {
-      ...session,
-      name: userInfo.name || session.name,
-      avatar: userInfo.avatar || session.avatar,
-    };
-  });
+
+  return uids.map((uid) => userMap.get(uid)).filter(Boolean);
 };
 
 /**
@@ -386,12 +347,7 @@ export const getRecentSessions = async (forceRefresh = false) => {
     })}`,
   });
   const data = assertSuccess(result, "获取最近私信联系人");
-  const sessions = await enrichSessionsWithUserInfo(
-    (data.session_list || [])
-      .map((session) => normalizeSession(session, data.account_info || {}))
-      .filter(Boolean)
-      .slice(0, SESSION_LIMIT)
-  );
+  const sessions = await getUserCards(getRecentTalkerIds(data.session_list || []));
   writeSessionCache(sessions);
   return sessions;
 };
