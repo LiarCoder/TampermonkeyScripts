@@ -638,7 +638,7 @@
   const RELATION_PAGE_SIZE = 20;
   const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
   const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
-  const mixinKeyEncTab = [
+  const MIXIN_KEY_ENC_TAB = [
     46,
     47,
     18,
@@ -768,7 +768,7 @@
     });
     return assertSuccess(result, action);
   };
-  const getMixinKey = (imgKey, subKey) => mixinKeyEncTab.map((index) => `${imgKey}${subKey}`[index]).join("").slice(0, 32);
+  const getMixinKey = (imgKey, subKey) => MIXIN_KEY_ENC_TAB.map((index) => `${imgKey}${subKey}`[index]).join("").slice(0, 32);
   const signWbi = (params, wbiImg) => {
     if (!(wbiImg == null ? void 0 : wbiImg.img_url) || !(wbiImg == null ? void 0 : wbiImg.sub_url)) {
       return params;

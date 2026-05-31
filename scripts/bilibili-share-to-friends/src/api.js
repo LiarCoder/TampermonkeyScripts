@@ -15,7 +15,7 @@ import {
   SESSION_LIMIT,
   RELATION_PAGE_SIZE,
   SCRIPT_ID,
-  mixinKeyEncTab,
+  MIXIN_KEY_ENC_TAB,
 } from "./constants.js";
 
 let navCache = null;
@@ -122,8 +122,7 @@ const postPrivateMessage = async ({ nav, form, receiver, devId, action }) => {
  * @returns {string} 32 位混合密钥。
  */
 const getMixinKey = (imgKey, subKey) =>
-  mixinKeyEncTab
-    .map((index) => `${imgKey}${subKey}`[index])
+  MIXIN_KEY_ENC_TAB.map((index) => `${imgKey}${subKey}`[index])
     .join("")
     .slice(0, 32);
 
