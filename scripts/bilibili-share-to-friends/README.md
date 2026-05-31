@@ -65,3 +65,6 @@ pnpm shell:bilibili
 ## 鸣谢
 
 - [SocialSisterYi/bilibili-API-collect](https://github.com/SocialSisterYi/bilibili-API-collect)：提供 Bilibili Web API、私信接口和 WBI 签名相关资料。
+- [pskdje/bilibili-API-collect](https://github.com/pskdje/bilibili-API-collect)：上述仓库归档后的备份资料。
+
+该脚本参考了上述仓库中的接口说明，仅用作学习交流，不用于商业目的。如有侵权，请联系删除。
