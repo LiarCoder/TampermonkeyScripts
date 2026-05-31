@@ -5,14 +5,14 @@ import "./style.css";
 /**
  * 渲染关系用户列表的分页状态底部区域。
  */
-export const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => (
+export const UserListFooter = ({ loadingMore, hasMore, moreError, footerText, onRetry }) => (
   <div className={`${SCRIPT_ID}-list-footer`}>
     {moreError ? (
       <button className={`${SCRIPT_ID}-list-retry`} type="button" onClick={onRetry}>
         {moreError}，点击重试
       </button>
     ) : (
-      <div>{loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了"}</div>
+      <div>{footerText || (loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了")}</div>
     )}
   </div>
 );
@@ -26,6 +26,7 @@ export const UserList = ({
   loadingMore = false,
   hasMore = false,
   moreError = "",
+  footerText = "",
   showFooter = false,
   onRetry = () => {},
   onSelect,
@@ -38,11 +39,12 @@ export const UserList = ({
         </li>
       ))}
     </ul>
-    {showFooter ? (
+    {showFooter || footerText ? (
       <UserListFooter
         loadingMore={loadingMore}
         hasMore={hasMore}
         moreError={moreError}
+        footerText={footerText}
         onRetry={onRetry}
       />
     ) : null}

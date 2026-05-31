@@ -1565,28 +1565,30 @@ https://www.bilibili.com/video/${video.bvid}`
       }
     );
   };
-  const UserListFooter = ({ loadingMore, hasMore, moreError, onRetry }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-footer`, children: moreError ? /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-list-retry`, type: "button", onClick: onRetry, children: [
+  const UserListFooter = ({ loadingMore, hasMore, moreError, footerText, onRetry }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-footer`, children: moreError ? /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-list-retry`, type: "button", onClick: onRetry, children: [
     moreError,
     "，点击重试"
-  ] }) : /* @__PURE__ */ u$1("div", { children: loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了" }) });
+  ] }) : /* @__PURE__ */ u$1("div", { children: footerText || (loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了") }) });
   const UserList = ({
     users,
     selectedMid = null,
     loadingMore = false,
     hasMore = false,
     moreError = "",
+    footerText = "",
     showFooter = false,
     onRetry = () => {
     },
     onSelect
   }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-scroll`, "data-bili-share-to-friends-list-scroll": "true", children: [
     /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(UserListItem, { user, selected: user.mid === selectedMid, onSelect }) }, user.mid)) }),
-    showFooter ? /* @__PURE__ */ u$1(
+    showFooter || footerText ? /* @__PURE__ */ u$1(
       UserListFooter,
       {
         loadingMore,
         hasMore,
         moreError,
+        footerText,
         onRetry
       }
     ) : null,
@@ -2094,7 +2096,15 @@ https://www.bilibili.com/video/${video.bvid}`
     if (recent.users.length === 0) {
       return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
     }
-    return /* @__PURE__ */ u$1(UserList, { users: recent.users, selectedMid, onSelect });
+    return /* @__PURE__ */ u$1(
+      UserList,
+      {
+        users: recent.users,
+        selectedMid,
+        footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
+        onSelect
+      }
+    );
   };
   const tabs = [
     { value: "recent", label: "最近聊天" },
