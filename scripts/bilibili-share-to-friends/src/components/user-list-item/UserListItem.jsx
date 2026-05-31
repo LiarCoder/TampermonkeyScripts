@@ -1,37 +1,15 @@
-import { SCRIPT_ID } from "../../constants.js";
+import { DEFAULT_AVATAR_URL, SCRIPT_ID } from "../../constants.js";
 import "./style.css";
-
-const isLinkTarget = (target) => target instanceof Element && Boolean(target.closest("a"));
 
 /**
  * 渲染带用户主页链接的单个可选择用户行。
  */
 export const UserListItem = ({ user, selected = false, onSelect }) => {
-  const handleSelect = (event) => {
-    if (isLinkTarget(event.target)) {
-      return;
-    }
-
-    onSelect(event.currentTarget, user);
-  };
-
-  const handleKeyDown = (event) => {
-    if (isLinkTarget(event.target) || (event.key !== "Enter" && event.key !== " ")) {
-      return;
-    }
-
-    event.preventDefault();
-    onSelect(event.currentTarget, user);
-  };
-
   return (
     <div
       className={`${SCRIPT_ID}-person`}
-      role="button"
-      tabIndex={0}
-      aria-selected={String(selected)}
-      onClick={handleSelect}
-      onKeyDown={handleKeyDown}
+      data-selected={String(selected)}
+      onClick={() => onSelect(user)}
     >
       <img
         className={`${SCRIPT_ID}-avatar`}
@@ -43,7 +21,7 @@ export const UserListItem = ({ user, selected = false, onSelect }) => {
             return;
           }
           event.currentTarget.dataset.fallbackApplied = "true";
-          event.currentTarget.src = "https://static.hdslb.com/images/member/noface.gif";
+          event.currentTarget.src = DEFAULT_AVATAR_URL;
         }}
       />
       <div className={`${SCRIPT_ID}-person-main`}>

@@ -113,7 +113,7 @@
 }
 
 .bili-share-to-friends-person:hover,
-.bili-share-to-friends-person[aria-selected="true"] {
+.bili-share-to-friends-person[data-selected="true"] {
   background: #f6fbff;
 }
 
@@ -164,84 +164,84 @@
   border-radius: 50%;
 }
 
-.bili-share-to-friends-person[aria-selected="true"] .bili-share-to-friends-check {
+.bili-share-to-friends-person[data-selected="true"] .bili-share-to-friends-check {
   border-color: #00aeec;
   background: radial-gradient(circle at center, #00aeec 0 45%, transparent 47%);
 }
-.bili-share-to-friends-list-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.bili-share-to-friends-list {
-  margin: 0;
-  padding: 5px 0;
-  list-style: none;
-}
-
-.bili-share-to-friends-list-footer {
-  min-height: 24px;
-  padding: 0 14px 6px;
-  color: #9499a0;
-  font-size: 12px;
-  line-height: 24px;
-  text-align: center;
-}
-
-.bili-share-to-friends-list-retry {
-  border: 0;
-  background: transparent;
-  color: #00aeec;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-list-sentinel {
-  height: 1px;
-}
+.bili-share-to-friends-list-scroll {\r
+  flex: 1;\r
+  min-height: 0;\r
+  overflow-x: hidden;\r
+  overflow-y: auto;\r
+}\r
+\r
+.bili-share-to-friends-list {\r
+  margin: 0;\r
+  padding: 5px 0;\r
+  list-style: none;\r
+}\r
+\r
+.bili-share-to-friends-list-footer {\r
+  min-height: 24px;\r
+  padding: 0 14px 6px;\r
+  color: #9499a0;\r
+  font-size: 12px;\r
+  line-height: 24px;\r
+  text-align: center;\r
+}\r
+\r
+.bili-share-to-friends-list-retry {\r
+  border: 0;\r
+  background: transparent;\r
+  color: #00aeec;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-list-sentinel {\r
+  height: 1px;\r
+}\r
 .bili-share-to-friends-panel {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
 }
-.bili-share-to-friends-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.38);
-}
-
-.bili-share-to-friends-dialog:not([open]) {
-  display: none !important;
-  pointer-events: none !important;
-}
-
-.bili-share-to-friends-dialog {
-  display: flex;
-  flex-direction: column;
-  width: min(420px, calc(100vw - 32px));
-  height: min(620px, calc(100vh - 48px));
-  max-height: calc(100vh - 48px);
-  padding: 0;
-  border: 0;
-  border-radius: 8px;
-  background: #fff;
-  color: #18191c;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
-  overflow: hidden;
-  font:
-    14px/1.5 -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    "Microsoft YaHei",
-    sans-serif;
-}
-
-.bili-share-to-friends-dialog-content {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-}
+.bili-share-to-friends-dialog::backdrop {\r
+  background: rgba(0, 0, 0, 0.38);\r
+}\r
+\r
+.bili-share-to-friends-dialog:not([open]) {\r
+  display: none !important;\r
+  pointer-events: none !important;\r
+}\r
+\r
+.bili-share-to-friends-dialog {\r
+  display: flex;\r
+  flex-direction: column;\r
+  width: min(420px, calc(100vw - 32px));\r
+  height: min(620px, calc(100vh - 48px));\r
+  max-height: calc(100vh - 48px);\r
+  padding: 0;\r
+  border: 0;\r
+  border-radius: 8px;\r
+  background: #fff;\r
+  color: #18191c;\r
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);\r
+  overflow: hidden;\r
+  font:\r
+    14px/1.5 -apple-system,\r
+    BlinkMacSystemFont,\r
+    "Segoe UI",\r
+    "Microsoft YaHei",\r
+    sans-serif;\r
+}\r
+\r
+.bili-share-to-friends-dialog-content {\r
+  display: flex;\r
+  flex: 1 1 auto;\r
+  flex-direction: column;\r
+  min-height: 0;\r
+}\r
 .bili-share-to-friends-footer {
   display: flex;
   align-items: center;
@@ -631,6 +631,7 @@
     return url;
   };
   const SCRIPT_ID = "bili-share-to-friends";
+  const DEFAULT_AVATAR_URL = "https://static.hdslb.com/images/member/noface.gif";
   const DEV_ID_KEY = `${SCRIPT_ID}.dev_id`;
   const SESSION_CACHE_KEY = `${SCRIPT_ID}.recent_sessions.v2`;
   const SESSION_CACHE_TTL = 5 * 60 * 1e3;
@@ -1505,30 +1506,13 @@ https://www.bilibili.com/video/${video.bvid}`
     ] });
   };
   const StateView = ({ text, isError = false }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-state${isError ? ` ${SCRIPT_ID}-state-error` : ""}`, children: text });
-  const isLinkTarget = (target) => target instanceof Element && Boolean(target.closest("a"));
   const UserListItem = ({ user, selected = false, onSelect }) => {
-    const handleSelect = (event) => {
-      if (isLinkTarget(event.target)) {
-        return;
-      }
-      onSelect(event.currentTarget, user);
-    };
-    const handleKeyDown = (event) => {
-      if (isLinkTarget(event.target) || event.key !== "Enter" && event.key !== " ") {
-        return;
-      }
-      event.preventDefault();
-      onSelect(event.currentTarget, user);
-    };
     return /* @__PURE__ */ u$1(
       "div",
       {
         className: `${SCRIPT_ID}-person`,
-        role: "button",
-        tabIndex: 0,
-        "aria-selected": String(selected),
-        onClick: handleSelect,
-        onKeyDown: handleKeyDown,
+        "data-selected": String(selected),
+        onClick: () => onSelect(user),
         children: [
           /* @__PURE__ */ u$1(
             "img",
@@ -1542,7 +1526,7 @@ https://www.bilibili.com/video/${video.bvid}`
                   return;
                 }
                 event.currentTarget.dataset.fallbackApplied = "true";
-                event.currentTarget.src = "https://static.hdslb.com/images/member/noface.gif";
+                event.currentTarget.src = DEFAULT_AVATAR_URL;
               }
             }
           ),
@@ -2170,7 +2154,7 @@ https://www.bilibili.com/video/${video.bvid}`
       },
       [activeTab, resetSelection]
     );
-    const handleUserSelect = q((_button, user) => {
+    const handleUserSelect = q((user) => {
       setSendError("");
       setSelectedUser(user);
     }, []);

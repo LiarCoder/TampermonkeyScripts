@@ -1,6 +1,9 @@
 /** 脚本命名空间，用于 DOM 类名、存储键和日志。 */
 export const SCRIPT_ID = "bili-share-to-friends";
 
+/** 用户头像加载失败时使用的 B 站默认头像。 */
+export const DEFAULT_AVATAR_URL = "https://static.hdslb.com/images/member/noface.gif";
+
 /** 生成的 B 站私信设备 id 对应的本地存储键。 */
 export const DEV_ID_KEY = `${SCRIPT_ID}.dev_id`;
 

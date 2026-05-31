@@ -47,7 +47,7 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     [activeTab, resetSelection]
   );
 
-  const handleUserSelect = useCallback((_button, user) => {
+  const handleUserSelect = useCallback((user) => {
     setSendError("");
     setSelectedUser(user);
   }, []);
