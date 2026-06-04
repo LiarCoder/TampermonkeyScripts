@@ -220,10 +220,17 @@ export const AllFriendsPanel = ({
   }, [debouncedSearch]);
 
   useEffect(() => {
-    if (active) {
+    if (active && !displayState.loaded && !displayState.error && !displayLoading.loading) {
       loadRelationUsers(activeRelation);
     }
-  }, [active, activeRelation, loadRelationUsers]);
+  }, [
+    active,
+    activeRelation,
+    displayLoading.loading,
+    displayState.error,
+    displayState.loaded,
+    loadRelationUsers,
+  ]);
 
   useEffect(() => {
     loadMoreObserverRef.current?.disconnect();
@@ -323,7 +330,6 @@ export const AllFriendsPanel = ({
           }
           resetSelection();
           setActiveRelation(relation);
-          loadRelationUsers(relation);
         }}
       />
       <SearchBox
