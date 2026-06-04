@@ -1787,10 +1787,7 @@ https://www.bilibili.com/video/${video.bvid}`
       var _a, _b;
       (_a = loadMoreObserverRef.current) == null ? void 0 : _a.disconnect();
       loadMoreObserverRef.current = null;
-      if (!active) {
-        return;
-      }
-      if (!displayState.hasMore || displayLoading.loading || displayLoading.loadingMore) {
+      if (!active || !displayState.loaded || !displayState.hasMore || displayState.moreError || displayLoading.loading || displayLoading.loadingMore) {
         return;
       }
       const scrollRoot = (_b = panelRef.current) == null ? void 0 : _b.querySelector(LIST_SCROLL_SELECTOR);
@@ -1815,6 +1812,8 @@ https://www.bilibili.com/video/${video.bvid}`
       displayLoading.loading,
       displayLoading.loadingMore,
       displayState.hasMore,
+      displayState.loaded,
+      displayState.moreError,
       loadRelationUsers
     ]);
     const resetSelection = () => {

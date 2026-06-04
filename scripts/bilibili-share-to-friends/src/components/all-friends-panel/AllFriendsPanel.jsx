@@ -235,10 +235,14 @@ export const AllFriendsPanel = ({
   useEffect(() => {
     loadMoreObserverRef.current?.disconnect();
     loadMoreObserverRef.current = null;
-    if (!active) {
-      return;
-    }
-    if (!displayState.hasMore || displayLoading.loading || displayLoading.loadingMore) {
+    if (
+      !active ||
+      !displayState.loaded ||
+      !displayState.hasMore ||
+      displayState.moreError ||
+      displayLoading.loading ||
+      displayLoading.loadingMore
+    ) {
       return;
     }
     const scrollRoot = panelRef.current?.querySelector(LIST_SCROLL_SELECTOR);
@@ -263,6 +267,8 @@ export const AllFriendsPanel = ({
     displayLoading.loading,
     displayLoading.loadingMore,
     displayState.hasMore,
+    displayState.loaded,
+    displayState.moreError,
     loadRelationUsers,
   ]);
 
