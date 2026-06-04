@@ -1614,6 +1614,11 @@ https://www.bilibili.com/video/${video.bvid}`
     const loadMoreObserverRef = A(null);
     const loadingKeysRef = A(/* @__PURE__ */ new Set());
     const pendingScrollTopRef = A(null);
+    const scrollTopMapRef = A({
+      following: 0,
+      followers: 0,
+      followingSearch: 0
+    });
     const [activeRelation, setActiveRelation] = d("following");
     const [searchTerm, setSearchTerm] = d("");
     const [relations, setRelations] = d(createRelationsState);
@@ -1652,6 +1657,11 @@ https://www.bilibili.com/video/${video.bvid}`
       setSearchTerm("");
       setRelations(createRelationsState());
       setFollowingSearch(createPageState());
+      scrollTopMapRef.current = {
+        following: 0,
+        followers: 0,
+        followingSearch: 0
+      };
       onSelectionReset();
     }, [mid, onSelectionReset]);
     _(() => {
@@ -1673,6 +1683,9 @@ https://www.bilibili.com/video/${video.bvid}`
       },
       []
     );
+    const saveCurrentScrollTop = q(() => {
+      scrollTopMapRef.current[displaySource] = getListScrollTop();
+    }, [displaySource, getListScrollTop]);
     const setPageState = q((source, updater) => {
       if (source === "followingSearch") {
         setFollowingSearch(updater);
@@ -1816,12 +1829,23 @@ https://www.bilibili.com/video/${video.bvid}`
       displayState.moreError,
       loadRelationUsers
     ]);
+    _(() => {
+      var _a;
+      if (!active) {
+        return;
+      }
+      const scrollRoot = (_a = panelRef.current) == null ? void 0 : _a.querySelector(LIST_SCROLL_SELECTOR);
+      if (scrollRoot) {
+        scrollRoot.scrollTop = scrollTopMapRef.current[displaySource] ?? 0;
+      }
+    }, [active, displaySource]);
     const resetSelection = () => {
       onSelectionReset();
     };
     const scheduleSearch = (value, { immediate = false } = {}) => {
       const previousKeyword = searchTerm.trim();
       const nextKeyword = value.trim();
+      saveCurrentScrollTop();
       setSearchTerm(value);
       if (previousKeyword === nextKeyword) {
         return;
@@ -1877,6 +1901,7 @@ https://www.bilibili.com/video/${video.bvid}`
               return;
             }
             resetSelection();
+            saveCurrentScrollTop();
             setActiveRelation(relation);
           }
         }

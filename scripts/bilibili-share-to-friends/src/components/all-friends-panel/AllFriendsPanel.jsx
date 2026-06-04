@@ -44,6 +44,11 @@ export const AllFriendsPanel = ({
   const loadMoreObserverRef = useRef(null);
   const loadingKeysRef = useRef(new Set());
   const pendingScrollTopRef = useRef(null);
+  const scrollTopMapRef = useRef({
+    following: 0,
+    followers: 0,
+    followingSearch: 0,
+  });
   const [activeRelation, setActiveRelation] = useState("following");
   const [searchTerm, setSearchTerm] = useState("");
   const [relations, setRelations] = useState(createRelationsState);
@@ -85,6 +90,11 @@ export const AllFriendsPanel = ({
     setSearchTerm("");
     setRelations(createRelationsState());
     setFollowingSearch(createPageState());
+    scrollTopMapRef.current = {
+      following: 0,
+      followers: 0,
+      followingSearch: 0,
+    };
     onSelectionReset();
   }, [mid, onSelectionReset]);
 
@@ -104,6 +114,10 @@ export const AllFriendsPanel = ({
     () => panelRef.current?.querySelector(LIST_SCROLL_SELECTOR)?.scrollTop ?? 0,
     []
   );
+
+  const saveCurrentScrollTop = useCallback(() => {
+    scrollTopMapRef.current[displaySource] = getListScrollTop();
+  }, [displaySource, getListScrollTop]);
 
   const setPageState = useCallback((source, updater) => {
     if (source === "followingSearch") {
@@ -272,6 +286,16 @@ export const AllFriendsPanel = ({
     loadRelationUsers,
   ]);
 
+  useLayoutEffect(() => {
+    if (!active) {
+      return;
+    }
+    const scrollRoot = panelRef.current?.querySelector(LIST_SCROLL_SELECTOR);
+    if (scrollRoot) {
+      scrollRoot.scrollTop = scrollTopMapRef.current[displaySource] ?? 0;
+    }
+  }, [active, displaySource]);
+
   const resetSelection = () => {
     onSelectionReset();
   };
@@ -279,6 +303,7 @@ export const AllFriendsPanel = ({
   const scheduleSearch = (value, { immediate = false } = {}) => {
     const previousKeyword = searchTerm.trim();
     const nextKeyword = value.trim();
+    saveCurrentScrollTop();
     setSearchTerm(value);
     if (previousKeyword === nextKeyword) {
       return;
@@ -335,6 +360,7 @@ export const AllFriendsPanel = ({
             return;
           }
           resetSelection();
+          saveCurrentScrollTop();
           setActiveRelation(relation);
         }}
       />
