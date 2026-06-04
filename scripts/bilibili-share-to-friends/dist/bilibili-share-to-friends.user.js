@@ -16,50 +16,50 @@
 // @run-at       document-end
 // ==/UserScript==
 
-(n=>{if(typeof GM_addStyle=="function"){GM_addStyle(n);return}const e=document.createElement("style");e.textContent=n,document.head.append(e)})(` .bili-share-to-friends-body {
+(n=>{if(typeof GM_addStyle=="function"){GM_addStyle(n);return}const r=document.createElement("style");r.textContent=n,document.head.append(r)})(` .bili-share-to-friends-body {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
 }
-.bili-share-to-friends-relation-filter {
-  display: flex;
-  gap: 18px;
-  flex: 0 0 auto;
-  padding: 7px 14px 1px;
-  color: #18191c;
-}
-
-.bili-share-to-friends-relation-option {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-relation-option input {
-  appearance: none;
-  box-sizing: border-box;
-  width: 15px;
-  height: 15px;
-  margin: 0;
-  border: 1px solid #c9ccd0;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-relation-option input:checked {
-  border-color: #00aeec;
-  background: radial-gradient(circle at center, #00aeec 0 43%, transparent 45%);
-}
-
-.bili-share-to-friends-relation-option input:focus-visible {
-  outline: 2px solid rgba(0, 174, 236, 0.2);
-  outline-offset: 2px;
-}
+.bili-share-to-friends-relation-filter {\r
+  display: flex;\r
+  gap: 18px;\r
+  flex: 0 0 auto;\r
+  padding: 7px 14px 1px;\r
+  color: #18191c;\r
+}\r
+\r
+.bili-share-to-friends-relation-option {\r
+  display: inline-flex;\r
+  align-items: center;\r
+  gap: 6px;\r
+  font-size: 13px;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-relation-option input {\r
+  appearance: none;\r
+  box-sizing: border-box;\r
+  width: 15px;\r
+  height: 15px;\r
+  margin: 0;\r
+  border: 1px solid #c9ccd0;\r
+  border-radius: 50%;\r
+  background: #fff;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-relation-option input:checked {\r
+  border-color: #00aeec;\r
+  background: radial-gradient(circle at center, #00aeec 0 43%, transparent 45%);\r
+}\r
+\r
+.bili-share-to-friends-relation-option input:focus-visible {\r
+  outline: 2px solid rgba(0, 174, 236, 0.2);\r
+  outline-offset: 2px;\r
+}\r
 .bili-share-to-friends-search {
   flex: 0 0 auto;
   padding: 6px 14px 3px;
@@ -97,77 +97,77 @@
 .bili-share-to-friends-state-error {
   color: #d03050;
 }
-.bili-share-to-friends-person {
-  display: grid;
-  grid-template-columns: 36px 1fr auto;
-  align-items: center;
-  gap: 9px;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 8px 14px;
-  border: 0;
-  background: #fff;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-person:hover,
-.bili-share-to-friends-person[data-selected="true"] {
-  background: #f6fbff;
-}
-
-.bili-share-to-friends-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: #e3e5e7;
-}
-
-.bili-share-to-friends-person-main {
-  min-width: 0;
-}
-
-.bili-share-to-friends-name {
-  display: inline-block;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 14px;
-  color: #18191c;
-  text-decoration: none;
-  vertical-align: top;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.bili-share-to-friends-name:hover,
-.bili-share-to-friends-name:focus-visible {
-  color: #00aeec;
-}
-
-.bili-share-to-friends-meta {
-  min-width: 0;
-  margin-top: 1px;
-  color: #9499a0;
-  font-size: 12px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.bili-share-to-friends-check {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #c9ccd0;
-  border-radius: 50%;
-}
-
-.bili-share-to-friends-person[data-selected="true"] .bili-share-to-friends-check {
-  border-color: #00aeec;
-  background: radial-gradient(circle at center, #00aeec 0 45%, transparent 47%);
-}
+.bili-share-to-friends-person {\r
+  display: grid;\r
+  grid-template-columns: 36px 1fr auto;\r
+  align-items: center;\r
+  gap: 9px;\r
+  box-sizing: border-box;\r
+  width: 100%;\r
+  padding: 8px 14px;\r
+  border: 0;\r
+  background: #fff;\r
+  color: inherit;\r
+  text-align: left;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-person:hover,\r
+.bili-share-to-friends-person[data-selected="true"] {\r
+  background: #f6fbff;\r
+}\r
+\r
+.bili-share-to-friends-avatar {\r
+  width: 36px;\r
+  height: 36px;\r
+  border-radius: 50%;\r
+  object-fit: cover;\r
+  background: #e3e5e7;\r
+}\r
+\r
+.bili-share-to-friends-person-main {\r
+  min-width: 0;\r
+}\r
+\r
+.bili-share-to-friends-name {\r
+  display: inline-block;\r
+  min-width: 0;\r
+  max-width: 100%;\r
+  font-size: 14px;\r
+  color: #18191c;\r
+  text-decoration: none;\r
+  vertical-align: top;\r
+  overflow: hidden;\r
+  white-space: nowrap;\r
+  text-overflow: ellipsis;\r
+}\r
+\r
+.bili-share-to-friends-name:hover,\r
+.bili-share-to-friends-name:focus-visible {\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-meta {\r
+  min-width: 0;\r
+  margin-top: 1px;\r
+  color: #9499a0;\r
+  font-size: 12px;\r
+  overflow: hidden;\r
+  white-space: nowrap;\r
+  text-overflow: ellipsis;\r
+}\r
+\r
+.bili-share-to-friends-check {\r
+  width: 18px;\r
+  height: 18px;\r
+  border: 1px solid #c9ccd0;\r
+  border-radius: 50%;\r
+}\r
+\r
+.bili-share-to-friends-person[data-selected="true"] .bili-share-to-friends-check {\r
+  border-color: #00aeec;\r
+  background: radial-gradient(circle at center, #00aeec 0 45%, transparent 47%);\r
+}\r
 .bili-share-to-friends-list-scroll {\r
   flex: 1;\r
   min-height: 0;\r
@@ -200,12 +200,12 @@
 .bili-share-to-friends-list-sentinel {\r
   height: 1px;\r
 }\r
-.bili-share-to-friends-panel {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-}
+.bili-share-to-friends-panel {\r
+  display: flex;\r
+  flex: 1 1 auto;\r
+  flex-direction: column;\r
+  min-height: 0;\r
+}\r
 .bili-share-to-friends-dialog::backdrop {\r
   background: rgba(0, 0, 0, 0.38);\r
 }\r
@@ -369,35 +369,35 @@
   width: 22px;
   height: 22px;
 }
-.bili-share-to-friends-tabs {
-  display: flex;
-  gap: 8px;
-  flex: 0 0 auto;
-  padding: 7px 14px 8px;
-  background: #fff;
-}
-
-.bili-share-to-friends-tab {
-  height: 28px;
-  padding: 0 10px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #61666d;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-tab:hover {
-  color: #00aeec;
-}
-
-.bili-share-to-friends-tab[aria-selected="true"] {
-  color: #00aeec;
-  border-color: #b8e8f8;
-  background: #f6fbff;
-  font-weight: 600;
-}
+.bili-share-to-friends-tabs {\r
+  display: flex;\r
+  gap: 8px;\r
+  flex: 0 0 auto;\r
+  padding: 7px 14px 8px;\r
+  background: #fff;\r
+}\r
+\r
+.bili-share-to-friends-tab {\r
+  height: 28px;\r
+  padding: 0 10px;\r
+  border: 1px solid transparent;\r
+  border-radius: 4px;\r
+  background: transparent;\r
+  color: #61666d;\r
+  font-size: 13px;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-tab:hover {\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-tab[aria-selected="true"] {\r
+  color: #00aeec;\r
+  border-color: #b8e8f8;\r
+  background: #f6fbff;\r
+  font-weight: 600;\r
+}\r
 .bili-share-to-friends-video {
   display: grid;
   grid-template-columns: 80px 1fr;
@@ -1614,6 +1614,11 @@ https://www.bilibili.com/video/${video.bvid}`
     const loadMoreObserverRef = A(null);
     const loadingKeysRef = A(/* @__PURE__ */ new Set());
     const pendingScrollTopRef = A(null);
+    const scrollTopMapRef = A({
+      following: 0,
+      followers: 0,
+      followingSearch: 0
+    });
     const [activeRelation, setActiveRelation] = d("following");
     const [searchTerm, setSearchTerm] = d("");
     const [relations, setRelations] = d(createRelationsState);
@@ -1652,6 +1657,11 @@ https://www.bilibili.com/video/${video.bvid}`
       setSearchTerm("");
       setRelations(createRelationsState());
       setFollowingSearch(createPageState());
+      scrollTopMapRef.current = {
+        following: 0,
+        followers: 0,
+        followingSearch: 0
+      };
       onSelectionReset();
     }, [mid, onSelectionReset]);
     _(() => {
@@ -1673,6 +1683,9 @@ https://www.bilibili.com/video/${video.bvid}`
       },
       []
     );
+    const saveCurrentScrollTop = q(() => {
+      scrollTopMapRef.current[displaySource] = getListScrollTop();
+    }, [displaySource, getListScrollTop]);
     const setPageState = q((source, updater) => {
       if (source === "followingSearch") {
         setFollowingSearch(updater);
@@ -1772,18 +1785,22 @@ https://www.bilibili.com/video/${video.bvid}`
       return () => debouncedSearch.cancel();
     }, [debouncedSearch]);
     y(() => {
-      if (active) {
+      if (active && !displayState.loaded && !displayState.error && !displayLoading.loading) {
         loadRelationUsers(activeRelation);
       }
-    }, [active, activeRelation, loadRelationUsers]);
+    }, [
+      active,
+      activeRelation,
+      displayLoading.loading,
+      displayState.error,
+      displayState.loaded,
+      loadRelationUsers
+    ]);
     y(() => {
       var _a, _b;
       (_a = loadMoreObserverRef.current) == null ? void 0 : _a.disconnect();
       loadMoreObserverRef.current = null;
-      if (!active) {
-        return;
-      }
-      if (!displayState.hasMore || displayLoading.loading || displayLoading.loadingMore) {
+      if (!active || !displayState.loaded || !displayState.hasMore || displayState.moreError || displayLoading.loading || displayLoading.loadingMore) {
         return;
       }
       const scrollRoot = (_b = panelRef.current) == null ? void 0 : _b.querySelector(LIST_SCROLL_SELECTOR);
@@ -1808,14 +1825,27 @@ https://www.bilibili.com/video/${video.bvid}`
       displayLoading.loading,
       displayLoading.loadingMore,
       displayState.hasMore,
+      displayState.loaded,
+      displayState.moreError,
       loadRelationUsers
     ]);
+    _(() => {
+      var _a;
+      if (!active) {
+        return;
+      }
+      const scrollRoot = (_a = panelRef.current) == null ? void 0 : _a.querySelector(LIST_SCROLL_SELECTOR);
+      if (scrollRoot) {
+        scrollRoot.scrollTop = scrollTopMapRef.current[displaySource] ?? 0;
+      }
+    }, [active, displaySource]);
     const resetSelection = () => {
       onSelectionReset();
     };
     const scheduleSearch = (value, { immediate = false } = {}) => {
       const previousKeyword = searchTerm.trim();
       const nextKeyword = value.trim();
+      saveCurrentScrollTop();
       setSearchTerm(value);
       if (previousKeyword === nextKeyword) {
         return;
@@ -1871,8 +1901,8 @@ https://www.bilibili.com/video/${video.bvid}`
               return;
             }
             resetSelection();
+            saveCurrentScrollTop();
             setActiveRelation(relation);
-            loadRelationUsers(relation);
           }
         }
       ),
