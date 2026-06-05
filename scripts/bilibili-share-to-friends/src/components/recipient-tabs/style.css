@@ -27,3 +27,27 @@
   background: #f6fbff;
   font-weight: 600;
 }
+
+.bili-share-to-friends-clear-selection {
+  height: 28px;
+  margin-left: auto;
+  padding: 0 10px;
+  border: 1px solid #fb7299;
+  border-radius: 4px;
+  background: #fff;
+  color: #fb7299;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-clear-selection:hover {
+  background: #fff4f7;
+}
+
+.bili-share-to-friends-clear-selection:disabled {
+  border-color: #e3e5e7;
+  background: #f6f7f8;
+  color: #c9ccd0;
+  cursor: not-allowed;
+}

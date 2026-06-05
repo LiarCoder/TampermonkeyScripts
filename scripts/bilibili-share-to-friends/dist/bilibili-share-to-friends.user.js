@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.6
+// @version      0.4.7
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -421,35 +421,59 @@
   width: 22px;
   height: 22px;
 }
-.bili-share-to-friends-tabs {\r
-  display: flex;\r
-  gap: 8px;\r
-  flex: 0 0 auto;\r
-  padding: 7px 14px 8px;\r
-  background: #fff;\r
-}\r
-\r
-.bili-share-to-friends-tab {\r
-  height: 28px;\r
-  padding: 0 10px;\r
-  border: 1px solid transparent;\r
-  border-radius: 4px;\r
-  background: transparent;\r
-  color: #61666d;\r
-  font-size: 13px;\r
-  cursor: pointer;\r
-}\r
-\r
-.bili-share-to-friends-tab:hover {\r
-  color: #00aeec;\r
-}\r
-\r
-.bili-share-to-friends-tab[aria-selected="true"] {\r
-  color: #00aeec;\r
-  border-color: #b8e8f8;\r
-  background: #f6fbff;\r
-  font-weight: 600;\r
-}\r
+.bili-share-to-friends-tabs {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+  padding: 7px 14px 8px;
+  background: #fff;
+}
+
+.bili-share-to-friends-tab {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #61666d;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-tab:hover {
+  color: #00aeec;
+}
+
+.bili-share-to-friends-tab[aria-selected="true"] {
+  color: #00aeec;
+  border-color: #b8e8f8;
+  background: #f6fbff;
+  font-weight: 600;
+}
+
+.bili-share-to-friends-clear-selection {
+  height: 28px;
+  margin-left: auto;
+  padding: 0 10px;
+  border: 1px solid #fb7299;
+  border-radius: 4px;
+  background: #fff;
+  color: #fb7299;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bili-share-to-friends-clear-selection:hover {
+  background: #fff4f7;
+}
+
+.bili-share-to-friends-clear-selection:disabled {
+  border-color: #e3e5e7;
+  background: #f6f7f8;
+  color: #c9ccd0;
+  cursor: not-allowed;
+}
 .bili-share-to-friends-send-result {
   display: flex;
   flex-direction: column;
@@ -2330,17 +2354,29 @@ https://www.bilibili.com/video/${video.bvid}`
     { value: "recent", label: "最近聊天" },
     { value: "all", label: "全部好友" }
   ];
-  const RecipientTabs = ({ activeTab, onChange }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-tabs`, children: tabs.map((tab) => /* @__PURE__ */ u$1(
-    "button",
-    {
-      className: `${SCRIPT_ID}-tab`,
-      type: "button",
-      "aria-selected": String(activeTab === tab.value),
-      onClick: () => onChange(tab.value),
-      children: tab.label
-    },
-    tab.value
-  )) });
+  const RecipientTabs = ({ activeTab, onChange, hasSelection = false, onClearSelection }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-tabs`, children: [
+    tabs.map((tab) => /* @__PURE__ */ u$1(
+      "button",
+      {
+        className: `${SCRIPT_ID}-tab`,
+        type: "button",
+        "aria-selected": String(activeTab === tab.value),
+        onClick: () => onChange(tab.value),
+        children: tab.label
+      },
+      tab.value
+    )),
+    /* @__PURE__ */ u$1(
+      "button",
+      {
+        className: `${SCRIPT_ID}-clear-selection`,
+        type: "button",
+        disabled: !hasSelection,
+        onClick: onClearSelection,
+        children: "清空所选"
+      }
+    )
+  ] });
   const STATUS_TEXT = {
     pending: "等待发送",
     sending: "正在发送...",
@@ -2496,7 +2532,15 @@ https://www.bilibili.com/video/${video.bvid}`
       }
       return /* @__PURE__ */ u$1(S, { children: [
         sendError ? /* @__PURE__ */ u$1(StateView, { text: sendError, isError: true }) : null,
-        /* @__PURE__ */ u$1(RecipientTabs, { activeTab, onChange: handleTabChange }),
+        /* @__PURE__ */ u$1(
+          RecipientTabs,
+          {
+            activeTab,
+            onChange: handleTabChange,
+            hasSelection: selectedUsers.length > 0,
+            onClearSelection: resetSelection
+          }
+        ),
         /* @__PURE__ */ u$1(
           RecentRecipientsPanel,
           {
