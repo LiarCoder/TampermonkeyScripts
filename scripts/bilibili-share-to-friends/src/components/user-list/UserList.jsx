@@ -22,7 +22,7 @@ export const UserListFooter = ({ loadingMore, hasMore, moreError, footerText, on
  */
 export const UserList = ({
   users,
-  selectedMid = null,
+  selectedMids = [],
   loadingMore = false,
   hasMore = false,
   moreError = "",
@@ -35,7 +35,11 @@ export const UserList = ({
     <ul className={`${SCRIPT_ID}-list`}>
       {users.map((user) => (
         <li key={user.mid}>
-          <UserListItem user={user} selected={user.mid === selectedMid} onSelect={onSelect} />
+          <UserListItem
+            user={user}
+            selected={selectedMids.some((mid) => String(mid) === String(user.mid))}
+            onSelect={onSelect}
+          />
         </li>
       ))}
     </ul>

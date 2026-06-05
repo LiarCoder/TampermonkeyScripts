@@ -264,6 +264,20 @@
   border-top: 1px solid #e3e5e7;
 }
 
+.bili-share-to-friends-footer-notice {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #61666d;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-footer-notice[data-error="true"] {
+  color: #d03050;
+}
+
 .bili-share-to-friends-btn {
   min-width: 76px;
   height: 30px;
@@ -747,6 +761,7 @@
   const SESSION_CACHE_KEY = `${SCRIPT_ID}.recent_sessions.v2`;
   const SESSION_CACHE_TTL = 5 * 60 * 1e3;
   const SESSION_LIMIT = 20;
+  const MAX_SELECTED_USERS = 5;
   const RELATION_PAGE_SIZE = 20;
   const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
   const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
@@ -1666,7 +1681,7 @@ https://www.bilibili.com/video/${video.bvid}`
   ] }) : /* @__PURE__ */ u$1("div", { children: footerText || (loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了") }) });
   const UserList = ({
     users,
-    selectedMid = null,
+    selectedMids = [],
     loadingMore = false,
     hasMore = false,
     moreError = "",
@@ -1676,7 +1691,14 @@ https://www.bilibili.com/video/${video.bvid}`
     },
     onSelect
   }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-scroll`, "data-bili-share-to-friends-list-scroll": "true", children: [
-    /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(UserListItem, { user, selected: user.mid === selectedMid, onSelect }) }, user.mid)) }),
+    /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(
+      UserListItem,
+      {
+        user,
+        selected: selectedMids.some((mid) => String(mid) === String(user.mid)),
+        onSelect
+      }
+    ) }, user.mid)) }),
     showFooter || footerText ? /* @__PURE__ */ u$1(
       UserListFooter,
       {
@@ -1715,7 +1737,7 @@ https://www.bilibili.com/video/${video.bvid}`
   const AllFriendsPanel = ({
     active,
     mid,
-    selectedMid = null,
+    selectedMids = [],
     onSelect,
     onSelectionReset = () => {
     }
@@ -1950,9 +1972,6 @@ https://www.bilibili.com/video/${video.bvid}`
         scrollRoot.scrollTop = scrollTopMapRef.current[displaySource] ?? 0;
       }
     }, [active, displaySource]);
-    const resetSelection = () => {
-      onSelectionReset();
-    };
     const scheduleSearch = (value, { immediate = false } = {}) => {
       const previousKeyword = searchTerm.trim();
       const nextKeyword = value.trim();
@@ -1960,9 +1979,6 @@ https://www.bilibili.com/video/${video.bvid}`
       setSearchTerm(value);
       if (previousKeyword === nextKeyword) {
         return;
-      }
-      if (previousKeyword || nextKeyword) {
-        resetSelection();
       }
       if (immediate) {
         debouncedSearch.cancel();
@@ -1989,7 +2005,7 @@ https://www.bilibili.com/video/${video.bvid}`
         UserList,
         {
           users: displayUsers,
-          selectedMid,
+          selectedMids,
           hasMore: displayState.hasMore,
           loadingMore: displayLoading.loadingMore,
           moreError: displayState.moreError,
@@ -2013,7 +2029,6 @@ https://www.bilibili.com/video/${video.bvid}`
                 if (activeRelation === relation) {
                   return;
                 }
-                resetSelection();
                 saveCurrentScrollTop();
                 setActiveRelation(relation);
               }
@@ -2060,7 +2075,8 @@ https://www.bilibili.com/video/${video.bvid}`
   };
   const DialogFooter = ({
     video,
-    selectedUser,
+    maxSelectedUsers,
+    selectedUsers = [],
     sendStage = "selecting",
     onClose,
     onContinue = () => {
@@ -2069,43 +2085,66 @@ https://www.bilibili.com/video/${video.bvid}`
     },
     onSendStart = () => {
     },
-    onSendSuccess = () => {
+    onSendProgress = () => {
     },
-    onSendFailure = () => {
+    onSendComplete = () => {
     },
     onSendError = () => {
     }
   }) => {
     const [sending, setSending] = d(false);
+    const selectedCount = selectedUsers.length;
+    const selectionLimitExceeded = selectedCount > maxSelectedUsers;
+    const sendDisabled = sending || selectedCount === 0 || selectionLimitExceeded;
+    const selectionNotice = selectionLimitExceeded ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。` : selectedCount > 0 ? `已选择 ${selectedCount} 个` : "";
     y(() => {
       onSendingChange(sending);
     }, [onSendingChange, sending]);
     const handleSend = async () => {
-      if (!selectedUser || sending) {
+      if (sendDisabled) {
         return;
       }
+      const receivers = [...selectedUsers];
       setSending(true);
       onSendError("");
-      onSendStart(selectedUser);
+      onSendStart(receivers);
       try {
         const login = await assertLogin();
-        await sendVideoText({
-          nav: login.nav,
-          csrf: login.csrf,
-          video,
-          receiver: selectedUser
-        });
-        onSendSuccess({
-          user: selectedUser,
-          status: "success"
-        });
+        for (const receiver of receivers) {
+          onSendProgress({
+            user: receiver,
+            status: "sending",
+            error: ""
+          });
+          try {
+            await sendVideoText({
+              nav: login.nav,
+              csrf: login.csrf,
+              video,
+              receiver
+            });
+            onSendProgress({
+              user: receiver,
+              status: "success"
+            });
+          } catch (sendError) {
+            onSendProgress({
+              user: receiver,
+              status: "failed",
+              error: sendError.message
+            });
+          }
+        }
       } catch (sendError) {
-        onSendFailure({
-          user: selectedUser,
-          status: "failed",
-          error: sendError.message
+        receivers.forEach((receiver) => {
+          onSendProgress({
+            user: receiver,
+            status: "failed",
+            error: sendError.message
+          });
         });
       } finally {
+        onSendComplete();
         setSending(false);
       }
     };
@@ -2130,13 +2169,14 @@ https://www.bilibili.com/video/${video.bvid}`
       ] });
     }
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+      selectionNotice ? /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer-notice`, "data-error": String(selectionLimitExceeded), children: selectionNotice }) : null,
       /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: sending, onClick: onClose, children: "取消" }),
       /* @__PURE__ */ u$1(
         "button",
         {
           className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
           type: "button",
-          disabled: sending || !selectedUser,
+          disabled: sendDisabled,
           onClick: handleSend,
           children: sending ? "发送中" : "发送"
         }
@@ -2191,7 +2231,7 @@ https://www.bilibili.com/video/${video.bvid}`
     R(/* @__PURE__ */ u$1(EntryButton, { onClick }), container);
     return container.firstElementChild;
   };
-  const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) => {
+  const RecentRecipientsPanel = ({ active, selectedMids = [], onSelect }) => {
     const [recent, setRecent] = d({
       users: [],
       error: "",
@@ -2247,7 +2287,7 @@ https://www.bilibili.com/video/${video.bvid}`
         UserList,
         {
           users: recent.users,
-          selectedMid,
+          selectedMids,
           footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
           onSelect
         }
@@ -2278,6 +2318,7 @@ https://www.bilibili.com/video/${video.bvid}`
     tab.value
   )) });
   const STATUS_TEXT = {
+    pending: "等待发送",
     sending: "正在发送...",
     success: "发送成功",
     failed: "发送失败"
@@ -2285,8 +2326,9 @@ https://www.bilibili.com/video/${video.bvid}`
   const SendResultPanel = ({ results }) => {
     const successCount = results.filter((result) => result.status === "success").length;
     const failedCount = results.filter((result) => result.status === "failed").length;
+    const pendingCount = results.filter((result) => result.status === "pending").length;
     const sendingCount = results.filter((result) => result.status === "sending").length;
-    const isFinished = sendingCount === 0;
+    const isFinished = pendingCount === 0 && sendingCount === 0;
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-result`, children: [
       /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-summary`, children: isFinished ? `发送完成：成功 ${successCount} 个，失败 ${failedCount} 个` : "正在发送视频链接..." }),
       /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-send-list`, children: results.map((result) => /* @__PURE__ */ u$1(
@@ -2330,22 +2372,23 @@ https://www.bilibili.com/video/${video.bvid}`
   const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
     const [activeTab, setActiveTab] = d("recent");
     const [panelResetKey, setPanelResetKey] = d(0);
-    const [selectedUser, setSelectedUser] = d(null);
+    const [selectedUsers, setSelectedUsers] = d([]);
     const [sending, setSending] = d(false);
     const [sendError, setSendError] = d("");
     const [sendStage, setSendStage] = d("selecting");
     const [sendResults, setSendResults] = d([]);
+    const selectedMids = T(() => selectedUsers.map((user) => user.mid), [selectedUsers]);
     y(() => {
       setActiveTab("recent");
       setPanelResetKey((key) => key + 1);
-      setSelectedUser(null);
+      setSelectedUsers([]);
       setSendError("");
       setSendStage("selecting");
       setSendResults([]);
     }, [video]);
     const handleClose = q(() => closeDialog(dialog), [dialog]);
     const resetSelection = q(() => {
-      setSelectedUser(null);
+      setSelectedUsers([]);
       setSendError("");
     }, []);
     const handleTabChange = q(
@@ -2353,38 +2396,44 @@ https://www.bilibili.com/video/${video.bvid}`
         if (activeTab === tab) {
           return;
         }
-        resetSelection();
         setActiveTab(tab);
       },
-      [activeTab, resetSelection]
+      [activeTab]
     );
     const handleUserSelect = q((user) => {
       setSendError("");
-      setSelectedUser(user);
+      setSelectedUsers((currentUsers) => {
+        if (currentUsers.some((currentUser) => String(currentUser.mid) === String(user.mid))) {
+          return currentUsers.filter((currentUser) => String(currentUser.mid) !== String(user.mid));
+        }
+        return [...currentUsers, user];
+      });
     }, []);
-    const handleSendStart = q((user) => {
+    const handleSendStart = q((users) => {
       setSendError("");
       setSendStage("sending");
-      setSendResults([
-        {
+      setSendResults(
+        users.map((user, index) => ({
           user,
-          status: "sending",
+          status: index === 0 ? "sending" : "pending",
           error: ""
-        }
-      ]);
+        }))
+      );
     }, []);
-    const handleSendSuccess = q((nextResult) => {
-      setSendStage("result");
-      setSendResults([nextResult]);
+    const handleSendProgress = q((nextResult) => {
+      setSendResults(
+        (currentResults) => currentResults.map(
+          (result) => String(result.user.mid) === String(nextResult.user.mid) ? { ...result, ...nextResult } : result
+        )
+      );
     }, []);
-    const handleSendFailure = q((nextResult) => {
+    const handleSendComplete = q(() => {
       setSendStage("result");
-      setSendResults([nextResult]);
     }, []);
     const handleContinue = q(() => {
       setActiveTab("recent");
       setPanelResetKey((key) => key + 1);
-      setSelectedUser(null);
+      setSelectedUsers([]);
       setSendError("");
       setSendStage("selecting");
       setSendResults([]);
@@ -2406,7 +2455,7 @@ https://www.bilibili.com/video/${video.bvid}`
           RecentRecipientsPanel,
           {
             active: activeTab === "recent",
-            selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
+            selectedMids,
             onSelect: handleUserSelect
           },
           `recent-${panelResetKey}`
@@ -2416,7 +2465,7 @@ https://www.bilibili.com/video/${video.bvid}`
           {
             active: activeTab === "all",
             mid: nav == null ? void 0 : nav.mid,
-            selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
+            selectedMids,
             onSelectionReset: resetSelection,
             onSelect: handleUserSelect
           },
@@ -2432,14 +2481,15 @@ https://www.bilibili.com/video/${video.bvid}`
         DialogFooter,
         {
           video,
-          selectedUser,
+          maxSelectedUsers: MAX_SELECTED_USERS,
+          selectedUsers,
           sendStage,
           onClose: handleClose,
           onContinue: handleContinue,
           onSendingChange: setSending,
           onSendStart: handleSendStart,
-          onSendSuccess: handleSendSuccess,
-          onSendFailure: handleSendFailure,
+          onSendProgress: handleSendProgress,
+          onSendComplete: handleSendComplete,
           onSendError: setSendError
         }
       )

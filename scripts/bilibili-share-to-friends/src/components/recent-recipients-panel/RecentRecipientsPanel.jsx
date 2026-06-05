@@ -8,7 +8,7 @@ import { UserList } from "../user-list/UserList.jsx";
 /**
  * 渲染最近私信联系人列表。
  */
-export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) => {
+export const RecentRecipientsPanel = ({ active, selectedMids = [], onSelect }) => {
   const [recent, setRecent] = useState({
     users: [],
     error: "",
@@ -70,7 +70,7 @@ export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) 
     return (
       <UserList
         users={recent.users}
-        selectedMid={selectedMid}
+        selectedMids={selectedMids}
         footerText={`最近聊天列表只展示 ${SESSION_LIMIT} 个`}
         onSelect={onSelect}
       />

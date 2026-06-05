@@ -8,6 +8,20 @@
   border-top: 1px solid #e3e5e7;
 }
 
+.bili-share-to-friends-footer-notice {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #61666d;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-footer-notice[data-error="true"] {
+  color: #d03050;
+}
+
 .bili-share-to-friends-btn {
   min-width: 76px;
   height: 30px;

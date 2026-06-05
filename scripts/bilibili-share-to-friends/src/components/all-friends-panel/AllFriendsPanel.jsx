@@ -34,7 +34,7 @@ const getPageLoadingState = (state) => ({
 export const AllFriendsPanel = ({
   active,
   mid,
-  selectedMid = null,
+  selectedMids = [],
   onSelect,
   onSelectionReset = () => {},
 }) => {
@@ -295,10 +295,6 @@ export const AllFriendsPanel = ({
     }
   }, [active, displaySource]);
 
-  const resetSelection = () => {
-    onSelectionReset();
-  };
-
   const scheduleSearch = (value, { immediate = false } = {}) => {
     const previousKeyword = searchTerm.trim();
     const nextKeyword = value.trim();
@@ -306,9 +302,6 @@ export const AllFriendsPanel = ({
     setSearchTerm(value);
     if (previousKeyword === nextKeyword) {
       return;
-    }
-    if (previousKeyword || nextKeyword) {
-      resetSelection();
     }
     if (immediate) {
       debouncedSearch.cancel();
@@ -335,7 +328,7 @@ export const AllFriendsPanel = ({
     return (
       <UserList
         users={displayUsers}
-        selectedMid={selectedMid}
+        selectedMids={selectedMids}
         hasMore={displayState.hasMore}
         loadingMore={displayLoading.loadingMore}
         moreError={displayState.moreError}
@@ -358,7 +351,6 @@ export const AllFriendsPanel = ({
             if (activeRelation === relation) {
               return;
             }
-            resetSelection();
             saveCurrentScrollTop();
             setActiveRelation(relation);
           }}

@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { useCallback, useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 
 import {
   AllFriendsPanel,
@@ -15,21 +15,22 @@ import {
   VideoPreview,
 } from "./components/index.js";
 import { assertLogin, getVideoInfo } from "./api.js";
-import { SCRIPT_ID } from "./constants.js";
+import { MAX_SELECTED_USERS, SCRIPT_ID } from "./constants.js";
 
 export const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
   const [activeTab, setActiveTab] = useState("recent");
   const [panelResetKey, setPanelResetKey] = useState(0);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState("");
   const [sendStage, setSendStage] = useState("selecting");
   const [sendResults, setSendResults] = useState([]);
+  const selectedMids = useMemo(() => selectedUsers.map((user) => user.mid), [selectedUsers]);
 
   useEffect(() => {
     setActiveTab("recent");
     setPanelResetKey((key) => key + 1);
-    setSelectedUser(null);
+    setSelectedUsers([]);
     setSendError("");
     setSendStage("selecting");
     setSendResults([]);
@@ -38,7 +39,7 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
   const handleClose = useCallback(() => closeDialog(dialog), [dialog]);
 
   const resetSelection = useCallback(() => {
-    setSelectedUser(null);
+    setSelectedUsers([]);
     setSendError("");
   }, []);
 
@@ -47,43 +48,51 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
       if (activeTab === tab) {
         return;
       }
-      resetSelection();
       setActiveTab(tab);
     },
-    [activeTab, resetSelection]
+    [activeTab]
   );
 
   const handleUserSelect = useCallback((user) => {
     setSendError("");
-    setSelectedUser(user);
+    setSelectedUsers((currentUsers) => {
+      if (currentUsers.some((currentUser) => String(currentUser.mid) === String(user.mid))) {
+        return currentUsers.filter((currentUser) => String(currentUser.mid) !== String(user.mid));
+      }
+      return [...currentUsers, user];
+    });
   }, []);
 
-  const handleSendStart = useCallback((user) => {
+  const handleSendStart = useCallback((users) => {
     setSendError("");
     setSendStage("sending");
-    setSendResults([
-      {
+    setSendResults(
+      users.map((user, index) => ({
         user,
-        status: "sending",
+        status: index === 0 ? "sending" : "pending",
         error: "",
-      },
-    ]);
+      }))
+    );
   }, []);
 
-  const handleSendSuccess = useCallback((nextResult) => {
-    setSendStage("result");
-    setSendResults([nextResult]);
+  const handleSendProgress = useCallback((nextResult) => {
+    setSendResults((currentResults) =>
+      currentResults.map((result) =>
+        String(result.user.mid) === String(nextResult.user.mid)
+          ? { ...result, ...nextResult }
+          : result
+      )
+    );
   }, []);
 
-  const handleSendFailure = useCallback((nextResult) => {
+  const handleSendComplete = useCallback(() => {
     setSendStage("result");
-    setSendResults([nextResult]);
   }, []);
 
   const handleContinue = useCallback(() => {
     setActiveTab("recent");
     setPanelResetKey((key) => key + 1);
-    setSelectedUser(null);
+    setSelectedUsers([]);
     setSendError("");
     setSendStage("selecting");
     setSendResults([]);
@@ -106,14 +115,14 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
         <RecentRecipientsPanel
           key={`recent-${panelResetKey}`}
           active={activeTab === "recent"}
-          selectedMid={selectedUser?.mid}
+          selectedMids={selectedMids}
           onSelect={handleUserSelect}
         />
         <AllFriendsPanel
           key={`all-${panelResetKey}`}
           active={activeTab === "all"}
           mid={nav?.mid}
-          selectedMid={selectedUser?.mid}
+          selectedMids={selectedMids}
           onSelectionReset={resetSelection}
           onSelect={handleUserSelect}
         />
@@ -128,14 +137,15 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
       <div className={`${SCRIPT_ID}-body`}>{renderBody()}</div>
       <DialogFooter
         video={video}
-        selectedUser={selectedUser}
+        maxSelectedUsers={MAX_SELECTED_USERS}
+        selectedUsers={selectedUsers}
         sendStage={sendStage}
         onClose={handleClose}
         onContinue={handleContinue}
         onSendingChange={setSending}
         onSendStart={handleSendStart}
-        onSendSuccess={handleSendSuccess}
-        onSendFailure={handleSendFailure}
+        onSendProgress={handleSendProgress}
+        onSendComplete={handleSendComplete}
         onSendError={setSendError}
       />
     </div>

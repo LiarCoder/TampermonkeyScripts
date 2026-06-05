@@ -2,6 +2,7 @@ import { SCRIPT_ID } from "../../constants.js";
 import "./style.css";
 
 const STATUS_TEXT = {
+  pending: "等待发送",
   sending: "正在发送...",
   success: "发送成功",
   failed: "发送失败",
@@ -13,8 +14,9 @@ const STATUS_TEXT = {
 export const SendResultPanel = ({ results }) => {
   const successCount = results.filter((result) => result.status === "success").length;
   const failedCount = results.filter((result) => result.status === "failed").length;
+  const pendingCount = results.filter((result) => result.status === "pending").length;
   const sendingCount = results.filter((result) => result.status === "sending").length;
-  const isFinished = sendingCount === 0;
+  const isFinished = pendingCount === 0 && sendingCount === 0;
 
   return (
     <div className={`${SCRIPT_ID}-send-result`}>

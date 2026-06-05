@@ -9,48 +9,76 @@ import "./style.css";
  */
 export const DialogFooter = ({
   video,
-  selectedUser,
+  maxSelectedUsers,
+  selectedUsers = [],
   sendStage = "selecting",
   onClose,
   onContinue = () => {},
   onSendingChange = () => {},
   onSendStart = () => {},
-  onSendSuccess = () => {},
-  onSendFailure = () => {},
+  onSendProgress = () => {},
+  onSendComplete = () => {},
   onSendError = () => {},
 }) => {
   const [sending, setSending] = useState(false);
+  const selectedCount = selectedUsers.length;
+  const selectionLimitExceeded = selectedCount > maxSelectedUsers;
+  const sendDisabled = sending || selectedCount === 0 || selectionLimitExceeded;
+  const selectionNotice = selectionLimitExceeded
+    ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。`
+    : selectedCount > 0
+      ? `已选择 ${selectedCount} 个`
+      : "";
 
   useEffect(() => {
     onSendingChange(sending);
   }, [onSendingChange, sending]);
 
   const handleSend = async () => {
-    if (!selectedUser || sending) {
+    if (sendDisabled) {
       return;
     }
+    const receivers = [...selectedUsers];
     setSending(true);
     onSendError("");
-    onSendStart(selectedUser);
+    onSendStart(receivers);
     try {
       const login = await assertLogin();
-      await sendVideoText({
-        nav: login.nav,
-        csrf: login.csrf,
-        video,
-        receiver: selectedUser,
-      });
-      onSendSuccess({
-        user: selectedUser,
-        status: "success",
-      });
+      for (const receiver of receivers) {
+        onSendProgress({
+          user: receiver,
+          status: "sending",
+          error: "",
+        });
+        try {
+          await sendVideoText({
+            nav: login.nav,
+            csrf: login.csrf,
+            video,
+            receiver,
+          });
+          onSendProgress({
+            user: receiver,
+            status: "success",
+          });
+        } catch (sendError) {
+          onSendProgress({
+            user: receiver,
+            status: "failed",
+            error: sendError.message,
+          });
+        }
+      }
     } catch (sendError) {
-      onSendFailure({
-        user: selectedUser,
-        status: "failed",
-        error: sendError.message,
+      receivers.forEach((receiver) => {
+        onSendProgress({
+          user: receiver,
+          status: "failed",
+          error: sendError.message,
+        });
       });
     } finally {
+      onSendComplete();
       setSending(false);
     }
   };
@@ -87,13 +115,18 @@ export const DialogFooter = ({
 
   return (
     <div className={`${SCRIPT_ID}-footer`}>
+      {selectionNotice ? (
+        <div className={`${SCRIPT_ID}-footer-notice`} data-error={String(selectionLimitExceeded)}>
+          {selectionNotice}
+        </div>
+      ) : null}
       <button className={`${SCRIPT_ID}-btn`} type="button" disabled={sending} onClick={onClose}>
         取消
       </button>
       <button
         className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`}
         type="button"
-        disabled={sending || !selectedUser}
+        disabled={sendDisabled}
         onClick={handleSend}
       >
         {sending ? "发送中" : "发送"}
