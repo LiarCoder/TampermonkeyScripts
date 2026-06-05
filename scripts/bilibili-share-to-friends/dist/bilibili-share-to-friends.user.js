@@ -497,11 +497,18 @@
 }
 
 .bili-share-to-friends-send-name {
+  display: inline-block;
   min-width: 0;
   overflow: hidden;
   color: #18191c;
+  text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bili-share-to-friends-send-name:hover,
+.bili-share-to-friends-send-name:focus-visible {
+  color: #00aeec;
 }
 
 .bili-share-to-friends-send-status {
@@ -2346,7 +2353,16 @@ https://www.bilibili.com/video/${video.bvid}`
           className: `${SCRIPT_ID}-send-item`,
           "data-status": result.status,
           children: [
-            /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-name`, children: result.user.name }),
+            /* @__PURE__ */ u$1(
+              "a",
+              {
+                className: `${SCRIPT_ID}-send-name`,
+                href: `https://space.bilibili.com/${result.user.mid}`,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                children: result.user.name
+              }
+            ),
             /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-status`, children: STATUS_TEXT[result.status] || result.status }),
             result.error ? /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-error`, children: result.error }) : null
           ]

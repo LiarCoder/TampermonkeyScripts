@@ -32,7 +32,14 @@ export const SendResultPanel = ({ results }) => {
             data-status={result.status}
             key={result.user.mid}
           >
-            <span className={`${SCRIPT_ID}-send-name`}>{result.user.name}</span>
+            <a
+              className={`${SCRIPT_ID}-send-name`}
+              href={`https://space.bilibili.com/${result.user.mid}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {result.user.name}
+            </a>
             <span className={`${SCRIPT_ID}-send-status`}>
               {STATUS_TEXT[result.status] || result.status}
             </span>

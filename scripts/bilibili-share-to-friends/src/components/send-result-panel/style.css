@@ -45,11 +45,18 @@
 }
 
 .bili-share-to-friends-send-name {
+  display: inline-block;
   min-width: 0;
   overflow: hidden;
   color: #18191c;
+  text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.bili-share-to-friends-send-name:hover,
+.bili-share-to-friends-send-name:focus-visible {
+  color: #00aeec;
 }
 
 .bili-share-to-friends-send-status {
