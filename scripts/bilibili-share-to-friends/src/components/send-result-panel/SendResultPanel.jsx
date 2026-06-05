@@ -21,9 +21,15 @@ export const SendResultPanel = ({ results }) => {
   return (
     <div className={`${SCRIPT_ID}-send-result`}>
       <div className={`${SCRIPT_ID}-send-summary`}>
-        {isFinished
-          ? `发送完成：成功 ${successCount} 个，失败 ${failedCount} 个`
-          : "正在发送视频链接..."}
+        {isFinished ? (
+          <>
+            发送完成：
+            <span className={`${SCRIPT_ID}-send-summary-success`}>成功 {successCount} 个</span>，
+            <span className={`${SCRIPT_ID}-send-summary-failed`}>失败 {failedCount} 个</span>
+          </>
+        ) : (
+          "正在发送视频链接..."
+        )}
       </div>
       <ul className={`${SCRIPT_ID}-send-list`}>
         {results.map((result) => (

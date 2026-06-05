@@ -12,6 +12,14 @@
   font-weight: 600;
 }
 
+.bili-share-to-friends-send-summary-success {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-summary-failed {
+  color: #d03050;
+}
+
 .bili-share-to-friends-send-list {
   display: flex;
   flex-direction: column;

@@ -464,6 +464,14 @@
   font-weight: 600;
 }
 
+.bili-share-to-friends-send-summary-success {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-summary-failed {
+  color: #d03050;
+}
+
 .bili-share-to-friends-send-list {
   display: flex;
   flex-direction: column;
@@ -2346,7 +2354,20 @@ https://www.bilibili.com/video/${video.bvid}`
     const sendingCount = results.filter((result) => result.status === "sending").length;
     const isFinished = pendingCount === 0 && sendingCount === 0;
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-result`, children: [
-      /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-summary`, children: isFinished ? `发送完成：成功 ${successCount} 个，失败 ${failedCount} 个` : "正在发送视频链接..." }),
+      /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-summary`, children: isFinished ? /* @__PURE__ */ u$1(S, { children: [
+        "发送完成：",
+        /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-summary-success`, children: [
+          "成功 ",
+          successCount,
+          " 个"
+        ] }),
+        "，",
+        /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-summary-failed`, children: [
+          "失败 ",
+          failedCount,
+          " 个"
+        ] })
+      ] }) : "正在发送视频链接..." }),
       /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-send-list`, children: results.map((result) => /* @__PURE__ */ u$1(
         "li",
         {
