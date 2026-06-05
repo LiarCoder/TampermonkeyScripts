@@ -9,12 +9,11 @@ export const DialogHeader = ({ title, onClose, disabled = false }) => (
     <h3 className={`${SCRIPT_ID}-title`}>{title}</h3>
     <button
       className={`${SCRIPT_ID}-close`}
+      aria-label="关闭"
       title="关闭"
       type="button"
       disabled={disabled}
       onClick={onClose}
-    >
-      ×
-    </button>
+    />
   </div>
 );

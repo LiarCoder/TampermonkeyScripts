@@ -314,15 +314,41 @@
 }
 
 .bili-share-to-friends-close {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   width: 28px;
   height: 28px;
+  padding: 0;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: #61666d;
-  font-size: 22px;
-  line-height: 26px;
+  font-size: 0;
+  line-height: 0;
   cursor: pointer;
+}
+
+.bili-share-to-friends-close::before,
+.bili-share-to-friends-close::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+}
+
+.bili-share-to-friends-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.bili-share-to-friends-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .bili-share-to-friends-close:hover {
@@ -2030,11 +2056,11 @@ https://www.bilibili.com/video/${video.bvid}`
       "button",
       {
         className: `${SCRIPT_ID}-close`,
+        "aria-label": "关闭",
         title: "关闭",
         type: "button",
         disabled,
-        onClick: onClose,
-        children: "×"
+        onClick: onClose
       }
     )
   ] });
