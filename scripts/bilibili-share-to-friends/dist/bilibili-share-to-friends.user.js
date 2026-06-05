@@ -2096,7 +2096,8 @@ https://www.bilibili.com/video/${video.bvid}`
     const selectedCount = selectedUsers.length;
     const selectionLimitExceeded = selectedCount > maxSelectedUsers;
     const sendDisabled = sending || selectedCount === 0 || selectionLimitExceeded;
-    const selectionNotice = selectionLimitExceeded ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。` : selectedCount > 0 ? `已选择 ${selectedCount} 个` : "";
+    const selectionNotice = selectionLimitExceeded ? `最多 ${maxSelectedUsers} 个` : selectedCount > 0 ? `已选择 ${selectedCount} 个` : "";
+    const selectionNoticeTitle = selectionLimitExceeded ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。` : selectionNotice;
     y(() => {
       onSendingChange(sending);
     }, [onSendingChange, sending]);
@@ -2169,7 +2170,15 @@ https://www.bilibili.com/video/${video.bvid}`
       ] });
     }
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
-      selectionNotice ? /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer-notice`, "data-error": String(selectionLimitExceeded), children: selectionNotice }) : null,
+      selectionNotice ? /* @__PURE__ */ u$1(
+        "div",
+        {
+          className: `${SCRIPT_ID}-footer-notice`,
+          "data-error": String(selectionLimitExceeded),
+          title: selectionNoticeTitle,
+          children: selectionNotice
+        }
+      ) : null,
       /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: sending, onClick: onClose, children: "取消" }),
       /* @__PURE__ */ u$1(
         "button",

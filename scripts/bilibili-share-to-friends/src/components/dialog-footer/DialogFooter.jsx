@@ -25,10 +25,13 @@ export const DialogFooter = ({
   const selectionLimitExceeded = selectedCount > maxSelectedUsers;
   const sendDisabled = sending || selectedCount === 0 || selectionLimitExceeded;
   const selectionNotice = selectionLimitExceeded
-    ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。`
+    ? `最多 ${maxSelectedUsers} 个`
     : selectedCount > 0
       ? `已选择 ${selectedCount} 个`
       : "";
+  const selectionNoticeTitle = selectionLimitExceeded
+    ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。`
+    : selectionNotice;
 
   useEffect(() => {
     onSendingChange(sending);
@@ -116,7 +119,11 @@ export const DialogFooter = ({
   return (
     <div className={`${SCRIPT_ID}-footer`}>
       {selectionNotice ? (
-        <div className={`${SCRIPT_ID}-footer-notice`} data-error={String(selectionLimitExceeded)}>
+        <div
+          className={`${SCRIPT_ID}-footer-notice`}
+          data-error={String(selectionLimitExceeded)}
+          title={selectionNoticeTitle}
+        >
           {selectionNotice}
         </div>
       ) : null}
