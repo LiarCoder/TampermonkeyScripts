@@ -7,6 +7,7 @@ export * from "./recent-recipients-panel/RecentRecipientsPanel.jsx";
 export * from "./recipient-tabs/RecipientTabs.jsx";
 export * from "./relation-filter/RelationFilter.jsx";
 export * from "./search-box/SearchBox.jsx";
+export * from "./send-result-panel/SendResultPanel.jsx";
 export * from "./state-view/StateView.jsx";
 export * from "./user-list/UserList.jsx";
 export * from "./user-list-item/UserListItem.jsx";

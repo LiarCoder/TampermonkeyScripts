@@ -10,10 +10,13 @@ import "./style.css";
 export const DialogFooter = ({
   video,
   selectedUser,
-  showCloseOnly = false,
+  sendStage = "selecting",
   onClose,
+  onContinue = () => {},
   onSendingChange = () => {},
+  onSendStart = () => {},
   onSendSuccess = () => {},
+  onSendFailure = () => {},
   onSendError = () => {},
 }) => {
   const [sending, setSending] = useState(false);
@@ -28,6 +31,7 @@ export const DialogFooter = ({
     }
     setSending(true);
     onSendError("");
+    onSendStart(selectedUser);
     try {
       const login = await assertLogin();
       await sendVideoText({
@@ -37,19 +41,39 @@ export const DialogFooter = ({
         receiver: selectedUser,
       });
       onSendSuccess({
-        message: `已将视频链接发送给 ${selectedUser.name}。`,
-        isError: false,
+        user: selectedUser,
+        status: "success",
       });
     } catch (sendError) {
-      onSendError(sendError.message);
+      onSendFailure({
+        user: selectedUser,
+        status: "failed",
+        error: sendError.message,
+      });
     } finally {
       setSending(false);
     }
   };
 
-  if (showCloseOnly) {
+  if (sendStage === "sending") {
     return (
       <div className={`${SCRIPT_ID}-footer`}>
+        <button className={`${SCRIPT_ID}-btn`} type="button" disabled>
+          取消
+        </button>
+        <button className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`} type="button" disabled>
+          发送中
+        </button>
+      </div>
+    );
+  }
+
+  if (sendStage === "result") {
+    return (
+      <div className={`${SCRIPT_ID}-footer`}>
+        <button className={`${SCRIPT_ID}-btn`} type="button" onClick={onContinue}>
+          继续
+        </button>
         <button
           className={`${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`}
           type="button"

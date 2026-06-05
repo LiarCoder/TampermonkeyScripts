@@ -436,6 +436,79 @@
   background: #f6fbff;\r
   font-weight: 600;\r
 }\r
+.bili-share-to-friends-send-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px;
+}
+
+.bili-share-to-friends-send-summary {
+  color: #18191c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bili-share-to-friends-send-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.bili-share-to-friends-send-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #e3e5e7;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] {
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] {
+  border-color: #ffccc7;
+  background: #fff2f0;
+}
+
+.bili-share-to-friends-send-name {
+  min-width: 0;
+  overflow: hidden;
+  color: #18191c;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-send-status {
+  color: #61666d;
+  font-size: 12px;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] .bili-share-to-friends-send-status {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] .bili-share-to-friends-send-status,
+.bili-share-to-friends-send-error {
+  color: #d03050;
+}
+
+.bili-share-to-friends-send-error {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .bili-share-to-friends-video {
   display: grid;
   grid-template-columns: 80px 1fr;
@@ -1988,11 +2061,17 @@ https://www.bilibili.com/video/${video.bvid}`
   const DialogFooter = ({
     video,
     selectedUser,
-    showCloseOnly = false,
+    sendStage = "selecting",
     onClose,
+    onContinue = () => {
+    },
     onSendingChange = () => {
     },
+    onSendStart = () => {
+    },
     onSendSuccess = () => {
+    },
+    onSendFailure = () => {
     },
     onSendError = () => {
     }
@@ -2007,6 +2086,7 @@ https://www.bilibili.com/video/${video.bvid}`
       }
       setSending(true);
       onSendError("");
+      onSendStart(selectedUser);
       try {
         const login = await assertLogin();
         await sendVideoText({
@@ -2016,25 +2096,38 @@ https://www.bilibili.com/video/${video.bvid}`
           receiver: selectedUser
         });
         onSendSuccess({
-          message: `已将视频链接发送给 ${selectedUser.name}。`,
-          isError: false
+          user: selectedUser,
+          status: "success"
         });
       } catch (sendError) {
-        onSendError(sendError.message);
+        onSendFailure({
+          user: selectedUser,
+          status: "failed",
+          error: sendError.message
+        });
       } finally {
         setSending(false);
       }
     };
-    if (showCloseOnly) {
-      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: /* @__PURE__ */ u$1(
-        "button",
-        {
-          className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
-          type: "button",
-          onClick: onClose,
-          children: "关闭"
-        }
-      ) });
+    if (sendStage === "sending") {
+      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: true, children: "取消" }),
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`, type: "button", disabled: true, children: "发送中" })
+      ] });
+    }
+    if (sendStage === "result") {
+      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", onClick: onContinue, children: "继续" }),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
+            type: "button",
+            onClick: onClose,
+            children: "关闭"
+          }
+        )
+      ] });
     }
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
       /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: sending, onClick: onClose, children: "取消" }),
@@ -2184,6 +2277,33 @@ https://www.bilibili.com/video/${video.bvid}`
     },
     tab.value
   )) });
+  const STATUS_TEXT = {
+    sending: "正在发送...",
+    success: "发送成功",
+    failed: "发送失败"
+  };
+  const SendResultPanel = ({ results }) => {
+    const successCount = results.filter((result) => result.status === "success").length;
+    const failedCount = results.filter((result) => result.status === "failed").length;
+    const sendingCount = results.filter((result) => result.status === "sending").length;
+    const isFinished = sendingCount === 0;
+    return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-result`, children: [
+      /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-summary`, children: isFinished ? `发送完成：成功 ${successCount} 个，失败 ${failedCount} 个` : "正在发送视频链接..." }),
+      /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-send-list`, children: results.map((result) => /* @__PURE__ */ u$1(
+        "li",
+        {
+          className: `${SCRIPT_ID}-send-item`,
+          "data-status": result.status,
+          children: [
+            /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-name`, children: result.user.name }),
+            /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-status`, children: STATUS_TEXT[result.status] || result.status }),
+            result.error ? /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-error`, children: result.error }) : null
+          ]
+        },
+        result.user.mid
+      )) })
+    ] });
+  };
   const VideoCover = ({ video }) => {
     const [loadFailed, setLoadFailed] = d(false);
     if (!(video == null ? void 0 : video.pic) || loadFailed) {
@@ -2209,14 +2329,19 @@ https://www.bilibili.com/video/${video.bvid}`
   ] });
   const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
     const [activeTab, setActiveTab] = d("recent");
+    const [panelResetKey, setPanelResetKey] = d(0);
     const [selectedUser, setSelectedUser] = d(null);
     const [sending, setSending] = d(false);
     const [sendError, setSendError] = d("");
-    const [sendResult, setSendResult] = d(null);
+    const [sendStage, setSendStage] = d("selecting");
+    const [sendResults, setSendResults] = d([]);
     y(() => {
+      setActiveTab("recent");
+      setPanelResetKey((key) => key + 1);
       setSelectedUser(null);
       setSendError("");
-      setSendResult(null);
+      setSendStage("selecting");
+      setSendResults([]);
     }, [video]);
     const handleClose = q(() => closeDialog(dialog), [dialog]);
     const resetSelection = q(() => {
@@ -2237,13 +2362,36 @@ https://www.bilibili.com/video/${video.bvid}`
       setSendError("");
       setSelectedUser(user);
     }, []);
-    const handleSendSuccess = q((nextResult) => {
+    const handleSendStart = q((user) => {
       setSendError("");
-      setSendResult(nextResult);
+      setSendStage("sending");
+      setSendResults([
+        {
+          user,
+          status: "sending",
+          error: ""
+        }
+      ]);
+    }, []);
+    const handleSendSuccess = q((nextResult) => {
+      setSendStage("result");
+      setSendResults([nextResult]);
+    }, []);
+    const handleSendFailure = q((nextResult) => {
+      setSendStage("result");
+      setSendResults([nextResult]);
+    }, []);
+    const handleContinue = q(() => {
+      setActiveTab("recent");
+      setPanelResetKey((key) => key + 1);
+      setSelectedUser(null);
+      setSendError("");
+      setSendStage("selecting");
+      setSendResults([]);
     }, []);
     const renderBody = () => {
-      if (sendResult) {
-        return /* @__PURE__ */ u$1(StateView, { text: sendResult.message, isError: sendResult.isError });
+      if (sendStage !== "selecting") {
+        return /* @__PURE__ */ u$1(SendResultPanel, { results: sendResults });
       }
       if (status) {
         return /* @__PURE__ */ u$1(StateView, { text: status });
@@ -2260,7 +2408,8 @@ https://www.bilibili.com/video/${video.bvid}`
             active: activeTab === "recent",
             selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
             onSelect: handleUserSelect
-          }
+          },
+          `recent-${panelResetKey}`
         ),
         /* @__PURE__ */ u$1(
           AllFriendsPanel,
@@ -2270,7 +2419,8 @@ https://www.bilibili.com/video/${video.bvid}`
             selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
             onSelectionReset: resetSelection,
             onSelect: handleUserSelect
-          }
+          },
+          `all-${panelResetKey}`
         )
       ] });
     };
@@ -2283,10 +2433,13 @@ https://www.bilibili.com/video/${video.bvid}`
         {
           video,
           selectedUser,
-          showCloseOnly: Boolean(sendResult),
+          sendStage,
           onClose: handleClose,
+          onContinue: handleContinue,
           onSendingChange: setSending,
+          onSendStart: handleSendStart,
           onSendSuccess: handleSendSuccess,
+          onSendFailure: handleSendFailure,
           onSendError: setSendError
         }
       )
