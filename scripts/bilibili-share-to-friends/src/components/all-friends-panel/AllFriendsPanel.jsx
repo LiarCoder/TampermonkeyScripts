@@ -7,7 +7,6 @@ import { RelationFilter } from "../relation-filter/RelationFilter.jsx";
 import { SearchBox } from "../search-box/SearchBox.jsx";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
-import "./style.css";
 
 const createPageState = () => ({
   users: [],
@@ -322,10 +321,6 @@ export const AllFriendsPanel = ({
     debouncedSearch(nextKeyword);
   };
 
-  if (!active) {
-    return null;
-  }
-
   const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
   const renderListContent = () => {
     if (displayLoading.loading) {
@@ -352,29 +347,34 @@ export const AllFriendsPanel = ({
   };
 
   return (
-    <div className={`${SCRIPT_ID}-panel`} ref={panelRef}>
-      <RelationFilter
-        activeRelation={activeRelation}
-        onChange={(relation) => {
-          if (activeRelation === relation) {
-            return;
+    <div
+      className={`${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`}
+      aria-hidden={!active}
+    >
+      <div className={`${SCRIPT_ID}-panel`} ref={panelRef}>
+        <RelationFilter
+          activeRelation={activeRelation}
+          onChange={(relation) => {
+            if (activeRelation === relation) {
+              return;
+            }
+            resetSelection();
+            saveCurrentScrollTop();
+            setActiveRelation(relation);
+          }}
+        />
+        <SearchBox
+          value={searchTerm}
+          notice={
+            activeRelation === "followers" && keyword
+              ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
+              : ""
           }
-          resetSelection();
-          saveCurrentScrollTop();
-          setActiveRelation(relation);
-        }}
-      />
-      <SearchBox
-        value={searchTerm}
-        notice={
-          activeRelation === "followers" && keyword
-            ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
-            : ""
-        }
-        onCompositionStart={() => debouncedSearch.cancel()}
-        onInput={scheduleSearch}
-      />
-      {renderListContent()}
+          onCompositionStart={() => debouncedSearch.cancel()}
+          onInput={scheduleSearch}
+        />
+        {renderListContent()}
+      </div>
     </div>
   );
 };

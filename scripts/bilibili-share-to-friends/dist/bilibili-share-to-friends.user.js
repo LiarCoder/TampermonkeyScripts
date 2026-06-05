@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.5
+// @version      0.4.6
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -22,6 +22,24 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+}
+
+.bili-share-to-friends-tab-panel {
+  display: none;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bili-share-to-friends-tab-panel-active {
+  display: block;
+}
+
+.bili-share-to-friends-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 .bili-share-to-friends-relation-filter {\r
   display: flex;\r
@@ -199,12 +217,6 @@
 \r
 .bili-share-to-friends-list-sentinel {\r
   height: 1px;\r
-}\r
-.bili-share-to-friends-panel {\r
-  display: flex;\r
-  flex: 1 1 auto;\r
-  flex-direction: column;\r
-  min-height: 0;\r
 }\r
 .bili-share-to-friends-dialog::backdrop {\r
   background: rgba(0, 0, 0, 0.38);\r
@@ -1863,9 +1875,6 @@ https://www.bilibili.com/video/${video.bvid}`
       }
       debouncedSearch(nextKeyword);
     };
-    if (!active) {
-      return null;
-    }
     const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
     const renderListContent = () => {
       if (displayLoading.loading) {
@@ -1891,32 +1900,39 @@ https://www.bilibili.com/video/${video.bvid}`
         }
       );
     };
-    return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, ref: panelRef, children: [
-      /* @__PURE__ */ u$1(
-        RelationFilter,
-        {
-          activeRelation,
-          onChange: (relation) => {
-            if (activeRelation === relation) {
-              return;
+    return /* @__PURE__ */ u$1(
+      "div",
+      {
+        className: `${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`,
+        "aria-hidden": !active,
+        children: /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, ref: panelRef, children: [
+          /* @__PURE__ */ u$1(
+            RelationFilter,
+            {
+              activeRelation,
+              onChange: (relation) => {
+                if (activeRelation === relation) {
+                  return;
+                }
+                resetSelection();
+                saveCurrentScrollTop();
+                setActiveRelation(relation);
+              }
             }
-            resetSelection();
-            saveCurrentScrollTop();
-            setActiveRelation(relation);
-          }
-        }
-      ),
-      /* @__PURE__ */ u$1(
-        SearchBox,
-        {
-          value: searchTerm,
-          notice: activeRelation === "followers" && keyword ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。" : "",
-          onCompositionStart: () => debouncedSearch.cancel(),
-          onInput: scheduleSearch
-        }
-      ),
-      renderListContent()
-    ] });
+          ),
+          /* @__PURE__ */ u$1(
+            SearchBox,
+            {
+              value: searchTerm,
+              notice: activeRelation === "followers" && keyword ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。" : "",
+              onCompositionStart: () => debouncedSearch.cancel(),
+              onInput: scheduleSearch
+            }
+          ),
+          renderListContent()
+        ] })
+      }
+    );
   };
   const closeDialog = (dialog) => {
     if (!dialog) {
@@ -2098,25 +2114,32 @@ https://www.bilibili.com/video/${video.bvid}`
         canceled = true;
       };
     }, [active, recent.loaded]);
-    if (!active) {
-      return null;
-    }
-    if (recent.loading) {
-      return /* @__PURE__ */ u$1(StateView, { text: "正在读取最近私信联系人..." });
-    }
-    if (recent.error) {
-      return /* @__PURE__ */ u$1(StateView, { text: recent.error, isError: true });
-    }
-    if (recent.users.length === 0) {
-      return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
-    }
+    const renderContent = () => {
+      if (recent.loading) {
+        return /* @__PURE__ */ u$1(StateView, { text: "正在读取最近私信联系人..." });
+      }
+      if (recent.error) {
+        return /* @__PURE__ */ u$1(StateView, { text: recent.error, isError: true });
+      }
+      if (recent.users.length === 0) {
+        return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
+      }
+      return /* @__PURE__ */ u$1(
+        UserList,
+        {
+          users: recent.users,
+          selectedMid,
+          footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
+          onSelect
+        }
+      );
+    };
     return /* @__PURE__ */ u$1(
-      UserList,
+      "div",
       {
-        users: recent.users,
-        selectedMid,
-        footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
-        onSelect
+        className: `${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`,
+        "aria-hidden": !active,
+        children: /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, children: renderContent() })
       }
     );
   };

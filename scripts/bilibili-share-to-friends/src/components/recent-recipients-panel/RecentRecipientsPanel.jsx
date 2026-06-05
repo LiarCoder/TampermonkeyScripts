@@ -1,7 +1,7 @@
 import { useEffect, useState } from "preact/hooks";
 
 import { getRecentSessions } from "../../api.js";
-import { SESSION_LIMIT } from "../../constants.js";
+import { SCRIPT_ID, SESSION_LIMIT } from "../../constants.js";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
 
@@ -57,24 +57,32 @@ export const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) 
     };
   }, [active, recent.loaded]);
 
-  if (!active) {
-    return null;
-  }
-  if (recent.loading) {
-    return <StateView text="正在读取最近私信联系人..." />;
-  }
-  if (recent.error) {
-    return <StateView text={recent.error} isError />;
-  }
-  if (recent.users.length === 0) {
-    return <StateView text="暂无最近私信联系人。" />;
-  }
+  const renderContent = () => {
+    if (recent.loading) {
+      return <StateView text="正在读取最近私信联系人..." />;
+    }
+    if (recent.error) {
+      return <StateView text={recent.error} isError />;
+    }
+    if (recent.users.length === 0) {
+      return <StateView text="暂无最近私信联系人。" />;
+    }
+    return (
+      <UserList
+        users={recent.users}
+        selectedMid={selectedMid}
+        footerText={`最近聊天列表只展示 ${SESSION_LIMIT} 个`}
+        onSelect={onSelect}
+      />
+    );
+  };
+
   return (
-    <UserList
-      users={recent.users}
-      selectedMid={selectedMid}
-      footerText={`最近聊天列表只展示 ${SESSION_LIMIT} 个`}
-      onSelect={onSelect}
-    />
+    <div
+      className={`${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`}
+      aria-hidden={!active}
+    >
+      <div className={`${SCRIPT_ID}-panel`}>{renderContent()}</div>
+    </div>
   );
 };
