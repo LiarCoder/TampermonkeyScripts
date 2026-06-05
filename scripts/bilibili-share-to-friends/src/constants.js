@@ -16,6 +16,9 @@ export const SESSION_CACHE_TTL = 5 * 60 * 1000;
 /** 弹窗中展示的最近私信会话数量上限。 */
 export const SESSION_LIMIT = 20;
 
+/** 单次建议发送的用户数量上限，超过后禁用发送按钮。 */
+export const MAX_SELECTED_USERS = 5;
+
 /** 加载关注或粉丝列表时使用的分页大小。 */
 export const RELATION_PAGE_SIZE = 20;
 

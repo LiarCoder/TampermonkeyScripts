@@ -1,0 +1,88 @@
+.bili-share-to-friends-send-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px;
+}
+
+.bili-share-to-friends-send-summary {
+  color: #18191c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bili-share-to-friends-send-summary-success {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-summary-failed {
+  color: #d03050;
+}
+
+.bili-share-to-friends-send-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.bili-share-to-friends-send-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #e3e5e7;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] {
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] {
+  border-color: #ffccc7;
+  background: #fff2f0;
+}
+
+.bili-share-to-friends-send-name {
+  display: inline-block;
+  min-width: 0;
+  overflow: hidden;
+  color: #18191c;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-send-name:hover,
+.bili-share-to-friends-send-name:focus-visible {
+  color: #00aeec;
+}
+
+.bili-share-to-friends-send-status {
+  color: #61666d;
+  font-size: 12px;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] .bili-share-to-friends-send-status {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] .bili-share-to-friends-send-status,
+.bili-share-to-friends-send-error {
+  color: #d03050;
+}
+
+.bili-share-to-friends-send-error {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  line-height: 1.5;
+}

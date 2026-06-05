@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.5
+// @version      0.4.6
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -22,6 +22,24 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
+}
+
+.bili-share-to-friends-tab-panel {
+  display: none;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.bili-share-to-friends-tab-panel-active {
+  display: block;
+}
+
+.bili-share-to-friends-panel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 .bili-share-to-friends-relation-filter {\r
   display: flex;\r
@@ -200,12 +218,6 @@
 .bili-share-to-friends-list-sentinel {\r
   height: 1px;\r
 }\r
-.bili-share-to-friends-panel {\r
-  display: flex;\r
-  flex: 1 1 auto;\r
-  flex-direction: column;\r
-  min-height: 0;\r
-}\r
 .bili-share-to-friends-dialog::backdrop {\r
   background: rgba(0, 0, 0, 0.38);\r
 }\r
@@ -250,6 +262,20 @@
   flex: 0 0 auto;
   padding: 9px 14px;
   border-top: 1px solid #e3e5e7;
+}
+
+.bili-share-to-friends-footer-notice {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #61666d;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-footer-notice[data-error="true"] {
+  color: #d03050;
 }
 
 .bili-share-to-friends-btn {
@@ -302,15 +328,41 @@
 }
 
 .bili-share-to-friends-close {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   width: 28px;
   height: 28px;
+  padding: 0;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: #61666d;
-  font-size: 22px;
-  line-height: 26px;
+  font-size: 0;
+  line-height: 0;
   cursor: pointer;
+}
+
+.bili-share-to-friends-close::before,
+.bili-share-to-friends-close::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+}
+
+.bili-share-to-friends-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.bili-share-to-friends-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 .bili-share-to-friends-close:hover {
@@ -398,6 +450,94 @@
   background: #f6fbff;\r
   font-weight: 600;\r
 }\r
+.bili-share-to-friends-send-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 14px;
+}
+
+.bili-share-to-friends-send-summary {
+  color: #18191c;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bili-share-to-friends-send-summary-success {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-summary-failed {
+  color: #d03050;
+}
+
+.bili-share-to-friends-send-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.bili-share-to-friends-send-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #e3e5e7;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] {
+  border-color: #b7eb8f;
+  background: #f6ffed;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] {
+  border-color: #ffccc7;
+  background: #fff2f0;
+}
+
+.bili-share-to-friends-send-name {
+  display: inline-block;
+  min-width: 0;
+  overflow: hidden;
+  color: #18191c;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bili-share-to-friends-send-name:hover,
+.bili-share-to-friends-send-name:focus-visible {
+  color: #00aeec;
+}
+
+.bili-share-to-friends-send-status {
+  color: #61666d;
+  font-size: 12px;
+}
+
+.bili-share-to-friends-send-item[data-status="success"] .bili-share-to-friends-send-status {
+  color: #389e0d;
+}
+
+.bili-share-to-friends-send-item[data-status="failed"] .bili-share-to-friends-send-status,
+.bili-share-to-friends-send-error {
+  color: #d03050;
+}
+
+.bili-share-to-friends-send-error {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .bili-share-to-friends-video {
   display: grid;
   grid-template-columns: 80px 1fr;
@@ -636,6 +776,7 @@
   const SESSION_CACHE_KEY = `${SCRIPT_ID}.recent_sessions.v2`;
   const SESSION_CACHE_TTL = 5 * 60 * 1e3;
   const SESSION_LIMIT = 20;
+  const MAX_SELECTED_USERS = 5;
   const RELATION_PAGE_SIZE = 20;
   const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
   const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
@@ -1555,7 +1696,7 @@ https://www.bilibili.com/video/${video.bvid}`
   ] }) : /* @__PURE__ */ u$1("div", { children: footerText || (loadingMore ? "正在加载更多..." : hasMore ? "" : "没有更多了") }) });
   const UserList = ({
     users,
-    selectedMid = null,
+    selectedMids = [],
     loadingMore = false,
     hasMore = false,
     moreError = "",
@@ -1565,7 +1706,14 @@ https://www.bilibili.com/video/${video.bvid}`
     },
     onSelect
   }) => /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-list-scroll`, "data-bili-share-to-friends-list-scroll": "true", children: [
-    /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(UserListItem, { user, selected: user.mid === selectedMid, onSelect }) }, user.mid)) }),
+    /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-list`, children: users.map((user) => /* @__PURE__ */ u$1("li", { children: /* @__PURE__ */ u$1(
+      UserListItem,
+      {
+        user,
+        selected: selectedMids.some((mid) => String(mid) === String(user.mid)),
+        onSelect
+      }
+    ) }, user.mid)) }),
     showFooter || footerText ? /* @__PURE__ */ u$1(
       UserListFooter,
       {
@@ -1604,7 +1752,7 @@ https://www.bilibili.com/video/${video.bvid}`
   const AllFriendsPanel = ({
     active,
     mid,
-    selectedMid = null,
+    selectedMids = [],
     onSelect,
     onSelectionReset = () => {
     }
@@ -1839,9 +1987,6 @@ https://www.bilibili.com/video/${video.bvid}`
         scrollRoot.scrollTop = scrollTopMapRef.current[displaySource] ?? 0;
       }
     }, [active, displaySource]);
-    const resetSelection = () => {
-      onSelectionReset();
-    };
     const scheduleSearch = (value, { immediate = false } = {}) => {
       const previousKeyword = searchTerm.trim();
       const nextKeyword = value.trim();
@@ -1849,9 +1994,6 @@ https://www.bilibili.com/video/${video.bvid}`
       setSearchTerm(value);
       if (previousKeyword === nextKeyword) {
         return;
-      }
-      if (previousKeyword || nextKeyword) {
-        resetSelection();
       }
       if (immediate) {
         debouncedSearch.cancel();
@@ -1863,9 +2005,6 @@ https://www.bilibili.com/video/${video.bvid}`
       }
       debouncedSearch(nextKeyword);
     };
-    if (!active) {
-      return null;
-    }
     const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
     const renderListContent = () => {
       if (displayLoading.loading) {
@@ -1881,7 +2020,7 @@ https://www.bilibili.com/video/${video.bvid}`
         UserList,
         {
           users: displayUsers,
-          selectedMid,
+          selectedMids,
           hasMore: displayState.hasMore,
           loadingMore: displayLoading.loadingMore,
           moreError: displayState.moreError,
@@ -1891,32 +2030,38 @@ https://www.bilibili.com/video/${video.bvid}`
         }
       );
     };
-    return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, ref: panelRef, children: [
-      /* @__PURE__ */ u$1(
-        RelationFilter,
-        {
-          activeRelation,
-          onChange: (relation) => {
-            if (activeRelation === relation) {
-              return;
+    return /* @__PURE__ */ u$1(
+      "div",
+      {
+        className: `${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`,
+        "aria-hidden": !active,
+        children: /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, ref: panelRef, children: [
+          /* @__PURE__ */ u$1(
+            RelationFilter,
+            {
+              activeRelation,
+              onChange: (relation) => {
+                if (activeRelation === relation) {
+                  return;
+                }
+                saveCurrentScrollTop();
+                setActiveRelation(relation);
+              }
             }
-            resetSelection();
-            saveCurrentScrollTop();
-            setActiveRelation(relation);
-          }
-        }
-      ),
-      /* @__PURE__ */ u$1(
-        SearchBox,
-        {
-          value: searchTerm,
-          notice: activeRelation === "followers" && keyword ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。" : "",
-          onCompositionStart: () => debouncedSearch.cancel(),
-          onInput: scheduleSearch
-        }
-      ),
-      renderListContent()
-    ] });
+          ),
+          /* @__PURE__ */ u$1(
+            SearchBox,
+            {
+              value: searchTerm,
+              notice: activeRelation === "followers" && keyword ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。" : "",
+              onCompositionStart: () => debouncedSearch.cancel(),
+              onInput: scheduleSearch
+            }
+          ),
+          renderListContent()
+        ] })
+      }
+    );
   };
   const closeDialog = (dialog) => {
     if (!dialog) {
@@ -1945,63 +2090,117 @@ https://www.bilibili.com/video/${video.bvid}`
   };
   const DialogFooter = ({
     video,
-    selectedUser,
-    showCloseOnly = false,
+    maxSelectedUsers,
+    selectedUsers = [],
+    sendStage = "selecting",
     onClose,
+    onContinue = () => {
+    },
     onSendingChange = () => {
     },
-    onSendSuccess = () => {
+    onSendStart = () => {
+    },
+    onSendProgress = () => {
+    },
+    onSendComplete = () => {
     },
     onSendError = () => {
     }
   }) => {
     const [sending, setSending] = d(false);
+    const selectedCount = selectedUsers.length;
+    const selectionLimitExceeded = selectedCount > maxSelectedUsers;
+    const sendDisabled = sending || selectedCount === 0 || selectionLimitExceeded;
+    const selectionNotice = selectionLimitExceeded ? `最多 ${maxSelectedUsers} 个` : selectedCount > 0 ? `已选择 ${selectedCount} 个` : "";
+    const selectionNoticeTitle = selectionLimitExceeded ? `最多一次发送 ${maxSelectedUsers} 个，请取消部分勾选后再发送。` : selectionNotice;
     y(() => {
       onSendingChange(sending);
     }, [onSendingChange, sending]);
     const handleSend = async () => {
-      if (!selectedUser || sending) {
+      if (sendDisabled) {
         return;
       }
+      const receivers = [...selectedUsers];
       setSending(true);
       onSendError("");
+      onSendStart(receivers);
       try {
         const login = await assertLogin();
-        await sendVideoText({
-          nav: login.nav,
-          csrf: login.csrf,
-          video,
-          receiver: selectedUser
-        });
-        onSendSuccess({
-          message: `已将视频链接发送给 ${selectedUser.name}。`,
-          isError: false
-        });
+        for (const receiver of receivers) {
+          onSendProgress({
+            user: receiver,
+            status: "sending",
+            error: ""
+          });
+          try {
+            await sendVideoText({
+              nav: login.nav,
+              csrf: login.csrf,
+              video,
+              receiver
+            });
+            onSendProgress({
+              user: receiver,
+              status: "success"
+            });
+          } catch (sendError) {
+            onSendProgress({
+              user: receiver,
+              status: "failed",
+              error: sendError.message
+            });
+          }
+        }
       } catch (sendError) {
-        onSendError(sendError.message);
+        receivers.forEach((receiver) => {
+          onSendProgress({
+            user: receiver,
+            status: "failed",
+            error: sendError.message
+          });
+        });
       } finally {
+        onSendComplete();
         setSending(false);
       }
     };
-    if (showCloseOnly) {
-      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: /* @__PURE__ */ u$1(
-        "button",
-        {
-          className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
-          type: "button",
-          onClick: onClose,
-          children: "关闭"
-        }
-      ) });
+    if (sendStage === "sending") {
+      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: true, children: "取消" }),
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`, type: "button", disabled: true, children: "发送中" })
+      ] });
+    }
+    if (sendStage === "result") {
+      return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+        /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", onClick: onContinue, children: "继续" }),
+        /* @__PURE__ */ u$1(
+          "button",
+          {
+            className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
+            type: "button",
+            onClick: onClose,
+            children: "关闭"
+          }
+        )
+      ] });
     }
     return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-footer`, children: [
+      selectionNotice ? /* @__PURE__ */ u$1(
+        "div",
+        {
+          className: `${SCRIPT_ID}-footer-notice`,
+          "data-error": String(selectionLimitExceeded),
+          title: selectionNoticeTitle,
+          children: selectionNotice
+        }
+      ) : null,
       /* @__PURE__ */ u$1("button", { className: `${SCRIPT_ID}-btn`, type: "button", disabled: sending, onClick: onClose, children: "取消" }),
       /* @__PURE__ */ u$1(
         "button",
         {
           className: `${SCRIPT_ID}-btn ${SCRIPT_ID}-btn-primary`,
           type: "button",
-          disabled: sending || !selectedUser,
+          disabled: sendDisabled,
           onClick: handleSend,
           children: sending ? "发送中" : "发送"
         }
@@ -2014,11 +2213,11 @@ https://www.bilibili.com/video/${video.bvid}`
       "button",
       {
         className: `${SCRIPT_ID}-close`,
+        "aria-label": "关闭",
         title: "关闭",
         type: "button",
         disabled,
-        onClick: onClose,
-        children: "×"
+        onClick: onClose
       }
     )
   ] });
@@ -2056,7 +2255,7 @@ https://www.bilibili.com/video/${video.bvid}`
     R(/* @__PURE__ */ u$1(EntryButton, { onClick }), container);
     return container.firstElementChild;
   };
-  const RecentRecipientsPanel = ({ active, selectedMid = null, onSelect }) => {
+  const RecentRecipientsPanel = ({ active, selectedMids = [], onSelect }) => {
     const [recent, setRecent] = d({
       users: [],
       error: "",
@@ -2098,25 +2297,32 @@ https://www.bilibili.com/video/${video.bvid}`
         canceled = true;
       };
     }, [active, recent.loaded]);
-    if (!active) {
-      return null;
-    }
-    if (recent.loading) {
-      return /* @__PURE__ */ u$1(StateView, { text: "正在读取最近私信联系人..." });
-    }
-    if (recent.error) {
-      return /* @__PURE__ */ u$1(StateView, { text: recent.error, isError: true });
-    }
-    if (recent.users.length === 0) {
-      return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
-    }
+    const renderContent = () => {
+      if (recent.loading) {
+        return /* @__PURE__ */ u$1(StateView, { text: "正在读取最近私信联系人..." });
+      }
+      if (recent.error) {
+        return /* @__PURE__ */ u$1(StateView, { text: recent.error, isError: true });
+      }
+      if (recent.users.length === 0) {
+        return /* @__PURE__ */ u$1(StateView, { text: "暂无最近私信联系人。" });
+      }
+      return /* @__PURE__ */ u$1(
+        UserList,
+        {
+          users: recent.users,
+          selectedMids,
+          footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
+          onSelect
+        }
+      );
+    };
     return /* @__PURE__ */ u$1(
-      UserList,
+      "div",
       {
-        users: recent.users,
-        selectedMid,
-        footerText: `最近聊天列表只展示 ${SESSION_LIMIT} 个`,
-        onSelect
+        className: `${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`,
+        "aria-hidden": !active,
+        children: /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-panel`, children: renderContent() })
       }
     );
   };
@@ -2135,6 +2341,57 @@ https://www.bilibili.com/video/${video.bvid}`
     },
     tab.value
   )) });
+  const STATUS_TEXT = {
+    pending: "等待发送",
+    sending: "正在发送...",
+    success: "发送成功",
+    failed: "发送失败"
+  };
+  const SendResultPanel = ({ results }) => {
+    const successCount = results.filter((result) => result.status === "success").length;
+    const failedCount = results.filter((result) => result.status === "failed").length;
+    const pendingCount = results.filter((result) => result.status === "pending").length;
+    const sendingCount = results.filter((result) => result.status === "sending").length;
+    const isFinished = pendingCount === 0 && sendingCount === 0;
+    return /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-result`, children: [
+      /* @__PURE__ */ u$1("div", { className: `${SCRIPT_ID}-send-summary`, children: isFinished ? /* @__PURE__ */ u$1(S, { children: [
+        "发送完成：",
+        /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-summary-success`, children: [
+          "成功 ",
+          successCount,
+          " 个"
+        ] }),
+        "，",
+        /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-summary-failed`, children: [
+          "失败 ",
+          failedCount,
+          " 个"
+        ] })
+      ] }) : "正在发送视频链接..." }),
+      /* @__PURE__ */ u$1("ul", { className: `${SCRIPT_ID}-send-list`, children: results.map((result) => /* @__PURE__ */ u$1(
+        "li",
+        {
+          className: `${SCRIPT_ID}-send-item`,
+          "data-status": result.status,
+          children: [
+            /* @__PURE__ */ u$1(
+              "a",
+              {
+                className: `${SCRIPT_ID}-send-name`,
+                href: `https://space.bilibili.com/${result.user.mid}`,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                children: result.user.name
+              }
+            ),
+            /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-status`, children: STATUS_TEXT[result.status] || result.status }),
+            result.error ? /* @__PURE__ */ u$1("span", { className: `${SCRIPT_ID}-send-error`, children: result.error }) : null
+          ]
+        },
+        result.user.mid
+      )) })
+    ] });
+  };
   const VideoCover = ({ video }) => {
     const [loadFailed, setLoadFailed] = d(false);
     if (!(video == null ? void 0 : video.pic) || loadFailed) {
@@ -2160,18 +2417,24 @@ https://www.bilibili.com/video/${video.bvid}`
   ] });
   const ShareDialog = ({ dialog, video, nav = null, status = "", error = "" }) => {
     const [activeTab, setActiveTab] = d("recent");
-    const [selectedUser, setSelectedUser] = d(null);
+    const [panelResetKey, setPanelResetKey] = d(0);
+    const [selectedUsers, setSelectedUsers] = d([]);
     const [sending, setSending] = d(false);
     const [sendError, setSendError] = d("");
-    const [sendResult, setSendResult] = d(null);
+    const [sendStage, setSendStage] = d("selecting");
+    const [sendResults, setSendResults] = d([]);
+    const selectedMids = T(() => selectedUsers.map((user) => user.mid), [selectedUsers]);
     y(() => {
-      setSelectedUser(null);
+      setActiveTab("recent");
+      setPanelResetKey((key) => key + 1);
+      setSelectedUsers([]);
       setSendError("");
-      setSendResult(null);
+      setSendStage("selecting");
+      setSendResults([]);
     }, [video]);
     const handleClose = q(() => closeDialog(dialog), [dialog]);
     const resetSelection = q(() => {
-      setSelectedUser(null);
+      setSelectedUsers([]);
       setSendError("");
     }, []);
     const handleTabChange = q(
@@ -2179,22 +2442,51 @@ https://www.bilibili.com/video/${video.bvid}`
         if (activeTab === tab) {
           return;
         }
-        resetSelection();
         setActiveTab(tab);
       },
-      [activeTab, resetSelection]
+      [activeTab]
     );
     const handleUserSelect = q((user) => {
       setSendError("");
-      setSelectedUser(user);
+      setSelectedUsers((currentUsers) => {
+        if (currentUsers.some((currentUser) => String(currentUser.mid) === String(user.mid))) {
+          return currentUsers.filter((currentUser) => String(currentUser.mid) !== String(user.mid));
+        }
+        return [...currentUsers, user];
+      });
     }, []);
-    const handleSendSuccess = q((nextResult) => {
+    const handleSendStart = q((users) => {
       setSendError("");
-      setSendResult(nextResult);
+      setSendStage("sending");
+      setSendResults(
+        users.map((user, index) => ({
+          user,
+          status: index === 0 ? "sending" : "pending",
+          error: ""
+        }))
+      );
+    }, []);
+    const handleSendProgress = q((nextResult) => {
+      setSendResults(
+        (currentResults) => currentResults.map(
+          (result) => String(result.user.mid) === String(nextResult.user.mid) ? { ...result, ...nextResult } : result
+        )
+      );
+    }, []);
+    const handleSendComplete = q(() => {
+      setSendStage("result");
+    }, []);
+    const handleContinue = q(() => {
+      setActiveTab("recent");
+      setPanelResetKey((key) => key + 1);
+      setSelectedUsers([]);
+      setSendError("");
+      setSendStage("selecting");
+      setSendResults([]);
     }, []);
     const renderBody = () => {
-      if (sendResult) {
-        return /* @__PURE__ */ u$1(StateView, { text: sendResult.message, isError: sendResult.isError });
+      if (sendStage !== "selecting") {
+        return /* @__PURE__ */ u$1(SendResultPanel, { results: sendResults });
       }
       if (status) {
         return /* @__PURE__ */ u$1(StateView, { text: status });
@@ -2209,19 +2501,21 @@ https://www.bilibili.com/video/${video.bvid}`
           RecentRecipientsPanel,
           {
             active: activeTab === "recent",
-            selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
+            selectedMids,
             onSelect: handleUserSelect
-          }
+          },
+          `recent-${panelResetKey}`
         ),
         /* @__PURE__ */ u$1(
           AllFriendsPanel,
           {
             active: activeTab === "all",
             mid: nav == null ? void 0 : nav.mid,
-            selectedMid: selectedUser == null ? void 0 : selectedUser.mid,
+            selectedMids,
             onSelectionReset: resetSelection,
             onSelect: handleUserSelect
-          }
+          },
+          `all-${panelResetKey}`
         )
       ] });
     };
@@ -2233,11 +2527,15 @@ https://www.bilibili.com/video/${video.bvid}`
         DialogFooter,
         {
           video,
-          selectedUser,
-          showCloseOnly: Boolean(sendResult),
+          maxSelectedUsers: MAX_SELECTED_USERS,
+          selectedUsers,
+          sendStage,
           onClose: handleClose,
+          onContinue: handleContinue,
           onSendingChange: setSending,
-          onSendSuccess: handleSendSuccess,
+          onSendStart: handleSendStart,
+          onSendProgress: handleSendProgress,
+          onSendComplete: handleSendComplete,
           onSendError: setSendError
         }
       )

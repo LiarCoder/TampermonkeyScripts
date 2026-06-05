@@ -7,7 +7,6 @@ import { RelationFilter } from "../relation-filter/RelationFilter.jsx";
 import { SearchBox } from "../search-box/SearchBox.jsx";
 import { StateView } from "../state-view/StateView.jsx";
 import { UserList } from "../user-list/UserList.jsx";
-import "./style.css";
 
 const createPageState = () => ({
   users: [],
@@ -35,7 +34,7 @@ const getPageLoadingState = (state) => ({
 export const AllFriendsPanel = ({
   active,
   mid,
-  selectedMid = null,
+  selectedMids = [],
   onSelect,
   onSelectionReset = () => {},
 }) => {
@@ -296,10 +295,6 @@ export const AllFriendsPanel = ({
     }
   }, [active, displaySource]);
 
-  const resetSelection = () => {
-    onSelectionReset();
-  };
-
   const scheduleSearch = (value, { immediate = false } = {}) => {
     const previousKeyword = searchTerm.trim();
     const nextKeyword = value.trim();
@@ -307,9 +302,6 @@ export const AllFriendsPanel = ({
     setSearchTerm(value);
     if (previousKeyword === nextKeyword) {
       return;
-    }
-    if (previousKeyword || nextKeyword) {
-      resetSelection();
     }
     if (immediate) {
       debouncedSearch.cancel();
@@ -321,10 +313,6 @@ export const AllFriendsPanel = ({
     }
     debouncedSearch(nextKeyword);
   };
-
-  if (!active) {
-    return null;
-  }
 
   const emptyText = activeRelation === "following" ? "暂无关注用户。" : "暂无粉丝用户。";
   const renderListContent = () => {
@@ -340,7 +328,7 @@ export const AllFriendsPanel = ({
     return (
       <UserList
         users={displayUsers}
-        selectedMid={selectedMid}
+        selectedMids={selectedMids}
         hasMore={displayState.hasMore}
         loadingMore={displayLoading.loadingMore}
         moreError={displayState.moreError}
@@ -352,29 +340,33 @@ export const AllFriendsPanel = ({
   };
 
   return (
-    <div className={`${SCRIPT_ID}-panel`} ref={panelRef}>
-      <RelationFilter
-        activeRelation={activeRelation}
-        onChange={(relation) => {
-          if (activeRelation === relation) {
-            return;
+    <div
+      className={`${SCRIPT_ID}-tab-panel${active ? ` ${SCRIPT_ID}-tab-panel-active` : ""}`}
+      aria-hidden={!active}
+    >
+      <div className={`${SCRIPT_ID}-panel`} ref={panelRef}>
+        <RelationFilter
+          activeRelation={activeRelation}
+          onChange={(relation) => {
+            if (activeRelation === relation) {
+              return;
+            }
+            saveCurrentScrollTop();
+            setActiveRelation(relation);
+          }}
+        />
+        <SearchBox
+          value={searchTerm}
+          notice={
+            activeRelation === "followers" && keyword
+              ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
+              : ""
           }
-          resetSelection();
-          saveCurrentScrollTop();
-          setActiveRelation(relation);
-        }}
-      />
-      <SearchBox
-        value={searchTerm}
-        notice={
-          activeRelation === "followers" && keyword
-            ? "粉丝搜索仅筛选已加载的用户，继续向下滚动可扩大搜索范围。"
-            : ""
-        }
-        onCompositionStart={() => debouncedSearch.cancel()}
-        onInput={scheduleSearch}
-      />
-      {renderListContent()}
+          onCompositionStart={() => debouncedSearch.cancel()}
+          onInput={scheduleSearch}
+        />
+        {renderListContent()}
+      </div>
     </div>
   );
 };
