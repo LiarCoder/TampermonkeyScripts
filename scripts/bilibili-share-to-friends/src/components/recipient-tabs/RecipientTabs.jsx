@@ -9,7 +9,7 @@ const tabs = [
 /**
  * 渲染分享弹窗中的接收人来源标签页。
  */
-export const RecipientTabs = ({ activeTab, onChange }) => (
+export const RecipientTabs = ({ activeTab, onChange, hasSelection = false, onClearSelection }) => (
   <div className={`${SCRIPT_ID}-tabs`}>
     {tabs.map((tab) => (
       <button
@@ -22,5 +22,13 @@ export const RecipientTabs = ({ activeTab, onChange }) => (
         {tab.label}
       </button>
     ))}
+    <button
+      className={`${SCRIPT_ID}-clear-selection`}
+      type="button"
+      disabled={!hasSelection}
+      onClick={onClearSelection}
+    >
+      清空所选
+    </button>
   </div>
 );

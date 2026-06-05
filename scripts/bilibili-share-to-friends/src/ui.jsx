@@ -111,7 +111,12 @@ export const ShareDialog = ({ dialog, video, nav = null, status = "", error = ""
     return (
       <>
         {sendError ? <StateView text={sendError} isError /> : null}
-        <RecipientTabs activeTab={activeTab} onChange={handleTabChange} />
+        <RecipientTabs
+          activeTab={activeTab}
+          onChange={handleTabChange}
+          hasSelection={selectedUsers.length > 0}
+          onClearSelection={resetSelection}
+        />
         <RecentRecipientsPanel
           key={`recent-${panelResetKey}`}
           active={activeTab === "recent"}
