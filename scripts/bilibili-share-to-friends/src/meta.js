@@ -14,7 +14,7 @@ export const userscript = {
   icon: "https://www.bilibili.com/favicon.ico",
   updateURL: rawScriptUrl,
   downloadURL: rawScriptUrl,
-  match: ["https://www.bilibili.com/video/*"],
+  match: ["https://www.bilibili.com/video/*", "https://www.bilibili.com/bangumi/play/*"],
   grant: ["GM_addStyle", "GM_xmlhttpRequest"],
   connect: ["api.bilibili.com", "api.vc.bilibili.com"],
   "run-at": "document-end",

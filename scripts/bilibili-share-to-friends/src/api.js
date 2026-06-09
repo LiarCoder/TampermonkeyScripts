@@ -37,6 +37,35 @@ export const getBvidFromLocation = () => {
 };
 
 /**
+ * 从当前 B 站番剧播放页地址读取 ep_id。
+ *
+ * @returns {string} 番剧分集 id；不在番剧 ep 页时返回空字符串。
+ */
+export const getBangumiEpIdFromLocation = () => {
+  const match = location.href.match(/\/bangumi\/play\/ep(\d+)/);
+  return match ? match[1] : "";
+};
+
+/**
+ * 读取当前视频路由标识，用于 SPA 路由切换时重新注入入口。
+ *
+ * @returns {string} 当前视频或番剧分集路由标识。
+ */
+export const getVideoRouteKey = () => {
+  const bvid = getBvidFromLocation();
+  if (bvid) {
+    return `video:${bvid}`;
+  }
+
+  const epId = getBangumiEpIdFromLocation();
+  if (epId) {
+    return `bangumi:${epId}`;
+  }
+
+  return "";
+};
+
+/**
  * 校验 B 站接口响应是否成功，并返回数据字段。
  *
  * @param {object} result B 站接口响应。
@@ -49,6 +78,21 @@ const assertSuccess = (result, action) => {
     throw new Error(`${action}失败：${message}（code: ${result?.code ?? "-"}）`);
   }
   return result.data;
+};
+
+/**
+ * 校验 B 站 PGC 接口响应是否成功，并返回 result 字段。
+ *
+ * @param {object} result B 站 PGC 接口响应。
+ * @param {string} action 用于错误提示的操作名称。
+ * @returns {unknown} 响应中的 result 字段。
+ */
+const assertPgcSuccess = (result, action) => {
+  if (!result || result.code !== 0) {
+    const message = result?.message || result?.msg || "未知错误";
+    throw new Error(`${action}失败：${message}（code: ${result?.code ?? "-"}）`);
+  }
+  return result.result;
 };
 
 /**
@@ -192,15 +236,12 @@ export const assertLogin = async () => {
 };
 
 /**
- * 加载文本分享所需的当前视频信息。
+ * 加载文本分享所需的普通视频信息。
  *
+ * @param {string} bvid BV 号。
  * @returns {Promise<object>} 归一化后的视频信息。
  */
-export const getVideoInfo = async () => {
-  const bvid = getBvidFromLocation();
-  if (!bvid) {
-    throw new Error("没有识别到当前视频的 BV 号。");
-  }
+const getArchiveVideoInfo = async (bvid) => {
   const result = await httpRequest({
     url: `https://api.bilibili.com/x/web-interface/view?${buildQuery({ bvid })}`,
   });
@@ -213,6 +254,89 @@ export const getVideoInfo = async () => {
     ownerName: data.owner?.name || "UP主",
     ownerMid: data.owner?.mid || 0,
   };
+};
+
+/**
+ * 从番剧详情数据中查找当前分集。
+ *
+ * @param {object} season 番剧详情数据。
+ * @param {string} epId 当前分集 id。
+ * @returns {object | undefined} 当前分集数据。
+ */
+const findBangumiEpisode = (season, epId) => {
+  const episodes = [
+    ...(season?.episodes || []),
+    ...(season?.section || []).flatMap((section) => section.episodes || []),
+  ];
+  return episodes.find((episode) => String(episode.ep_id || episode.id) === String(epId));
+};
+
+/**
+ * 生成番剧分集分享标题。
+ *
+ * @param {object} season 番剧详情数据。
+ * @param {object} episode 当前分集数据。
+ * @returns {string} 分集标题。
+ */
+const getBangumiEpisodeTitle = (season, episode) => {
+  if (episode.share_copy) {
+    return episode.share_copy;
+  }
+  return (
+    [
+      season?.title ? `《${season.title}》` : "",
+      episode.show_title || episode.long_title || episode.title,
+    ]
+      .filter(Boolean)
+      .join(" ") || document.title.replace("_哔哩哔哩_bilibili", "")
+  );
+};
+
+/**
+ * 加载文本分享所需的番剧分集信息。
+ *
+ * @param {string} epId 番剧分集 id。
+ * @returns {Promise<object>} 归一化后的视频信息。
+ */
+const getBangumiVideoInfo = async (epId) => {
+  const result = await httpRequest({
+    url: `https://api.bilibili.com/pgc/view/web/season?${buildQuery({ ep_id: epId })}`,
+  });
+  const season = assertPgcSuccess(result, "获取番剧分集信息");
+  const episode = findBangumiEpisode(season, epId);
+  if (!episode) {
+    throw new Error("没有找到当前番剧分集信息。");
+  }
+
+  return {
+    aid: episode.aid,
+    bvid: episode.bvid || "",
+    title: getBangumiEpisodeTitle(season, episode),
+    pic: normalizeImageUrl(episode.cover || season.cover || ""),
+    ownerName: season.title || "番剧",
+    ownerMid: 0,
+    shareUrl:
+      episode.share_url || episode.link || `https://www.bilibili.com/bangumi/play/ep${epId}`,
+  };
+};
+
+/**
+ * 加载文本分享所需的当前视频信息。
+ *
+ * @returns {Promise<object>} 归一化后的视频信息。
+ */
+export const getVideoInfo = async () => {
+  const bvid = getBvidFromLocation();
+  if (bvid) {
+    return getArchiveVideoInfo(bvid);
+  }
+
+  const epId = getBangumiEpIdFromLocation();
+  if (epId) {
+    return getBangumiVideoInfo(epId);
+  }
+
+  throw new Error("没有识别到当前视频的 BV 号或番剧 ep_id。");
 };
 
 /**
@@ -453,8 +577,9 @@ const getDevId = () => {
 export const sendVideoText = async ({ nav, csrf, video, receiver }) => {
   const devId = getDevId();
   const timestamp = Math.round(Date.now() / 1000);
+  const videoUrl = video.shareUrl || `https://www.bilibili.com/video/${video.bvid}`;
   const content = {
-    content: `分享视频：【UP主：${video.ownerName}】${video.title}\nhttps://www.bilibili.com/video/${video.bvid}`,
+    content: `分享视频：【UP主：${video.ownerName}】${video.title}\n${videoUrl}`,
   };
   const form = createSendMessageForm({
     nav,
