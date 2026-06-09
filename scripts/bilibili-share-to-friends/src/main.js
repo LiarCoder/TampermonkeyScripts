@@ -1,13 +1,26 @@
 import "./styles.css";
 
-import { getBvidFromLocation } from "./api.js";
-import { SHARE_BUTTONS_SELECTOR } from "./constants.js";
+import { getVideoRouteKey } from "./api.js";
+import { BANGUMI_SHARE_BUTTONS_SELECTOR, VIDEO_SHARE_BUTTONS_SELECTOR } from "./constants.js";
 import { createEntryButton } from "./ui.jsx";
 
-let currentBvid = "";
+let currentVideoRouteKey = "";
+
+const isBangumiPlayPage = () => location.pathname.startsWith("/bangumi/play/");
 
 const findShareMethodContainer = () => {
-  return document.querySelector(SHARE_BUTTONS_SELECTOR);
+  const selectors = isBangumiPlayPage()
+    ? [BANGUMI_SHARE_BUTTONS_SELECTOR, VIDEO_SHARE_BUTTONS_SELECTOR]
+    : [VIDEO_SHARE_BUTTONS_SELECTOR, BANGUMI_SHARE_BUTTONS_SELECTOR];
+
+  for (const selector of selectors) {
+    const container = document.querySelector(selector);
+    if (container) {
+      return container;
+    }
+  }
+
+  return null;
 };
 
 const injectEntry = () => {
@@ -28,9 +41,9 @@ const injectEntry = () => {
 };
 
 const handleRouteChange = () => {
-  const nextBvid = getBvidFromLocation();
-  if (nextBvid && nextBvid !== currentBvid) {
-    currentBvid = nextBvid;
+  const nextVideoRouteKey = getVideoRouteKey();
+  if (nextVideoRouteKey && nextVideoRouteKey !== currentVideoRouteKey) {
+    currentVideoRouteKey = nextVideoRouteKey;
     injectEntry();
   }
 };
@@ -52,7 +65,7 @@ const init = () => {
   if (window.self !== window.top) {
     return;
   }
-  currentBvid = getBvidFromLocation();
+  currentVideoRouteKey = getVideoRouteKey();
   injectEntry();
   observePage();
 };

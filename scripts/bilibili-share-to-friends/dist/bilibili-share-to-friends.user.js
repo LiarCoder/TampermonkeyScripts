@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.7
+// @version      0.4.8
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -9,6 +9,7 @@
 // @downloadURL  https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/bilibili-share-to-friends/dist/bilibili-share-to-friends.user.js
 // @updateURL    https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/bilibili-share-to-friends/dist/bilibili-share-to-friends.user.js
 // @match        https://www.bilibili.com/video/*
+// @match        https://www.bilibili.com/bangumi/play/*
 // @connect      api.bilibili.com
 // @connect      api.vc.bilibili.com
 // @grant        GM_addStyle
@@ -802,7 +803,8 @@
   const SESSION_LIMIT = 20;
   const MAX_SELECTED_USERS = 5;
   const RELATION_PAGE_SIZE = 20;
-  const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
+  const VIDEO_SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
+  const BANGUMI_SHARE_BUTTONS_SELECTOR = "#share-container-id .Share_shareBtns__X_uY9";
   const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
   const MIXIN_KEY_ENC_TAB = [
     46,
@@ -879,12 +881,34 @@
     const match = location.href.match(/\/video\/(BV[0-9A-Za-z]+)/);
     return match ? match[1] : "";
   };
+  const getBangumiEpIdFromLocation = () => {
+    const match = location.href.match(/\/bangumi\/play\/ep(\d+)/);
+    return match ? match[1] : "";
+  };
+  const getVideoRouteKey = () => {
+    const bvid = getBvidFromLocation();
+    if (bvid) {
+      return `video:${bvid}`;
+    }
+    const epId = getBangumiEpIdFromLocation();
+    if (epId) {
+      return `bangumi:${epId}`;
+    }
+    return "";
+  };
   const assertSuccess = (result, action) => {
     if (!result || result.code !== 0) {
       const message = (result == null ? void 0 : result.message) || (result == null ? void 0 : result.msg) || "未知错误";
       throw new Error(`${action}失败：${message}（code: ${(result == null ? void 0 : result.code) ?? "-"}）`);
     }
     return result.data;
+  };
+  const assertPgcSuccess = (result, action) => {
+    if (!result || result.code !== 0) {
+      const message = (result == null ? void 0 : result.message) || (result == null ? void 0 : result.msg) || "未知错误";
+      throw new Error(`${action}失败：${message}（code: ${(result == null ? void 0 : result.code) ?? "-"}）`);
+    }
+    return result.result;
   };
   const createSendMessageForm = ({
     nav,
@@ -977,12 +1001,8 @@
     }
     return { nav, csrf };
   };
-  const getVideoInfo = async () => {
+  const getArchiveVideoInfo = async (bvid) => {
     var _a, _b;
-    const bvid = getBvidFromLocation();
-    if (!bvid) {
-      throw new Error("没有识别到当前视频的 BV 号。");
-    }
     const result = await httpRequest({
       url: `https://api.bilibili.com/x/web-interface/view?${buildQuery({ bvid })}`
     });
@@ -995,6 +1015,52 @@
       ownerName: ((_a = data.owner) == null ? void 0 : _a.name) || "UP主",
       ownerMid: ((_b = data.owner) == null ? void 0 : _b.mid) || 0
     };
+  };
+  const findBangumiEpisode = (season, epId) => {
+    const episodes = [
+      ...(season == null ? void 0 : season.episodes) || [],
+      ...((season == null ? void 0 : season.section) || []).flatMap((section) => section.episodes || [])
+    ];
+    return episodes.find((episode) => String(episode.ep_id || episode.id) === String(epId));
+  };
+  const getBangumiEpisodeTitle = (season, episode) => {
+    if (episode.share_copy) {
+      return episode.share_copy;
+    }
+    return [
+      (season == null ? void 0 : season.title) ? `《${season.title}》` : "",
+      episode.show_title || episode.long_title || episode.title
+    ].filter(Boolean).join(" ") || document.title.replace("_哔哩哔哩_bilibili", "");
+  };
+  const getBangumiVideoInfo = async (epId) => {
+    const result = await httpRequest({
+      url: `https://api.bilibili.com/pgc/view/web/season?${buildQuery({ ep_id: epId })}`
+    });
+    const season = assertPgcSuccess(result, "获取番剧分集信息");
+    const episode = findBangumiEpisode(season, epId);
+    if (!episode) {
+      throw new Error("没有找到当前番剧分集信息。");
+    }
+    return {
+      aid: episode.aid,
+      bvid: episode.bvid || "",
+      title: getBangumiEpisodeTitle(season, episode),
+      pic: normalizeImageUrl(episode.cover || season.cover || ""),
+      ownerName: season.title || "番剧",
+      ownerMid: 0,
+      shareUrl: episode.share_url || episode.link || `https://www.bilibili.com/bangumi/play/ep${epId}`
+    };
+  };
+  const getVideoInfo = async () => {
+    const bvid = getBvidFromLocation();
+    if (bvid) {
+      return getArchiveVideoInfo(bvid);
+    }
+    const epId = getBangumiEpIdFromLocation();
+    if (epId) {
+      return getBangumiVideoInfo(epId);
+    }
+    throw new Error("没有识别到当前视频的 BV 号或番剧 ep_id。");
   };
   const readSessionCache = () => {
     try {
@@ -1144,9 +1210,10 @@
   const sendVideoText = async ({ nav, csrf, video, receiver }) => {
     const devId = getDevId();
     const timestamp = Math.round(Date.now() / 1e3);
+    const videoUrl = video.shareUrl || `https://www.bilibili.com/video/${video.bvid}`;
     const content = {
       content: `分享视频：【UP主：${video.ownerName}】${video.title}
-https://www.bilibili.com/video/${video.bvid}`
+${videoUrl}`
     };
     const form = createSendMessageForm({
       nav,
@@ -2625,9 +2692,17 @@ https://www.bilibili.com/video/${video.bvid}`
     }
   };
   const createEntryButton = () => createEntryButton$1({ onClick: openShareDialog });
-  let currentBvid = "";
+  let currentVideoRouteKey = "";
+  const isBangumiPlayPage = () => location.pathname.startsWith("/bangumi/play/");
   const findShareMethodContainer = () => {
-    return document.querySelector(SHARE_BUTTONS_SELECTOR);
+    const selectors = isBangumiPlayPage() ? [BANGUMI_SHARE_BUTTONS_SELECTOR, VIDEO_SHARE_BUTTONS_SELECTOR] : [VIDEO_SHARE_BUTTONS_SELECTOR, BANGUMI_SHARE_BUTTONS_SELECTOR];
+    for (const selector of selectors) {
+      const container = document.querySelector(selector);
+      if (container) {
+        return container;
+      }
+    }
+    return null;
   };
   const injectEntry = () => {
     const container = findShareMethodContainer();
@@ -2646,9 +2721,9 @@ https://www.bilibili.com/video/${video.bvid}`
     container.appendChild(entry);
   };
   const handleRouteChange = () => {
-    const nextBvid = getBvidFromLocation();
-    if (nextBvid && nextBvid !== currentBvid) {
-      currentBvid = nextBvid;
+    const nextVideoRouteKey = getVideoRouteKey();
+    if (nextVideoRouteKey && nextVideoRouteKey !== currentVideoRouteKey) {
+      currentVideoRouteKey = nextVideoRouteKey;
       injectEntry();
     }
   };
@@ -2668,7 +2743,7 @@ https://www.bilibili.com/video/${video.bvid}`
     if (window.self !== window.top) {
       return;
     }
-    currentBvid = getBvidFromLocation();
+    currentVideoRouteKey = getVideoRouteKey();
     injectEntry();
     observePage();
   };

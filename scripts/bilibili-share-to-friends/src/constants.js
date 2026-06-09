@@ -22,8 +22,11 @@ export const MAX_SELECTED_USERS = 5;
 /** 加载关注或粉丝列表时使用的分页大小。 */
 export const RELATION_PAGE_SIZE = 20;
 
-/** B 站原生分享按钮容器选择器。 */
-export const SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
+/** B 站普通视频页原生分享按钮容器选择器。 */
+export const VIDEO_SHARE_BUTTONS_SELECTOR = ".video-share-dropdown .dropdown-bottom > .share-btns";
+
+/** B 站番剧播放页原生分享按钮容器选择器。 */
+export const BANGUMI_SHARE_BUTTONS_SELECTOR = "#share-container-id .Share_shareBtns__X_uY9";
 
 /** 关系用户列表分页滚动容器选择器。 */
 export const LIST_SCROLL_SELECTOR = "[data-bili-share-to-friends-list-scroll]";
