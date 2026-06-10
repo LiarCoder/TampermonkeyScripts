@@ -105,15 +105,6 @@
     target.appendChild(style);
     return style;
   };
-  const debounce = (callback, delay) => {
-    let timer = null;
-    const debounced = (...args) => {
-      globalThis.clearTimeout(timer);
-      timer = globalThis.setTimeout(() => callback(...args), delay);
-    };
-    debounced.cancel = () => globalThis.clearTimeout(timer);
-    return debounced;
-  };
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   const DIALOG_ID = "bitbucket-pr-checker";
   const DIALOG_BUTTONS_ID = "pr-checker-btns";
@@ -364,96 +355,52 @@
   const CONTINUE_BUTTON_ID = "show-create-pr-button";
   const TARGET_BRANCH_INPUT_ID = "targetBranch-field";
   const ILLEGAL_TARGET_BRANCHES = ["master", "main"];
-  const WARNING_TEXT_PREFIX = "目标分支不能为";
-  const CHECK_DELAY = 300;
-  const OBSERVER_DEBOUNCE_DELAY = 80;
-  const BLOCKED_DATA_KEY = "prCheckerTargetBranchBlocked";
   const isIllegalTargetBranch = (targetBranch) => ILLEGAL_TARGET_BRANCHES.some((illegalTargetBranch) => targetBranch.includes(illegalTargetBranch));
-  const getTargetBranchInput = () => document.getElementById(TARGET_BRANCH_INPUT_ID);
-  const getContinueButton = () => document.getElementById(CONTINUE_BUTTON_ID);
-  const getTargetBranch = () => {
-    var _a;
-    return ((_a = getTargetBranchInput()) == null ? void 0 : _a.value) ?? "";
-  };
   const showTargetBranchWarning = (targetBranch) => {
-    const createPrButton = getContinueButton();
-    if (!createPrButton) {
+    const createPrButton = document.getElementById(CONTINUE_BUTTON_ID);
+    if (!createPrButton || !isIllegalTargetBranch(targetBranch)) {
       return;
     }
     const warningTip = `目标分支不能为 ${targetBranch}`;
     const warningWrapper = document.querySelector(".pr-create-warning");
     const warningText = document.querySelector(".pr-create-warning-text");
-    if (!createPrButton.hasAttribute("disabled")) {
-      createPrButton.setAttribute("disabled", "");
-    }
-    if (createPrButton.getAttribute("title") !== warningTip) {
-      createPrButton.setAttribute("title", warningTip);
-    }
-    createPrButton.dataset[BLOCKED_DATA_KEY] = "true";
+    createPrButton.setAttribute("disabled", "");
+    createPrButton.setAttribute("title", warningTip);
     warningWrapper == null ? void 0 : warningWrapper.classList.remove("hidden");
-    if (warningText && warningText.innerText !== warningTip) {
+    if (warningText) {
       warningText.innerText = warningTip;
     }
   };
-  const clearTargetBranchWarning = () => {
-    var _a;
-    const createPrButton = getContinueButton();
-    if (!createPrButton || createPrButton.dataset[BLOCKED_DATA_KEY] !== "true") {
-      return;
-    }
-    createPrButton.removeAttribute("disabled");
-    if ((_a = createPrButton.getAttribute("title")) == null ? void 0 : _a.startsWith(WARNING_TEXT_PREFIX)) {
-      createPrButton.removeAttribute("title");
-    }
-    delete createPrButton.dataset[BLOCKED_DATA_KEY];
-    const warningWrapper = document.querySelector(".pr-create-warning");
-    const warningText = document.querySelector(".pr-create-warning-text");
-    if (warningText == null ? void 0 : warningText.innerText.startsWith(WARNING_TEXT_PREFIX)) {
-      warningText.innerText = "";
-      warningWrapper == null ? void 0 : warningWrapper.classList.add("hidden");
-    }
-  };
-  const checkTargetBranch = () => {
-    const targetBranch = getTargetBranch();
-    if (!targetBranch) {
-      return;
-    }
-    if (isIllegalTargetBranch(targetBranch)) {
-      showTargetBranchWarning(targetBranch);
-      return;
-    }
-    clearTargetBranchWarning();
-  };
-  const triggerTargetBranchCheck = ({ immediate = false } = {}) => {
+  const triggerTargetBranchWarning = (targetBranch, { immediate = false } = {}) => {
     window.setTimeout(
       () => {
-        checkTargetBranch();
+        showTargetBranchWarning(targetBranch);
       },
-      immediate ? 0 : CHECK_DELAY
+      immediate ? 0 : 300
     );
   };
-  const observeTargetBranch = () => {
+  const observeTargetBranch = (targetBranchInput) => {
     if (typeof MutationObserver !== "function") {
       return;
     }
-    const debouncedCheck = debounce(() => {
-      triggerTargetBranchCheck();
-    }, OBSERVER_DEBOUNCE_DELAY);
     const observer = new MutationObserver(() => {
-      debouncedCheck();
+      const targetBranch = targetBranchInput.value;
+      if (targetBranch) {
+        triggerTargetBranchWarning(targetBranch);
+      }
     });
-    observer.observe(document.documentElement, {
+    observer.observe(targetBranchInput, {
       attributes: true,
-      attributeFilter: ["class", "disabled", "title", "value"],
-      childList: true,
-      subtree: true
+      attributeFilter: ["value"]
     });
   };
   const initTargetBranchChecker = () => {
-    triggerTargetBranchCheck({ immediate: true });
-    observeTargetBranch();
-    document.addEventListener("input", () => triggerTargetBranchCheck());
-    document.addEventListener("change", () => triggerTargetBranchCheck());
+    const targetBranchInput = document.getElementById(TARGET_BRANCH_INPUT_ID);
+    if (!targetBranchInput) {
+      return;
+    }
+    triggerTargetBranchWarning(targetBranchInput.value, { immediate: true });
+    observeTargetBranch(targetBranchInput);
   };
   const STYLE_ID = "pr-checker-style";
   const isTopWindow = () => {
