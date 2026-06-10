@@ -73,6 +73,25 @@
       return false;
     }
   };
+  const getDocumentMountTarget = (documentRef = globalThis.document) => (documentRef == null ? void 0 : documentRef.body) ?? (documentRef == null ? void 0 : documentRef.documentElement) ?? null;
+  const observeAttributeChange = (element, attributeName, callback, { observerConstructor = globalThis.MutationObserver } = {}) => {
+    if (!element || !attributeName || typeof callback !== "function") {
+      return () => {
+      };
+    }
+    if (typeof observerConstructor !== "function") {
+      return () => {
+      };
+    }
+    const observer = new observerConstructor(() => {
+      callback(element.getAttribute(attributeName), element);
+    });
+    observer.observe(element, {
+      attributes: true,
+      attributeFilter: [attributeName]
+    });
+    return () => observer.disconnect();
+  };
   const waitForElement = (selector, { root = document, timeout = 1e4, interval = 100 } = {}) => new Promise((resolve, reject) => {
     const existing = root.querySelector(selector);
     if (existing) {
@@ -93,6 +112,20 @@
       }
     }, interval);
   });
+  const safeParseJson = (rawValue, fallback = null) => {
+    if (rawValue === null || rawValue === void 0 || rawValue === "") {
+      return fallback;
+    }
+    try {
+      return JSON.parse(rawValue);
+    } catch {
+      return fallback;
+    }
+  };
+  const safeParseArray = (rawValue) => {
+    const parsedValue = safeParseJson(rawValue, []);
+    return Array.isArray(parsedValue) ? parsedValue : [];
+  };
   const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
     if (id) {
       const existing = document.getElementById(id);
@@ -135,23 +168,11 @@
   ];
   const noop = () => {
   };
-  const getMountTarget = () => document.body ?? document.documentElement;
   const getUsername = () => {
     var _a;
     return ((_a = document.querySelector("[data-username]")) == null ? void 0 : _a.dataset.username) ?? "";
   };
   const getCustomCheckItemsStorageKey = () => `${CUSTOM_CHECK_ITEMS_STORAGE_PREFIX}.${getUsername()}`;
-  const safeParseArray = (rawValue) => {
-    if (!rawValue) {
-      return [];
-    }
-    try {
-      const parsedValue = JSON.parse(rawValue);
-      return Array.isArray(parsedValue) ? parsedValue : [];
-    } catch {
-      return [];
-    }
-  };
   const getCustomCheckItems = (storageKey) => safeParseArray(window.localStorage.getItem(storageKey)).map((item) => String(item));
   const setCustomCheckItems = (storageKey, checkItems) => {
     window.localStorage.setItem(storageKey, JSON.stringify(checkItems));
@@ -248,7 +269,7 @@
         })
       ]
     });
-    const mountTarget = getMountTarget();
+    const mountTarget = getDocumentMountTarget();
     if (mountTarget) {
       mountTarget.appendChild(fragment);
     }
@@ -398,15 +419,8 @@
     }
   };
   const observeInputValueChange = (input, onChange) => {
-    if (typeof MutationObserver !== "function") {
-      return;
-    }
-    const observer = new MutationObserver(() => {
+    observeAttributeChange(input, "value", () => {
       onChange(input.value);
-    });
-    observer.observe(input, {
-      attributes: true,
-      attributeFilter: ["value"]
     });
   };
   const initTargetBranchChecker = () => {
