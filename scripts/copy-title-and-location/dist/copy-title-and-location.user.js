@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         复制标题和地址
 // @namespace    http://tampermonkey.net/
-// @version      0.7.1
+// @version      0.7.2
 // @author       LiarCoder
 // @description  一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）
 // @icon         data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABTklEQVQ4jY3TO0tcURQF4G/ixFdhCIg2qWysZPwDsUkXSJk2Qso0IpLOTtLERkGwEjQhXV5d0gkGK6v7E/IHgg9EHR0nHLLvzGHujGbB5pzLOXvttfc6twaNRiMta1g1GG28xJfyRlEU6rF/FskpjvA4o7nABD7gM17hY3lYEjzHOd4NqP8QW3gURA+wJzYJI2hV0rq4xtfsexdPcwW3EQmLaSw4wVCQr+M1DtDEJt7iVz1jLRUsB0GOn9iPymWRJ7mChOFY5ysNVFHrHaKwKWEGUyG1HZcnMY4/0UarH0Ez1u+Yq9T8h5tw5BTTg1p4EYfNnuR6WC3srCgo+/odcRdK+7ubrGIRvfeLq7hz3KsgESXPE97HDFKfOUazxLFegst4MAmf7pGfkP6NNNAOwTesYAM/YkgdrzOcYRYLeJMTHMbTTE926T8U7GAb/gI+kkP5n3CsvwAAAABJRU5ErkJggg==
@@ -9,6 +9,7 @@
 // @updateURL    https://raw.githubusercontent.com/LiarCoder/TampermonkeyScripts/main/scripts/copy-title-and-location/dist/copy-title-and-location.user.js
 // @match        *://*/*
 // @grant        GM_addStyle
+// @noframes
 // ==/UserScript==
 
 (function () {
@@ -132,7 +133,7 @@
   const BUTTON_ID = "copy-title-and-location";
   const STYLE_ID = `${BUTTON_ID}-style`;
   const BUTTON_TEXT = "复制标题和地址";
-  const BUTTON_ICON_SVG = '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const BUTTON_STYLE = `
   #${BUTTON_ID} {
     position: fixed;
@@ -193,6 +194,51 @@
     }
   };
   const getMountTarget = () => document.body ?? document.documentElement;
+  const createSvgElement = (tagName, attributes = {}) => {
+    const element = document.createElementNS(SVG_NAMESPACE, tagName);
+    Object.entries(attributes).forEach(([key, value]) => {
+      element.setAttribute(key, String(value));
+    });
+    return element;
+  };
+  const createButtonIcon = () => {
+    const icon = createSvgElement("svg", {
+      width: 16,
+      height: 16,
+      viewBox: "0 0 48 48",
+      fill: "none"
+    });
+    icon.append(
+      createSvgElement("rect", {
+        width: 48,
+        height: 48,
+        fill: "white",
+        "fill-opacity": "0.01"
+      }),
+      createSvgElement("path", {
+        d: "M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z",
+        fill: "none",
+        stroke: "#333",
+        "stroke-width": 4,
+        "stroke-linejoin": "round"
+      }),
+      createSvgElement("path", {
+        d: "M16 20H32",
+        stroke: "#333",
+        "stroke-width": 4,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      }),
+      createSvgElement("path", {
+        d: "M16 28H32",
+        stroke: "#333",
+        "stroke-width": 4,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      })
+    );
+    return icon;
+  };
   const createTimestamp = () => {
     const date = /* @__PURE__ */ new Date();
     const dateText = date.toLocaleDateString().replace("/", "年").replace("/", "月");
@@ -232,11 +278,12 @@
   };
   const createCopyButton = () => createElement({
     tagName: "button",
-    html: `${BUTTON_TEXT}${BUTTON_ICON_SVG}`,
+    text: BUTTON_TEXT,
     attributes: {
       id: BUTTON_ID,
       type: "button"
     },
+    children: [createButtonIcon()],
     events: [
       {
         name: "click",
