@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PR三思器
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
+// @version      1.3.2
 // @author       liaw
 // @description  创建PR前，提醒一下有没有一些遗漏的东西需要检查
 // @license      MIT
