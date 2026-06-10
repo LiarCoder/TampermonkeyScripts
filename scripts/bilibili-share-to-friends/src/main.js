@@ -1,5 +1,7 @@
 import "./styles.css";
 
+import { isTopWindow } from "@tampermonkey-scripts/shared";
+
 import { getVideoRouteKey } from "./api.js";
 import { BANGUMI_SHARE_BUTTONS_SELECTOR, VIDEO_SHARE_BUTTONS_SELECTOR } from "./constants.js";
 import { createEntryButton } from "./ui.jsx";
@@ -62,7 +64,7 @@ const observePage = () => {
 };
 
 const init = () => {
-  if (window.self !== window.top) {
+  if (!isTopWindow()) {
     return;
   }
   currentVideoRouteKey = getVideoRouteKey();

@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createElement, waitForElement } from "../../src/utils/dom.js";
+import {
+  createElement,
+  createSvgElement,
+  isTopWindow,
+  waitForElement,
+} from "../../src/utils/dom.js";
 
 class FakeElement {
   constructor(tagName) {
@@ -127,6 +132,54 @@ test("创建元素时支持通过函数生成子节点", () => {
 
     assert.deepEqual(element.children, [child]);
   });
+});
+
+test("创建 SVG 元素时会应用属性并忽略空值", () => {
+  const document = {
+    createElementNS: (namespace, tagName) => {
+      const element = new FakeElement(tagName);
+      element.namespace = namespace;
+      return element;
+    },
+  };
+
+  withDomGlobals({ document, window: {} }, () => {
+    const element = createSvgElement("path", {
+      d: "M0 0H10",
+      "stroke-width": 4,
+      ignored: null,
+    });
+
+    assert.equal(element.tagName, "PATH");
+    assert.equal(element.namespace, "http://www.w3.org/2000/svg");
+    assert.equal(element.getAttribute("d"), "M0 0H10");
+    assert.equal(element.getAttribute("stroke-width"), "4");
+    assert.equal(element.getAttribute("ignored"), undefined);
+  });
+});
+
+test("判断顶层窗口时会识别当前窗口", () => {
+  const topWindow = {};
+  const childWindow = {
+    self: {},
+    top: topWindow,
+  };
+  topWindow.self = topWindow;
+  topWindow.top = topWindow;
+
+  assert.equal(isTopWindow(topWindow), true);
+  assert.equal(isTopWindow(childWindow), false);
+});
+
+test("判断顶层窗口时会处理跨域访问异常", () => {
+  const windowRef = {
+    self: {},
+    get top() {
+      throw new Error("Permission denied");
+    },
+  };
+
+  assert.equal(isTopWindow(windowRef), false);
 });
 
 test("等待元素时会立即返回已存在的元素", async () => {

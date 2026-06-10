@@ -17,31 +17,31 @@
 // @run-at       document-end
 // ==/UserScript==
 
-(n=>{if(typeof GM_addStyle=="function"){GM_addStyle(n);return}const r=document.createElement("style");r.textContent=n,document.head.append(r)})(` .bili-share-to-friends-body {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-}
-
-.bili-share-to-friends-tab-panel {
-  display: none;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.bili-share-to-friends-tab-panel-active {
-  display: block;
-}
-
-.bili-share-to-friends-panel {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
+(r=>{if(typeof GM_addStyle=="function"){GM_addStyle(r);return}const n=document.createElement("style");n.textContent=r,document.head.append(n)})(` .bili-share-to-friends-body {\r
+  display: flex;\r
+  flex-direction: column;\r
+  flex: 1 1 auto;\r
+  min-height: 0;\r
+  overflow: hidden;\r
+}\r
+\r
+.bili-share-to-friends-tab-panel {\r
+  display: none;\r
+  flex: 1 1 auto;\r
+  min-height: 0;\r
+}\r
+\r
+.bili-share-to-friends-tab-panel-active {\r
+  display: block;\r
+}\r
+\r
+.bili-share-to-friends-panel {\r
+  display: flex;\r
+  flex: 1 1 auto;\r
+  flex-direction: column;\r
+  height: 100%;\r
+  min-height: 0;\r
+}\r
 .bili-share-to-friends-relation-filter {\r
   display: flex;\r
   gap: 18px;\r
@@ -79,43 +79,43 @@
   outline: 2px solid rgba(0, 174, 236, 0.2);\r
   outline-offset: 2px;\r
 }\r
-.bili-share-to-friends-search {
-  flex: 0 0 auto;
-  padding: 6px 14px 3px;
-}
-
-.bili-share-to-friends-search-input {
-  box-sizing: border-box;
-  width: 100%;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #d7d9dc;
-  border-radius: 4px;
-  outline: none;
-  color: #18191c;
-  background: #fff;
-  font-size: 13px;
-}
-
-.bili-share-to-friends-search-input:focus {
-  border-color: #00aeec;
-}
-
-.bili-share-to-friends-search-notice {
-  margin-top: 4px;
-  color: #9499a0;
-  font-size: 12px;
-  line-height: 18px;
-}
-.bili-share-to-friends-state {
-  padding: 28px 16px;
-  color: #61666d;
-  text-align: center;
-}
-
-.bili-share-to-friends-state-error {
-  color: #d03050;
-}
+.bili-share-to-friends-search {\r
+  flex: 0 0 auto;\r
+  padding: 6px 14px 3px;\r
+}\r
+\r
+.bili-share-to-friends-search-input {\r
+  box-sizing: border-box;\r
+  width: 100%;\r
+  height: 30px;\r
+  padding: 0 10px;\r
+  border: 1px solid #d7d9dc;\r
+  border-radius: 4px;\r
+  outline: none;\r
+  color: #18191c;\r
+  background: #fff;\r
+  font-size: 13px;\r
+}\r
+\r
+.bili-share-to-friends-search-input:focus {\r
+  border-color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-search-notice {\r
+  margin-top: 4px;\r
+  color: #9499a0;\r
+  font-size: 12px;\r
+  line-height: 18px;\r
+}\r
+.bili-share-to-friends-state {\r
+  padding: 28px 16px;\r
+  color: #61666d;\r
+  text-align: center;\r
+}\r
+\r
+.bili-share-to-friends-state-error {\r
+  color: #d03050;\r
+}\r
 .bili-share-to-friends-person {\r
   display: grid;\r
   grid-template-columns: 36px 1fr auto;\r
@@ -255,367 +255,373 @@
   flex-direction: column;\r
   min-height: 0;\r
 }\r
-.bili-share-to-friends-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex: 0 0 auto;
-  padding: 9px 14px;
-  border-top: 1px solid #e3e5e7;
-}
-
-.bili-share-to-friends-footer-notice {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  color: #61666d;
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bili-share-to-friends-footer-notice[data-error="true"] {
-  color: #d03050;
-}
-
-.bili-share-to-friends-btn {
-  min-width: 76px;
-  height: 30px;
-  padding: 0 14px;
-  border: 1px solid #c9ccd0;
-  border-radius: 4px;
-  background: #fff;
-  color: #18191c;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-btn:hover {
-  border-color: #00aeec;
-  color: #00aeec;
-}
-
-.bili-share-to-friends-btn-primary {
-  color: #fff;
-  border-color: #00aeec;
-  background: #00aeec;
-}
-
-.bili-share-to-friends-btn-primary:hover {
-  color: #fff;
-  border-color: #40c5f1;
-  background: #40c5f1;
-}
-
-.bili-share-to-friends-btn:disabled {
-  border-color: #e3e5e7;
-  background: #f6f7f8;
-  color: #c9ccd0;
-  cursor: not-allowed;
-}
-.bili-share-to-friends-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 0 0 auto;
-  padding: 8px 14px;
-  border-bottom: 1px solid #e3e5e7;
-}
-
-.bili-share-to-friends-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.bili-share-to-friends-close {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: #61666d;
-  font-size: 0;
-  line-height: 0;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-close::before,
-.bili-share-to-friends-close::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 16px;
-  height: 2px;
-  border-radius: 1px;
-  background: currentColor;
-  content: "";
-}
-
-.bili-share-to-friends-close::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.bili-share-to-friends-close::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.bili-share-to-friends-close:hover {
-  background: #f1f2f3;
-}
-.bili-share-to-friends-entry {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  width: 60px;
-  min-width: 60px;
-  height: 60px;
-  margin: 0 0px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  color: #18191c;
-  background: transparent;
-  font-size: 12px;
-  line-height: 21px;
-  cursor: pointer;
-  user-select: none;
-  vertical-align: top;
-  transition:
-    color 0.2s,
-    transform 0.2s;
-}
-
-.bili-share-to-friends-entry:hover {
-  color: #00aeec;
-  transform: translateY(-1px);
-}
-
-.bili-share-to-friends-entry-text {
-  color: #18191c;
-  white-space: nowrap;
-}
-
-.bili-share-to-friends-entry:hover .bili-share-to-friends-entry-text {
-  color: #00aeec;
-}
-
-.bili-share-to-friends-entry-icon {
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: #fff;
-  background: #00aeec;
-}
-
-.bili-share-to-friends-entry-icon svg {
-  width: 22px;
-  height: 22px;
-}
-.bili-share-to-friends-tabs {
-  display: flex;
-  gap: 8px;
-  flex: 0 0 auto;
-  padding: 7px 14px 8px;
-  background: #fff;
-}
-
-.bili-share-to-friends-tab {
-  height: 28px;
-  padding: 0 10px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #61666d;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-tab:hover {
-  color: #00aeec;
-}
-
-.bili-share-to-friends-tab[aria-selected="true"] {
-  color: #00aeec;
-  border-color: #b8e8f8;
-  background: #f6fbff;
-  font-weight: 600;
-}
-
-.bili-share-to-friends-clear-selection {
-  height: 28px;
-  margin-left: auto;
-  padding: 0 10px;
-  border: 1px solid #fb7299;
-  border-radius: 4px;
-  background: #fff;
-  color: #fb7299;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.bili-share-to-friends-clear-selection:hover {
-  background: #fff4f7;
-}
-
-.bili-share-to-friends-clear-selection:disabled {
-  border-color: #e3e5e7;
-  background: #f6f7f8;
-  color: #c9ccd0;
-  cursor: not-allowed;
-}
-.bili-share-to-friends-send-result {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-  padding: 14px;
-}
-
-.bili-share-to-friends-send-summary {
-  color: #18191c;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.bili-share-to-friends-send-summary-success {
-  color: #389e0d;
-}
-
-.bili-share-to-friends-send-summary-failed {
-  color: #d03050;
-}
-
-.bili-share-to-friends-send-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  list-style: none;
-}
-
-.bili-share-to-friends-send-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 10px;
-  align-items: center;
-  padding: 10px;
-  border: 1px solid #e3e5e7;
-  border-radius: 6px;
-  background: #fff;
-}
-
-.bili-share-to-friends-send-item[data-status="success"] {
-  border-color: #b7eb8f;
-  background: #f6ffed;
-}
-
-.bili-share-to-friends-send-item[data-status="failed"] {
-  border-color: #ffccc7;
-  background: #fff2f0;
-}
-
-.bili-share-to-friends-send-name {
-  display: inline-block;
-  min-width: 0;
-  overflow: hidden;
-  color: #18191c;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.bili-share-to-friends-send-name:hover,
-.bili-share-to-friends-send-name:focus-visible {
-  color: #00aeec;
-}
-
-.bili-share-to-friends-send-status {
-  color: #61666d;
-  font-size: 12px;
-}
-
-.bili-share-to-friends-send-item[data-status="success"] .bili-share-to-friends-send-status {
-  color: #389e0d;
-}
-
-.bili-share-to-friends-send-item[data-status="failed"] .bili-share-to-friends-send-status,
-.bili-share-to-friends-send-error {
-  color: #d03050;
-}
-
-.bili-share-to-friends-send-error {
-  grid-column: 1 / -1;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.bili-share-to-friends-video {
-  display: grid;
-  grid-template-columns: 80px 1fr;
-  gap: 9px;
-  flex: 0 0 auto;
-  padding: 9px 14px;
-  border-bottom: 1px solid #e3e5e7;
-  background: #f6f7f8;
-}
-
-.bili-share-to-friends-cover {
-  width: 80px;
-  aspect-ratio: 16 / 10;
-  border-radius: 4px;
-  background: #e3e5e7;
-}
-
-.bili-share-to-friends-cover-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #9499a0;
-  font-size: 12px;
-}
-
-.bili-share-to-friends-cover-img {
-  object-fit: cover;
-}
-
-.bili-share-to-friends-video-title {
-  margin: 0;
-  color: #18191c;
-  font-size: 13px;
-  line-height: 17px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.bili-share-to-friends-video-author {
-  margin-top: 4px;
-  color: #9499a0;
-  font-size: 12px;
+.bili-share-to-friends-footer {\r
+  display: flex;\r
+  align-items: center;\r
+  justify-content: flex-end;\r
+  gap: 10px;\r
+  flex: 0 0 auto;\r
+  padding: 9px 14px;\r
+  border-top: 1px solid #e3e5e7;\r
+}\r
+\r
+.bili-share-to-friends-footer-notice {\r
+  flex: 1 1 auto;\r
+  min-width: 0;\r
+  overflow: hidden;\r
+  color: #61666d;\r
+  font-size: 12px;\r
+  text-overflow: ellipsis;\r
+  white-space: nowrap;\r
+}\r
+\r
+.bili-share-to-friends-footer-notice[data-error="true"] {\r
+  color: #d03050;\r
+}\r
+\r
+.bili-share-to-friends-btn {\r
+  min-width: 76px;\r
+  height: 30px;\r
+  padding: 0 14px;\r
+  border: 1px solid #c9ccd0;\r
+  border-radius: 4px;\r
+  background: #fff;\r
+  color: #18191c;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-btn:hover {\r
+  border-color: #00aeec;\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-btn-primary {\r
+  color: #fff;\r
+  border-color: #00aeec;\r
+  background: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-btn-primary:hover {\r
+  color: #fff;\r
+  border-color: #40c5f1;\r
+  background: #40c5f1;\r
+}\r
+\r
+.bili-share-to-friends-btn:disabled {\r
+  border-color: #e3e5e7;\r
+  background: #f6f7f8;\r
+  color: #c9ccd0;\r
+  cursor: not-allowed;\r
+}\r
+.bili-share-to-friends-header {\r
+  display: flex;\r
+  align-items: center;\r
+  justify-content: space-between;\r
+  flex: 0 0 auto;\r
+  padding: 8px 14px;\r
+  border-bottom: 1px solid #e3e5e7;\r
+}\r
+\r
+.bili-share-to-friends-title {\r
+  margin: 0;\r
+  font-size: 16px;\r
+  font-weight: 600;\r
+}\r
+\r
+.bili-share-to-friends-close {\r
+  position: relative;\r
+  display: flex;\r
+  align-items: center;\r
+  justify-content: center;\r
+  box-sizing: border-box;\r
+  width: 28px;\r
+  height: 28px;\r
+  padding: 0;\r
+  border: 0;\r
+  border-radius: 4px;\r
+  background: transparent;\r
+  color: #61666d;\r
+  font-size: 0;\r
+  line-height: 0;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-close::before,\r
+.bili-share-to-friends-close::after {\r
+  position: absolute;\r
+  top: 50%;\r
+  left: 50%;\r
+  width: 16px;\r
+  height: 2px;\r
+  border-radius: 1px;\r
+  background: currentColor;\r
+  content: "";\r
+}\r
+\r
+.bili-share-to-friends-close::before {\r
+  transform: translate(-50%, -50%) rotate(45deg);\r
+}\r
+\r
+.bili-share-to-friends-close::after {\r
+  transform: translate(-50%, -50%) rotate(-45deg);\r
+}\r
+\r
+.bili-share-to-friends-close:hover {\r
+  background: #f1f2f3;\r
+}\r
+.bili-share-to-friends-entry {\r
+  display: inline-flex;\r
+  flex-direction: column;\r
+  align-items: center;\r
+  justify-content: space-between;\r
+  width: 60px;\r
+  min-width: 60px;\r
+  height: 60px;\r
+  margin: 0 0px;\r
+  padding: 0;\r
+  border: 0;\r
+  border-radius: 0;\r
+  color: #18191c;\r
+  background: transparent;\r
+  font-size: 12px;\r
+  line-height: 21px;\r
+  cursor: pointer;\r
+  user-select: none;\r
+  vertical-align: top;\r
+  transition:\r
+    color 0.2s,\r
+    transform 0.2s;\r
+}\r
+\r
+.bili-share-to-friends-entry:hover {\r
+  color: #00aeec;\r
+  transform: translateY(-1px);\r
+}\r
+\r
+.bili-share-to-friends-entry-text {\r
+  color: #18191c;\r
+  white-space: nowrap;\r
+}\r
+\r
+.bili-share-to-friends-entry:hover .bili-share-to-friends-entry-text {\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-entry-icon {\r
+  width: 36px;\r
+  height: 36px;\r
+  display: inline-flex;\r
+  align-items: center;\r
+  justify-content: center;\r
+  border-radius: 50%;\r
+  color: #fff;\r
+  background: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-entry-icon svg {\r
+  width: 22px;\r
+  height: 22px;\r
+}\r
+.bili-share-to-friends-tabs {\r
+  display: flex;\r
+  gap: 8px;\r
+  flex: 0 0 auto;\r
+  padding: 7px 14px 8px;\r
+  background: #fff;\r
+}\r
+\r
+.bili-share-to-friends-tab {\r
+  height: 28px;\r
+  padding: 0 10px;\r
+  border: 1px solid transparent;\r
+  border-radius: 4px;\r
+  background: transparent;\r
+  color: #61666d;\r
+  font-size: 13px;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-tab:hover {\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-tab[aria-selected="true"] {\r
+  color: #00aeec;\r
+  border-color: #b8e8f8;\r
+  background: #f6fbff;\r
+  font-weight: 600;\r
+}\r
+\r
+.bili-share-to-friends-clear-selection {\r
+  height: 28px;\r
+  margin-left: auto;\r
+  padding: 0 10px;\r
+  border: 1px solid #fb7299;\r
+  border-radius: 4px;\r
+  background: #fff;\r
+  color: #fb7299;\r
+  font-size: 13px;\r
+  font-weight: 600;\r
+  cursor: pointer;\r
+}\r
+\r
+.bili-share-to-friends-clear-selection:hover {\r
+  background: #fff4f7;\r
+}\r
+\r
+.bili-share-to-friends-clear-selection:disabled {\r
+  border-color: #e3e5e7;\r
+  background: #f6f7f8;\r
+  color: #c9ccd0;\r
+  cursor: not-allowed;\r
+}\r
+.bili-share-to-friends-send-result {\r
+  display: flex;\r
+  flex-direction: column;\r
+  gap: 12px;\r
+  min-height: 0;\r
+  padding: 14px;\r
+}\r
+\r
+.bili-share-to-friends-send-summary {\r
+  color: #18191c;\r
+  font-size: 14px;\r
+  font-weight: 600;\r
+}\r
+\r
+.bili-share-to-friends-send-summary-success {\r
+  color: #389e0d;\r
+}\r
+\r
+.bili-share-to-friends-send-summary-failed {\r
+  color: #d03050;\r
+}\r
+\r
+.bili-share-to-friends-send-list {\r
+  display: flex;\r
+  flex-direction: column;\r
+  gap: 8px;\r
+  min-height: 0;\r
+  margin: 0;\r
+  padding: 0;\r
+  overflow: auto;\r
+  list-style: none;\r
+}\r
+\r
+.bili-share-to-friends-send-item {\r
+  display: grid;\r
+  grid-template-columns: minmax(0, 1fr) auto;\r
+  gap: 4px 10px;\r
+  align-items: center;\r
+  padding: 10px;\r
+  border: 1px solid #e3e5e7;\r
+  border-radius: 6px;\r
+  background: #fff;\r
+}\r
+\r
+.bili-share-to-friends-send-item[data-status="success"] {\r
+  border-color: #b7eb8f;\r
+  background: #f6ffed;\r
+}\r
+\r
+.bili-share-to-friends-send-item[data-status="failed"] {\r
+  border-color: #ffccc7;\r
+  background: #fff2f0;\r
+}\r
+\r
+.bili-share-to-friends-send-name {\r
+  display: inline-block;\r
+  min-width: 0;\r
+  overflow: hidden;\r
+  color: #18191c;\r
+  text-decoration: none;\r
+  text-overflow: ellipsis;\r
+  white-space: nowrap;\r
+}\r
+\r
+.bili-share-to-friends-send-name:hover,\r
+.bili-share-to-friends-send-name:focus-visible {\r
+  color: #00aeec;\r
+}\r
+\r
+.bili-share-to-friends-send-status {\r
+  color: #61666d;\r
+  font-size: 12px;\r
+}\r
+\r
+.bili-share-to-friends-send-item[data-status="success"] .bili-share-to-friends-send-status {\r
+  color: #389e0d;\r
+}\r
+\r
+.bili-share-to-friends-send-item[data-status="failed"] .bili-share-to-friends-send-status,\r
+.bili-share-to-friends-send-error {\r
+  color: #d03050;\r
+}\r
+\r
+.bili-share-to-friends-send-error {\r
+  grid-column: 1 / -1;\r
+  font-size: 12px;\r
+  line-height: 1.5;\r
+}\r
+.bili-share-to-friends-video {\r
+  display: grid;\r
+  grid-template-columns: 80px 1fr;\r
+  gap: 9px;\r
+  flex: 0 0 auto;\r
+  padding: 9px 14px;\r
+  border-bottom: 1px solid #e3e5e7;\r
+  background: #f6f7f8;\r
+}\r
+\r
+.bili-share-to-friends-cover {\r
+  width: 80px;\r
+  aspect-ratio: 16 / 10;\r
+  border-radius: 4px;\r
+  background: #e3e5e7;\r
+}\r
+\r
+.bili-share-to-friends-cover-placeholder {\r
+  display: flex;\r
+  align-items: center;\r
+  justify-content: center;\r
+  color: #9499a0;\r
+  font-size: 12px;\r
+}\r
+\r
+.bili-share-to-friends-cover-img {\r
+  object-fit: cover;\r
+}\r
+\r
+.bili-share-to-friends-video-title {\r
+  margin: 0;\r
+  color: #18191c;\r
+  font-size: 13px;\r
+  line-height: 17px;\r
+  display: -webkit-box;\r
+  -webkit-line-clamp: 2;\r
+  -webkit-box-orient: vertical;\r
+  overflow: hidden;\r
+}\r
+\r
+.bili-share-to-friends-video-author {\r
+  margin-top: 4px;\r
+  color: #9499a0;\r
+  font-size: 12px;\r
 } `);
 
 (function () {
   'use strict';
 
-  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   const getCookie = (name) => {
     const cookie = document.cookie.split(";").map((item) => item.trim()).find((item) => item.startsWith(`${name}=`));
     return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : "";
+  };
+  const isTopWindow = (windowRef = globalThis.window) => {
+    try {
+      return Boolean(windowRef && windowRef.self === windowRef.top);
+    } catch {
+      return false;
+    }
   };
   const md5 = (input) => {
     const rotateLeft = (value, shift) => value << shift | value >>> 32 - shift;
@@ -795,6 +801,7 @@
     }
     return url;
   };
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   const SCRIPT_ID = "bili-share-to-friends";
   const DEFAULT_AVATAR_URL = "https://static.hdslb.com/images/member/noface.gif";
   const DEV_ID_KEY = `${SCRIPT_ID}.dev_id`;
@@ -2740,7 +2747,7 @@ ${videoUrl}`
     window.addEventListener("hashchange", handleRouteChange);
   };
   const init = () => {
-    if (window.self !== window.top) {
+    if (!isTopWindow()) {
       return;
     }
     currentVideoRouteKey = getVideoRouteKey();

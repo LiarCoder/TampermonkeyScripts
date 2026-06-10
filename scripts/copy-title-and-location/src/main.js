@@ -1,9 +1,14 @@
-import { addStyle, copyTextToClipboard, createElement } from "@tampermonkey-scripts/shared";
+import {
+  addStyle,
+  copyTextToClipboard,
+  createElement,
+  createSvgElement,
+  isTopWindow,
+} from "@tampermonkey-scripts/shared";
 
 const BUTTON_ID = "copy-title-and-location";
 const STYLE_ID = `${BUTTON_ID}-style`;
 const BUTTON_TEXT = "复制标题和地址";
-const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 const BUTTON_STYLE = `
   #${BUTTON_ID} {
@@ -61,23 +66,7 @@ const SITE_REFERENCE_HANDLERS = [
   },
 ];
 
-const isTopWindow = () => {
-  try {
-    return window.self === window.top;
-  } catch {
-    return false;
-  }
-};
-
 const getMountTarget = () => document.body ?? document.documentElement;
-
-const createSvgElement = (tagName, attributes = {}) => {
-  const element = document.createElementNS(SVG_NAMESPACE, tagName);
-  Object.entries(attributes).forEach(([key, value]) => {
-    element.setAttribute(key, String(value));
-  });
-  return element;
-};
 
 const createButtonIcon = () => {
   const icon = createSvgElement("svg", {
