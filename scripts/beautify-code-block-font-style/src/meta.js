@@ -2,15 +2,16 @@ import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
 
 import packageJson from "../package.json";
 
-const rawScriptUrl = buildRawScriptUrl(packageJson.scriptName);
+const { author, description, scriptName, version } = packageJson;
+
+const rawScriptUrl = buildRawScriptUrl(scriptName);
 
 export const userscript = {
   name: "改变网页代码块的字体样式",
   namespace: "http://tampermonkey.net/",
-  version: "0.5.1",
-  description:
-    "改变网页代码块的字体样式，LeetCode、CSDN、掘金、博客园的代码块字体全被设置为Cascadia Code这款字体，后面还有YaHei Consolas Hybrid和Lucida Console这两款字体做候选，最后由CSDN代码块的字体样式兜底",
-  author: "LiarCoder",
+  version,
+  description,
+  author,
   updateURL: rawScriptUrl,
   downloadURL: rawScriptUrl,
   grant: "none",
