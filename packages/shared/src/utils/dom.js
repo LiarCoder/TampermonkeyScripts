@@ -1,5 +1,7 @@
 import { compact } from "./array.js";
 
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
 /**
  * 创建 DOM 元素，并应用常见属性、子节点和事件。
  *
@@ -53,6 +55,39 @@ export const createElement = ({
   if (parent) {
     parent.appendChild(element);
   }
+
+  return element;
+};
+
+/**
+ * 判断当前脚本是否运行在顶层窗口；跨域 frame 访问 window.top 失败时返回 false。
+ *
+ * @param {Window} [windowRef] 要判断的窗口对象，主要用于测试。
+ * @returns {boolean} 当前窗口是否为顶层窗口。
+ */
+export const isTopWindow = (windowRef = globalThis.window) => {
+  try {
+    return Boolean(windowRef && windowRef.self === windowRef.top);
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * 创建 SVG 元素并应用属性。
+ *
+ * @param {string} tagName SVG 标签名。
+ * @param {object} [attributes] SVG 属性。
+ * @returns {SVGElement} 创建后的 SVG 元素。
+ */
+export const createSvgElement = (tagName, attributes = {}) => {
+  const element = document.createElementNS(SVG_NAMESPACE, tagName);
+
+  Object.entries(attributes).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      element.setAttribute(key, String(value));
+    }
+  });
 
   return element;
 };

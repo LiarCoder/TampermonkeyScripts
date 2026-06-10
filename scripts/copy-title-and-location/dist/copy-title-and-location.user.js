@@ -68,6 +68,7 @@
       throw createCopyError(fallbackError, clipboardError);
     }
   };
+  const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const createElement = ({
     parent = null,
     tagName = "div",
@@ -111,6 +112,22 @@
     }
     return element;
   };
+  const isTopWindow = (windowRef = globalThis.window) => {
+    try {
+      return Boolean(windowRef && windowRef.self === windowRef.top);
+    } catch {
+      return false;
+    }
+  };
+  const createSvgElement = (tagName, attributes = {}) => {
+    const element = document.createElementNS(SVG_NAMESPACE, tagName);
+    Object.entries(attributes).forEach(([key, value]) => {
+      if (value !== void 0 && value !== null) {
+        element.setAttribute(key, String(value));
+      }
+    });
+    return element;
+  };
   const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
     if (id) {
       const existing = document.getElementById(id);
@@ -133,7 +150,6 @@
   const BUTTON_ID = "copy-title-and-location";
   const STYLE_ID = `${BUTTON_ID}-style`;
   const BUTTON_TEXT = "复制标题和地址";
-  const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
   const BUTTON_STYLE = `
   #${BUTTON_ID} {
     position: fixed;
@@ -186,21 +202,7 @@
       }
     }
   ];
-  const isTopWindow = () => {
-    try {
-      return window.self === window.top;
-    } catch {
-      return false;
-    }
-  };
   const getMountTarget = () => document.body ?? document.documentElement;
-  const createSvgElement = (tagName, attributes = {}) => {
-    const element = document.createElementNS(SVG_NAMESPACE, tagName);
-    Object.entries(attributes).forEach(([key, value]) => {
-      element.setAttribute(key, String(value));
-    });
-    return element;
-  };
   const createButtonIcon = () => {
     const icon = createSvgElement("svg", {
       width: 16,

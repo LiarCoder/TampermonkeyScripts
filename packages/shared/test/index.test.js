@@ -8,6 +8,8 @@ test("统一入口导出所有工具函数", () => {
   assert.equal(typeof shared.copyTextToClipboard, "function");
   assert.equal(typeof shared.getCookie, "function");
   assert.equal(typeof shared.createElement, "function");
+  assert.equal(typeof shared.createSvgElement, "function");
+  assert.equal(typeof shared.isTopWindow, "function");
   assert.equal(typeof shared.waitForElement, "function");
   assert.equal(typeof shared.md5, "function");
   assert.equal(typeof shared.httpRequest, "function");
