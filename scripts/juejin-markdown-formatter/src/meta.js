@@ -2,15 +2,16 @@ import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
 
 import packageJson from "../package.json";
 
-const rawScriptUrl = buildRawScriptUrl(packageJson.scriptName);
+const { author, description, displayName, scriptName, version } = packageJson;
+
+const rawScriptUrl = buildRawScriptUrl(scriptName);
 
 export const userscript = {
-  name: "掘金Markdown格式适配器",
+  name: displayName,
   namespace: "http://tampermonkey.net/",
-  version: "0.3.3",
-  description:
-    "掘金Markdown编辑器适配脚本：从本地导入Markdown文件，并对文档做一些处理：居中图片、居中图片标注的文字、解决==无法高亮的问题、自动填充标题",
-  author: "LiarCoder",
+  version,
+  description,
+  author,
   updateURL: rawScriptUrl,
   downloadURL: rawScriptUrl,
   match: "https://juejin.cn/editor/*",

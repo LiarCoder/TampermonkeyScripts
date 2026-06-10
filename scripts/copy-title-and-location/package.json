@@ -1,6 +1,9 @@
 {
   "name": "@tampermonkey-scripts/copy-title-and-location",
   "version": "0.7.0",
+  "displayName": "复制标题和地址",
+  "description": "一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）",
+  "author": "LiarCoder",
   "private": true,
   "type": "module",
   "scripts": {

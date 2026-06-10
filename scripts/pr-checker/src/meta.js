@@ -2,14 +2,16 @@ import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
 
 import packageJson from "../package.json";
 
-const rawScriptUrl = buildRawScriptUrl(packageJson.scriptName);
+const { author, description, displayName, scriptName, version } = packageJson;
+
+const rawScriptUrl = buildRawScriptUrl(scriptName);
 
 export const userscript = {
-  name: "PR三思器",
+  name: displayName,
   namespace: "http://tampermonkey.net/",
-  version: "V1.3.0",
-  description: "创建PR前，提醒一下有没有一些遗漏的东西需要检查",
-  author: "liaw",
+  version,
+  description,
+  author,
   updateURL: rawScriptUrl,
   downloadURL: rawScriptUrl,
   match: ["https://code.fineres.com/*/pull-requests?create*"],
