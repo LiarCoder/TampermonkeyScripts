@@ -3,9 +3,7 @@ import { addStyle, copyTextToClipboard, createElement } from "@tampermonkey-scri
 const BUTTON_ID = "copy-title-and-location";
 const STYLE_ID = `${BUTTON_ID}-style`;
 const BUTTON_TEXT = "复制标题和地址";
-
-const BUTTON_ICON_SVG =
-  '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
 const BUTTON_STYLE = `
   #${BUTTON_ID} {
@@ -73,6 +71,53 @@ const isTopWindow = () => {
 
 const getMountTarget = () => document.body ?? document.documentElement;
 
+const createSvgElement = (tagName, attributes = {}) => {
+  const element = document.createElementNS(SVG_NAMESPACE, tagName);
+  Object.entries(attributes).forEach(([key, value]) => {
+    element.setAttribute(key, String(value));
+  });
+  return element;
+};
+
+const createButtonIcon = () => {
+  const icon = createSvgElement("svg", {
+    width: 16,
+    height: 16,
+    viewBox: "0 0 48 48",
+    fill: "none",
+  });
+  icon.append(
+    createSvgElement("rect", {
+      width: 48,
+      height: 48,
+      fill: "white",
+      "fill-opacity": "0.01",
+    }),
+    createSvgElement("path", {
+      d: "M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z",
+      fill: "none",
+      stroke: "#333",
+      "stroke-width": 4,
+      "stroke-linejoin": "round",
+    }),
+    createSvgElement("path", {
+      d: "M16 20H32",
+      stroke: "#333",
+      "stroke-width": 4,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    }),
+    createSvgElement("path", {
+      d: "M16 28H32",
+      stroke: "#333",
+      "stroke-width": 4,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    })
+  );
+  return icon;
+};
+
 const createTimestamp = () => {
   const date = new Date();
   const dateText = date.toLocaleDateString().replace("/", "年").replace("/", "月");
@@ -120,11 +165,12 @@ const copyText = async (text) => {
 const createCopyButton = () =>
   createElement({
     tagName: "button",
-    html: `${BUTTON_TEXT}${BUTTON_ICON_SVG}`,
+    text: BUTTON_TEXT,
     attributes: {
       id: BUTTON_ID,
       type: "button",
     },
+    children: [createButtonIcon()],
     events: [
       {
         name: "click",
