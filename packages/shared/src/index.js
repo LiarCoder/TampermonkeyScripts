@@ -2,6 +2,7 @@ export * from "./utils/array.js";
 export * from "./utils/clipboard.js";
 export * from "./utils/cookie.js";
 export * from "./utils/dom.js";
+export * from "./utils/file.js";
 export * from "./utils/hash.js";
 export * from "./utils/http.js";
 export * from "./utils/query.js";

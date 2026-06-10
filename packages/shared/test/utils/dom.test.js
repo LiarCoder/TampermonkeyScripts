@@ -4,7 +4,9 @@ import test from "node:test";
 import {
   createElement,
   createSvgElement,
+  getDocumentMountTarget,
   isTopWindow,
+  observeAttributeChange,
   waitForElement,
 } from "../../src/utils/dom.js";
 
@@ -18,6 +20,7 @@ class FakeElement {
     this.dataset = {};
     this.children = [];
     this.listeners = new Map();
+    this.observerOptions = null;
   }
 
   setAttribute(key, value) {
@@ -30,6 +33,11 @@ class FakeElement {
 
   appendChild(child) {
     this.children.push(child);
+    return child;
+  }
+
+  removeChild(child) {
+    this.children = this.children.filter((item) => item !== child);
     return child;
   }
 
@@ -180,6 +188,71 @@ test("判断顶层窗口时会处理跨域访问异常", () => {
   };
 
   assert.equal(isTopWindow(windowRef), false);
+});
+
+test("获取文档挂载目标时优先返回 body", () => {
+  const body = new FakeElement("body");
+  const documentElement = new FakeElement("html");
+
+  assert.equal(getDocumentMountTarget({ body, documentElement }), body);
+});
+
+test("获取文档挂载目标时会回退到 documentElement", () => {
+  const documentElement = new FakeElement("html");
+
+  assert.equal(getDocumentMountTarget({ body: null, documentElement }), documentElement);
+  assert.equal(getDocumentMountTarget(null), null);
+});
+
+test("观察属性变化时会调用回调并返回清理函数", () => {
+  const input = new FakeElement("input");
+  input.setAttribute("value", "main");
+  let observedCallback = null;
+  let disconnected = false;
+  class FakeMutationObserver {
+    constructor(callback) {
+      observedCallback = callback;
+    }
+
+    observe(element, options) {
+      element.observerOptions = options;
+    }
+
+    disconnect() {
+      disconnected = true;
+    }
+  }
+  let nextValue = "";
+
+  const cleanup = observeAttributeChange(
+    input,
+    "value",
+    (value, element) => {
+      nextValue = value;
+      assert.equal(element, input);
+    },
+    { observerConstructor: FakeMutationObserver }
+  );
+
+  assert.deepEqual(input.observerOptions, {
+    attributes: true,
+    attributeFilter: ["value"],
+  });
+  input.setAttribute("value", "develop");
+  observedCallback();
+  assert.equal(nextValue, "develop");
+
+  cleanup();
+  assert.equal(disconnected, true);
+});
+
+test("观察属性变化缺少依赖时返回空清理函数", () => {
+  assert.doesNotThrow(() => observeAttributeChange(null, "value", () => {})());
+  assert.doesNotThrow(() =>
+    observeAttributeChange(new FakeElement("input"), "value", () => {}, {
+      observerConstructor: null,
+    })()
+  );
 });
 
 test("等待元素时会立即返回已存在的元素", async () => {
