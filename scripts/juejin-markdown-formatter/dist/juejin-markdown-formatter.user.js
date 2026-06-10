@@ -147,6 +147,24 @@
       }
     }, interval);
   });
+  const readFileAsText = (file, { fileReaderConstructor = globalThis.FileReader } = {}) => new Promise((resolve, reject) => {
+    if (!file) {
+      reject(new Error("File is unavailable."));
+      return;
+    }
+    if (typeof fileReaderConstructor !== "function") {
+      reject(new Error("FileReader is unavailable."));
+      return;
+    }
+    const reader = new fileReaderConstructor();
+    reader.addEventListener("load", () => {
+      resolve(String(reader.result ?? ""));
+    });
+    reader.addEventListener("error", () => {
+      reject(reader.error ?? new Error("Failed to read file as text."));
+    });
+    reader.readAsText(file);
+  });
   const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
     if (id) {
       const existing = document.getElementById(id);
@@ -166,7 +184,7 @@
     target.appendChild(style);
     return style;
   };
-  const styles = 'label[for="juejin-markdown-formatter-import-md-file"] {\n  vertical-align: middle;\n  cursor: pointer;\n}\n\n[data-title] {\n  position: relative;\n  overflow: visible;\n}\n\nlabel[for="juejin-markdown-formatter-import-md-file"]::before,\nlabel[for="juejin-markdown-formatter-import-md-file"]::after {\n  display: block;\n  position: fixed;\n  opacity: 0;\n  transition: 0.15s 0.15s;\n  visibility: hidden;\n}\n\nlabel[for="juejin-markdown-formatter-import-md-file"]::before {\n  content: attr(data-title);\n  z-index: 2;\n  transform: translate(-53px, -36px);\n  border-radius: 5px;\n  padding: 5px 10px;\n  line-height: 16px;\n  text-align: center;\n  background-color: #333333;\n  color: #fff;\n  font-size: 12px;\n  font-style: normal;\n  white-space: nowrap;\n}\n\nlabel[for="juejin-markdown-formatter-import-md-file"]::after {\n  content: "";\n  z-index: 1;\n  transform: translate(2px, -38px);\n  width: 0;\n  height: 0;\n  margin-bottom: -12px;\n  overflow: hidden;\n  border: 10px solid transparent;\n  border-top-color: #333333;\n}\n\nlabel[for="juejin-markdown-formatter-import-md-file"]:hover::before,\nlabel[for="juejin-markdown-formatter-import-md-file"]:hover::after {\n  visibility: visible;\n  opacity: 1;\n}\n\n#juejin-markdown-formatter-import-md-file {\n  display: none;\n}\n';
+  const styles = 'label[for="juejin-markdown-formatter-import-md-file"] {\r\n  vertical-align: middle;\r\n  cursor: pointer;\r\n}\r\n\r\n[data-title] {\r\n  position: relative;\r\n  overflow: visible;\r\n}\r\n\r\nlabel[for="juejin-markdown-formatter-import-md-file"]::before,\r\nlabel[for="juejin-markdown-formatter-import-md-file"]::after {\r\n  display: block;\r\n  position: fixed;\r\n  opacity: 0;\r\n  transition: 0.15s 0.15s;\r\n  visibility: hidden;\r\n}\r\n\r\nlabel[for="juejin-markdown-formatter-import-md-file"]::before {\r\n  content: attr(data-title);\r\n  z-index: 2;\r\n  transform: translate(-53px, -36px);\r\n  border-radius: 5px;\r\n  padding: 5px 10px;\r\n  line-height: 16px;\r\n  text-align: center;\r\n  background-color: #333333;\r\n  color: #fff;\r\n  font-size: 12px;\r\n  font-style: normal;\r\n  white-space: nowrap;\r\n}\r\n\r\nlabel[for="juejin-markdown-formatter-import-md-file"]::after {\r\n  content: "";\r\n  z-index: 1;\r\n  transform: translate(2px, -38px);\r\n  width: 0;\r\n  height: 0;\r\n  margin-bottom: -12px;\r\n  overflow: hidden;\r\n  border: 10px solid transparent;\r\n  border-top-color: #333333;\r\n}\r\n\r\nlabel[for="juejin-markdown-formatter-import-md-file"]:hover::before,\r\nlabel[for="juejin-markdown-formatter-import-md-file"]:hover::after {\r\n  visibility: visible;\r\n  opacity: 1;\r\n}\r\n\r\n#juejin-markdown-formatter-import-md-file {\r\n  display: none;\r\n}\r\n';
   const SCRIPT_ID = "juejin-markdown-formatter";
   const STYLE_ID = `${SCRIPT_ID}-style`;
   const FILE_INPUT_ID = `${SCRIPT_ID}-import-md-file`;
@@ -250,16 +268,6 @@
     }
     return `${content.substring(0, 10)} `;
   };
-  const readFileAsText = (file) => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      resolve(String(reader.result ?? ""));
-    });
-    reader.addEventListener("error", () => {
-      reject(reader.error ?? new Error("读取 Markdown 文件失败。"));
-    });
-    reader.readAsText(file);
-  });
   const updateTitleInput = (titleInput, content) => {
     titleInput.value = getArticleTitle(content);
     titleInput.focus();
