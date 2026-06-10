@@ -1,3 +1,5 @@
+import { addStyle, unique } from "@tampermonkey-scripts/shared";
+
 const STYLE_ELEMENT_ID = "beautify-code-block-font-style";
 
 const SELECTOR_GROUPS = {
@@ -65,7 +67,7 @@ const GENERIC_FONT_FAMILIES = new Set([
   "system-ui",
 ]);
 
-const getUniqueValues = (values) => [...new Set(values.filter(Boolean))];
+const getUniqueValues = (values) => unique(values.filter(Boolean));
 
 const buildSelectorList = (selectorGroups) =>
   getUniqueValues(Object.values(selectorGroups).flat()).join(",\n");
@@ -90,18 +92,8 @@ const buildFontStyle = () =>
     buildFontStyleRule(MONACO_TOKEN_SELECTOR, MONACO_TOKEN_FONT_STACK),
   ].join("\n\n");
 
-const getStyleContainer = () => document.head ?? document.documentElement;
-
 const applyStyle = () => {
-  const styleContainer = getStyleContainer();
-  if (!styleContainer || document.getElementById(STYLE_ELEMENT_ID)) {
-    return;
-  }
-
-  const styleElement = document.createElement("style");
-  styleElement.id = STYLE_ELEMENT_ID;
-  styleElement.textContent = buildFontStyle();
-  styleContainer.appendChild(styleElement);
+  addStyle(buildFontStyle(), { id: STYLE_ELEMENT_ID });
 };
 
 applyStyle();

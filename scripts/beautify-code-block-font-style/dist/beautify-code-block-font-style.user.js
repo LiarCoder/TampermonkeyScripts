@@ -14,6 +14,31 @@
 (function () {
   'use strict';
 
+  const unique = (items) => {
+    if (!Array.isArray(items)) {
+      return [];
+    }
+    return [...new Set(items)];
+  };
+  const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
+    if (id) {
+      const existing = document.getElementById(id);
+      if (existing) {
+        existing.textContent = css;
+        return existing;
+      }
+    }
+    if (typeof GM_addStyle === "function") {
+      return GM_addStyle(css);
+    }
+    const style = document.createElement("style");
+    if (id) {
+      style.id = id;
+    }
+    style.textContent = css;
+    target.appendChild(style);
+    return style;
+  };
   const STYLE_ELEMENT_ID = "beautify-code-block-font-style";
   const SELECTOR_GROUPS = {
     csdn: [
@@ -74,7 +99,7 @@
     "fantasy",
     "system-ui"
   ]);
-  const getUniqueValues = (values) => [...new Set(values.filter(Boolean))];
+  const getUniqueValues = (values) => unique(values.filter(Boolean));
   const buildSelectorList = (selectorGroups) => getUniqueValues(Object.values(selectorGroups).flat()).join(",\n");
   const quoteFontFamily = (fontFamily) => {
     if (GENERIC_FONT_FAMILIES.has(fontFamily)) {
@@ -90,16 +115,8 @@
     buildFontStyleRule(buildSelectorList(SELECTOR_GROUPS), FONT_STACK),
     buildFontStyleRule(MONACO_TOKEN_SELECTOR, MONACO_TOKEN_FONT_STACK)
   ].join("\n\n");
-  const getStyleContainer = () => document.head ?? document.documentElement;
   const applyStyle = () => {
-    const styleContainer = getStyleContainer();
-    if (!styleContainer || document.getElementById(STYLE_ELEMENT_ID)) {
-      return;
-    }
-    const styleElement = document.createElement("style");
-    styleElement.id = STYLE_ELEMENT_ID;
-    styleElement.textContent = buildFontStyle();
-    styleContainer.appendChild(styleElement);
+    addStyle(buildFontStyle(), { id: STYLE_ELEMENT_ID });
   };
   applyStyle();
 
