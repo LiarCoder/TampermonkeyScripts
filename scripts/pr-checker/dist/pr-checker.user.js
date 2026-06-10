@@ -354,6 +354,7 @@
   const styles = ":root {\n  --fd-color-border: #d7d9dc;\n  --fd-color-text: #141e31;\n  --fd-color-white: #ffffff;\n  --fd-color-text-light-solid: #ffffff;\n  --fd-color-primary: #00b899;\n  --fd-color-primary-hover: #4dcdb8;\n}\n\n@keyframes pr-checker-fade-in {\n  from {\n    opacity: 0;\n    transform: scale(0.9);\n  }\n\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n@keyframes pr-checker-fade-out {\n  from {\n    opacity: 1;\n    transform: scale(1);\n  }\n\n  to {\n    opacity: 0;\n    transform: scale(0.9);\n  }\n}\n\n@keyframes pr-checker-backdrop-fade-in {\n  from {\n    opacity: 0;\n  }\n\n  to {\n    opacity: 1;\n  }\n}\n\n@keyframes pr-checker-backdrop-fade-out {\n  from {\n    opacity: 1;\n  }\n\n  to {\n    opacity: 0;\n  }\n}\n\n.pr-checker-mask::backdrop {\n  background-color: rgba(0, 10, 31, 0.29);\n  animation: pr-checker-backdrop-fade-in 0.3s ease-out;\n}\n\n.pr-checker-mask.closing::backdrop {\n  animation: pr-checker-backdrop-fade-out 0.3s ease-out;\n}\n\n.pr-checker-dialog {\n  width: 500px;\n  padding: 0;\n  font-size: 14px;\n  color: var(--fd-color-text);\n  background: #ffffff;\n  border: none;\n  border-radius: 8px;\n  box-shadow:\n    0 9px 28px 8px #0000000d,\n    0 3px 6px -4px #0000001f,\n    0 6px 16px #00000014;\n  animation: pr-checker-fade-in 0.3s ease-out;\n}\n\n.pr-checker-dialog.closing {\n  animation: pr-checker-fade-out 0.3s ease-out;\n}\n\n.pr-checker-dialog .pr-checker-title {\n  padding: 16px 20px;\n  font-size: 18px;\n  font-weight: 700;\n  line-height: 26px;\n  border-bottom: 1px solid var(--fd-color-border);\n}\n\n.pr-checker-dialog .pr-checker-content {\n  padding: 16px 20px;\n}\n\n#pr-checker-btns {\n  display: flex;\n  gap: 12px;\n  justify-content: flex-end;\n  padding: 12px 20px;\n  margin-top: 14px;\n  border-top: 1px solid var(--fd-color-border);\n}\n\n#pr-checker-btns .pr-checker-btn {\n  padding: 0 16px;\n  line-height: 32px;\n  cursor: pointer;\n  border: 1px solid;\n  border-radius: 4px;\n  outline: none;\n  transition:\n    box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);\n}\n\n#pr-checker-btns .close-btn {\n  background: var(--fd-color-white);\n  border-color: var(--fd-color-border);\n}\n\n#pr-checker-btns .close-btn:hover {\n  color: var(--fd-color-primary-hover);\n  border-color: var(--fd-color-primary-hover);\n}\n\n#pr-checker-btns .ensure-btn {\n  color: var(--fd-color-text-light-solid);\n  background: var(--fd-color-primary);\n  border-color: var(--fd-color-primary);\n}\n\n#pr-checker-btns .ensure-btn:hover {\n  background: var(--fd-color-primary-hover);\n}\n\n.pr-checker-create-btn {\n  position: relative;\n  display: inline-block;\n  margin-right: 9px;\n  cursor: pointer;\n}\n\n.pr-checker-create-btn:hover #submit-form {\n  --aui-btn-bg: var(--aui-button-primary-hover-bg-color);\n  --aui-btn-text: var(--aui-button-primary-active-text-color);\n}\n\n.pr-checker-mask-btn {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n";
   const CONTINUE_BUTTON_ID = "show-create-pr-button";
   const TARGET_BRANCH_INPUT_ID = "targetBranch-field";
+  const SOURCE_BRANCH_INPUT_ID = "sourceBranch-field";
   const ILLEGAL_TARGET_BRANCHES = ["master", "main"];
   const isIllegalTargetBranch = (targetBranch) => ILLEGAL_TARGET_BRANCHES.some((illegalTargetBranch) => targetBranch.includes(illegalTargetBranch));
   const showTargetBranchWarning = (targetBranch) => {
@@ -379,28 +380,45 @@
       immediate ? 0 : 300
     );
   };
-  const observeTargetBranch = (targetBranchInput) => {
+  const getTargetBranch = () => {
+    var _a;
+    return ((_a = document.getElementById(TARGET_BRANCH_INPUT_ID)) == null ? void 0 : _a.value) ?? "";
+  };
+  const triggerCurrentTargetBranchWarning = ({ immediate = false } = {}) => {
+    const targetBranch = getTargetBranch();
+    if (targetBranch) {
+      triggerTargetBranchWarning(targetBranch, { immediate });
+    }
+  };
+  const observeInputValueChange = (input, onChange) => {
     if (typeof MutationObserver !== "function") {
       return;
     }
     const observer = new MutationObserver(() => {
-      const targetBranch = targetBranchInput.value;
-      if (targetBranch) {
-        triggerTargetBranchWarning(targetBranch);
-      }
+      onChange(input.value);
     });
-    observer.observe(targetBranchInput, {
+    observer.observe(input, {
       attributes: true,
       attributeFilter: ["value"]
     });
   };
   const initTargetBranchChecker = () => {
     const targetBranchInput = document.getElementById(TARGET_BRANCH_INPUT_ID);
+    const sourceBranchInput = document.getElementById(SOURCE_BRANCH_INPUT_ID);
     if (!targetBranchInput) {
       return;
     }
-    triggerTargetBranchWarning(targetBranchInput.value, { immediate: true });
-    observeTargetBranch(targetBranchInput);
+    triggerCurrentTargetBranchWarning({ immediate: true });
+    observeInputValueChange(targetBranchInput, (targetBranch) => {
+      if (targetBranch) {
+        triggerTargetBranchWarning(targetBranch);
+      }
+    });
+    if (sourceBranchInput) {
+      observeInputValueChange(sourceBranchInput, () => {
+        triggerCurrentTargetBranchWarning();
+      });
+    }
   };
   const STYLE_ID = "pr-checker-style";
   const isTopWindow = () => {

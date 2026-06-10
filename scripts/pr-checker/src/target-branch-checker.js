@@ -1,5 +1,6 @@
 const CONTINUE_BUTTON_ID = "show-create-pr-button";
 const TARGET_BRANCH_INPUT_ID = "targetBranch-field";
+const SOURCE_BRANCH_INPUT_ID = "sourceBranch-field";
 const ILLEGAL_TARGET_BRANCHES = ["master", "main"];
 
 const isIllegalTargetBranch = (targetBranch) =>
@@ -33,18 +34,24 @@ const triggerTargetBranchWarning = (targetBranch, { immediate = false } = {}) =>
   );
 };
 
-const observeTargetBranch = (targetBranchInput) => {
+const getTargetBranch = () => document.getElementById(TARGET_BRANCH_INPUT_ID)?.value ?? "";
+
+const triggerCurrentTargetBranchWarning = ({ immediate = false } = {}) => {
+  const targetBranch = getTargetBranch();
+  if (targetBranch) {
+    triggerTargetBranchWarning(targetBranch, { immediate });
+  }
+};
+
+const observeInputValueChange = (input, onChange) => {
   if (typeof MutationObserver !== "function") {
     return;
   }
 
   const observer = new MutationObserver(() => {
-    const targetBranch = targetBranchInput.value;
-    if (targetBranch) {
-      triggerTargetBranchWarning(targetBranch);
-    }
+    onChange(input.value);
   });
-  observer.observe(targetBranchInput, {
+  observer.observe(input, {
     attributes: true,
     attributeFilter: ["value"],
   });
@@ -52,10 +59,21 @@ const observeTargetBranch = (targetBranchInput) => {
 
 export const initTargetBranchChecker = () => {
   const targetBranchInput = document.getElementById(TARGET_BRANCH_INPUT_ID);
+  const sourceBranchInput = document.getElementById(SOURCE_BRANCH_INPUT_ID);
   if (!targetBranchInput) {
     return;
   }
 
-  triggerTargetBranchWarning(targetBranchInput.value, { immediate: true });
-  observeTargetBranch(targetBranchInput);
+  triggerCurrentTargetBranchWarning({ immediate: true });
+  observeInputValueChange(targetBranchInput, (targetBranch) => {
+    if (targetBranch) {
+      triggerTargetBranchWarning(targetBranch);
+    }
+  });
+
+  if (sourceBranchInput) {
+    observeInputValueChange(sourceBranchInput, () => {
+      triggerCurrentTargetBranchWarning();
+    });
+  }
 };
