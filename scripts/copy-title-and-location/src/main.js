@@ -3,6 +3,7 @@ import {
   copyTextToClipboard,
   createElement,
   createSvgElement,
+  getDocumentMountTarget,
   isTopWindow,
 } from "@tampermonkey-scripts/shared";
 
@@ -65,8 +66,6 @@ const SITE_REFERENCE_HANDLERS = [
     },
   },
 ];
-
-const getMountTarget = () => document.body ?? document.documentElement;
 
 const createButtonIcon = () => {
   const icon = createSvgElement("svg", {
@@ -182,7 +181,7 @@ const init = () => {
     return;
   }
 
-  const mountTarget = getMountTarget();
+  const mountTarget = getDocumentMountTarget();
   if (!mountTarget) {
     return;
   }

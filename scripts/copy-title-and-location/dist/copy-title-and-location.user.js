@@ -128,6 +128,7 @@
     });
     return element;
   };
+  const getDocumentMountTarget = (documentRef = globalThis.document) => (documentRef == null ? void 0 : documentRef.body) ?? (documentRef == null ? void 0 : documentRef.documentElement) ?? null;
   const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
     if (id) {
       const existing = document.getElementById(id);
@@ -202,7 +203,6 @@
       }
     }
   ];
-  const getMountTarget = () => document.body ?? document.documentElement;
   const createButtonIcon = () => {
     const icon = createSvgElement("svg", {
       width: 16,
@@ -306,7 +306,7 @@
     if (!isTopWindow() || document.getElementById(BUTTON_ID)) {
       return;
     }
-    const mountTarget = getMountTarget();
+    const mountTarget = getDocumentMountTarget();
     if (!mountTarget) {
       return;
     }
