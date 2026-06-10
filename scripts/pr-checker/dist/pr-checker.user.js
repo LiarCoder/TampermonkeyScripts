@@ -17,7 +17,6 @@
 (function () {
   'use strict';
 
-  var _GM_addStyle = /* @__PURE__ */ (() => typeof GM_addStyle != "undefined" ? GM_addStyle : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   const compact = (items) => {
     if (!Array.isArray(items)) {
@@ -68,6 +67,142 @@
     }
     return element;
   };
+  const waitForElement = (selector, { root = document, timeout = 1e4, interval = 100 } = {}) => new Promise((resolve, reject) => {
+    const existing = root.querySelector(selector);
+    if (existing) {
+      resolve(existing);
+      return;
+    }
+    const startedAt = Date.now();
+    const timer = window.setInterval(() => {
+      const element = root.querySelector(selector);
+      if (element) {
+        window.clearInterval(timer);
+        resolve(element);
+        return;
+      }
+      if (Date.now() - startedAt >= timeout) {
+        window.clearInterval(timer);
+        reject(new Error(`Timed out waiting for element: ${selector}`));
+      }
+    }, interval);
+  });
+  const addStyle = (css, { id = "", target = document.head || document.documentElement } = {}) => {
+    if (id) {
+      const existing = document.getElementById(id);
+      if (existing) {
+        existing.textContent = css;
+        return existing;
+      }
+    }
+    if (typeof GM_addStyle === "function") {
+      return GM_addStyle(css);
+    }
+    const style = document.createElement("style");
+    if (id) {
+      style.id = id;
+    }
+    style.textContent = css;
+    target.appendChild(style);
+    return style;
+  };
+  const styles = ":root {\n  --fd-color-border: #d7d9dc;\n  --fd-color-text: #141e31;\n  --fd-color-white: #ffffff;\n  --fd-color-text-light-solid: #ffffff;\n  --fd-color-primary: #00b899;\n  --fd-color-primary-hover: #4dcdb8;\n}\n\n@keyframes pr-checker-fade-in {\n  from {\n    opacity: 0;\n    transform: scale(0.9);\n  }\n\n  to {\n    opacity: 1;\n    transform: scale(1);\n  }\n}\n\n@keyframes pr-checker-fade-out {\n  from {\n    opacity: 1;\n    transform: scale(1);\n  }\n\n  to {\n    opacity: 0;\n    transform: scale(0.9);\n  }\n}\n\n@keyframes pr-checker-backdrop-fade-in {\n  from {\n    opacity: 0;\n  }\n\n  to {\n    opacity: 1;\n  }\n}\n\n@keyframes pr-checker-backdrop-fade-out {\n  from {\n    opacity: 1;\n  }\n\n  to {\n    opacity: 0;\n  }\n}\n\n.pr-checker-mask::backdrop {\n  background-color: rgba(0, 10, 31, 0.29);\n  animation: pr-checker-backdrop-fade-in 0.3s ease-out;\n}\n\n.pr-checker-mask.closing::backdrop {\n  animation: pr-checker-backdrop-fade-out 0.3s ease-out;\n}\n\n.pr-checker-dialog {\n  width: 500px;\n  padding: 0;\n  font-size: 14px;\n  color: var(--fd-color-text);\n  background: #ffffff;\n  border: none;\n  border-radius: 8px;\n  box-shadow:\n    0 9px 28px 8px #0000000d,\n    0 3px 6px -4px #0000001f,\n    0 6px 16px #00000014;\n  animation: pr-checker-fade-in 0.3s ease-out;\n}\n\n.pr-checker-dialog.closing {\n  animation: pr-checker-fade-out 0.3s ease-out;\n}\n\n.pr-checker-dialog .pr-checker-title {\n  padding: 16px 20px;\n  font-size: 18px;\n  font-weight: 700;\n  line-height: 26px;\n  border-bottom: 1px solid var(--fd-color-border);\n}\n\n.pr-checker-dialog .pr-checker-content {\n  padding: 16px 20px;\n}\n\n#pr-checker-btns {\n  display: flex;\n  gap: 12px;\n  justify-content: flex-end;\n  padding: 12px 20px;\n  margin-top: 14px;\n  border-top: 1px solid var(--fd-color-border);\n}\n\n#pr-checker-btns .pr-checker-btn {\n  padding: 0 16px;\n  line-height: 32px;\n  cursor: pointer;\n  border: 1px solid;\n  border-radius: 4px;\n  outline: none;\n  transition:\n    box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),\n    color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);\n}\n\n#pr-checker-btns .close-btn {\n  background: var(--fd-color-white);\n  border-color: var(--fd-color-border);\n}\n\n#pr-checker-btns .close-btn:hover {\n  color: var(--fd-color-primary-hover);\n  border-color: var(--fd-color-primary-hover);\n}\n\n#pr-checker-btns .ensure-btn {\n  color: var(--fd-color-text-light-solid);\n  background: var(--fd-color-primary);\n  border-color: var(--fd-color-primary);\n}\n\n#pr-checker-btns .ensure-btn:hover {\n  background: var(--fd-color-primary-hover);\n}\n\n.pr-checker-create-btn {\n  position: relative;\n  display: inline-block;\n  margin-right: 9px;\n  cursor: pointer;\n}\n\n.pr-checker-create-btn:hover #submit-form {\n  --aui-btn-bg: var(--aui-button-primary-hover-bg-color);\n  --aui-btn-text: var(--aui-button-primary-active-text-color);\n}\n\n.pr-checker-mask-btn {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n";
+  const STYLE_ID = "pr-checker-style";
+  const DIALOG_ID = "bitbucket-pr-checker";
+  const DIALOG_BUTTONS_ID = "pr-checker-btns";
+  const CHECK_ITEMS_ID = "pr-check-items";
+  const CREATE_PR_BUTTON_ID = "submit-form";
+  const CREATE_PR_BUTTON_SELECTOR = `#${CREATE_PR_BUTTON_ID}`;
+  const CONTINUE_BUTTON_ID = "show-create-pr-button";
+  const MASK_BUTTON_CLASS = "pr-checker-mask-btn";
+  const CREATE_BUTTON_WRAPPER_CLASS = "pr-checker-create-btn";
+  const TARGET_BRANCH_INPUT_ID = "targetBranch-field";
+  const CUSTOM_CHECK_ITEMS_STORAGE_PREFIX = "bitbucket.pr.checker";
+  const CREATE_BUTTON_WAIT_TIMEOUT = 1e4;
+  const CREATE_BUTTON_WAIT_INTERVAL = 200;
+  const DIALOG_CLOSE_ANIMATION_DURATION = 300;
+  const ILLEGAL_TARGET_BRANCHES = ["master", "main"];
+  const DEFAULT_CHECK_ITEMS = [
+    "copy的代码检查了吗？",
+    "移动端漏了吗？",
+    "CRM漏了吗？",
+    "KMS漏了吗？",
+    "任务号有没有关联错？",
+    "目标分支提对了吗？",
+    "国际化有没有处理好？"
+  ];
+  const noop = () => {
+  };
+  const isTopWindow = () => {
+    try {
+      return window.self === window.top;
+    } catch {
+      return false;
+    }
+  };
+  const getMountTarget = () => document.body ?? document.documentElement;
+  const getUsername = () => {
+    var _a;
+    return ((_a = document.querySelector("[data-username]")) == null ? void 0 : _a.dataset.username) ?? "";
+  };
+  const getCustomCheckItemsStorageKey = () => `${CUSTOM_CHECK_ITEMS_STORAGE_PREFIX}.${getUsername()}`;
+  const safeParseArray = (rawValue) => {
+    if (!rawValue) {
+      return [];
+    }
+    try {
+      const parsedValue = JSON.parse(rawValue);
+      return Array.isArray(parsedValue) ? parsedValue : [];
+    } catch {
+      return [];
+    }
+  };
+  const getCustomCheckItems = (storageKey) => safeParseArray(window.localStorage.getItem(storageKey)).map((item) => String(item));
+  const setCustomCheckItems = (storageKey, checkItems) => {
+    window.localStorage.setItem(storageKey, JSON.stringify(checkItems));
+  };
+  const getCheckItems = (storageKey) => [...DEFAULT_CHECK_ITEMS, ...getCustomCheckItems(storageKey)];
+  const addCustomCheckItems = (storageKey, ...checkItems) => {
+    const normalizedItems = checkItems.map((item) => String(item));
+    const customCheckItems = [.../* @__PURE__ */ new Set([...getCustomCheckItems(storageKey), ...normalizedItems])];
+    setCustomCheckItems(storageKey, customCheckItems);
+  };
+  const clearCustomCheckItems = (storageKey) => {
+    window.localStorage.removeItem(storageKey);
+  };
+  const exposePrCheckerApi = (storageKey) => {
+    const consoleWindow = _unsafeWindow ?? window;
+    consoleWindow.PrChecker = {
+      add: (...checkItems) => addCustomCheckItems(storageKey, ...checkItems),
+      clear: () => clearCustomCheckItems(storageKey)
+    };
+  };
+  const closeDialogWithAnimation = (dialog, callback = noop) => {
+    dialog.classList.add("closing");
+    window.setTimeout(() => {
+      if (typeof dialog.close === "function" && dialog.open) {
+        dialog.close();
+      } else {
+        dialog.removeAttribute("open");
+      }
+      dialog.classList.remove("closing");
+      callback();
+    }, DIALOG_CLOSE_ANIMATION_DURATION);
+  };
+  const createDialogButton = ({ className, text, onClick }) => createElement({
+    tagName: "button",
+    text,
+    attributes: {
+      class: `pr-checker-btn ${className}`,
+      type: "button"
+    },
+    events: [
+      {
+        name: "click",
+        handler: () => onClick()
+      }
+    ]
+  });
   const createDialog = ({
     id = "pr-checker-dialog",
     title = "",
@@ -75,141 +210,15 @@
     text4Cancel = "取消",
     closeOnClickMask = false,
     content = () => [],
-    onOk = () => {
-    },
-    onCancel = () => {
-    },
-    onDialogExist = () => null
+    onOk = noop,
+    onCancel = noop,
+    onDialogExist = noop
   }) => {
     const existingDialog = document.getElementById(id);
     if (existingDialog) {
       onDialogExist(existingDialog);
       return existingDialog;
     }
-    const initDialogStyle = () => {
-      const dialogStyle = `
-      @keyframes pr-checker-fade-in {
-        from {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      @keyframes pr-checker-fade-out {
-        from {
-          opacity: 1;
-          transform: scale(1);
-        }
-        to {
-          opacity: 0;
-          transform: scale(0.9);
-        }
-      }
-
-      @keyframes pr-checker-backdrop-fade-in {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      @keyframes pr-checker-backdrop-fade-out {
-        from {
-          opacity: 1;
-        }
-        to {
-          opacity: 0;
-        }
-      }
-
-      .pr-checker-mask::backdrop {
-        background-color: rgba(0, 10, 31, 0.29);
-        animation: pr-checker-backdrop-fade-in 0.3s ease-out;
-      }
-
-      .pr-checker-mask.closing::backdrop {
-        animation: pr-checker-backdrop-fade-out 0.3s ease-out;
-      }
-  
-      .pr-checker-dialog {
-        font-size: 14px;
-        color: var(--fd-color-text);
-        border: none;
-        border-radius: 8px;
-        background: #ffffff;
-        width: 500px;
-        padding: 0;
-        box-shadow: 0 9px 28px 8px #0000000d, 0 3px 6px -4px #0000001f,
-          0 6px 16px #00000014;
-        animation: pr-checker-fade-in 0.3s ease-out;
-      }
-
-      .pr-checker-dialog.closing {
-        animation: pr-checker-fade-out 0.3s ease-out;
-      }
-  
-      .pr-checker-dialog .pr-checker-title {
-        border-bottom: 1px solid var(--fd-color-border);
-        padding: 16px 20px;
-        font-size: 18px;
-        line-height: 26px;
-        font-weight: 700;
-      }
-
-      .pr-checker-dialog .pr-checker-content {
-        padding: 16px 20px;
-      }
-
-      #pr-checker-btns {
-        margin-top: 14px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        padding: 12px 20px;
-        border-top: 1px solid var(--fd-color-border);
-      }
-
-      #pr-checker-btns .pr-checker-btn {
-        border: 1px solid;
-        border-radius: 4px;
-        line-height: 32px;
-        padding: 0px 16px;
-        outline: none;
-        cursor: pointer;
-        transition: box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-          background 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-          border-color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
-          color 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-      }
-
-      #pr-checker-btns .close-btn {
-        background: var(--fd-color-white);
-        border-color: var(--fd-color-border);
-      }
-
-      #pr-checker-btns .close-btn:hover {
-        color: var(--fd-color-primary-hover);
-        border-color: var(--fd-color-primary-hover);
-      }
-
-      #pr-checker-btns .ensure-btn {
-        color: var(--fd-color-text-light-solid);
-        background: var(--fd-color-primary);
-        border-color: var(--fd-color-primary);
-      }
-
-      #pr-checker-btns .ensure-btn:hover {
-        background: var(--fd-color-primary-hover);
-      }
-    `;
-      _GM_addStyle(dialogStyle);
-    };
     const fragment = document.createDocumentFragment();
     const dialog = createElement({
       parent: fragment,
@@ -218,251 +227,169 @@
         id,
         class: "pr-checker-dialog pr-checker-mask"
       },
-      children: () => {
-        return [
-          // 创建标题
-          createElement({
-            text: title,
-            attributes: { class: "pr-checker-title" }
-          }),
-          // 创建内容
-          createElement({
-            attributes: { class: "pr-checker-content" },
-            children: (element) => content(element)
-          }),
-          // 创建按钮组
-          createElement({
-            attributes: { id: "pr-checker-btns" },
-            children: compact([
-              // 取消按钮
-              text4Cancel && createElement({
-                tagName: "button",
-                text: text4Cancel,
-                attributes: {
-                  class: "pr-checker-btn close-btn"
-                },
-                events: [
-                  {
-                    name: "click",
-                    handler: () => {
-                      closeDialogWithAnimation(onCancel);
-                    }
-                  }
-                ]
-              }),
-              // 确认按钮
-              text4Ok && createElement({
-                tagName: "button",
-                text: text4Ok,
-                attributes: {
-                  class: "pr-checker-btn ensure-btn"
-                },
-                events: [
-                  {
-                    name: "click",
-                    handler: () => {
-                      closeDialogWithAnimation(onOk);
-                    }
-                  }
-                ]
-              })
-            ])
-          })
-        ];
-      }
+      children: () => [
+        createElement({
+          text: title,
+          attributes: { class: "pr-checker-title" }
+        }),
+        createElement({
+          attributes: { class: "pr-checker-content" },
+          children: (element) => content(element)
+        }),
+        createElement({
+          attributes: { id: DIALOG_BUTTONS_ID },
+          children: compact([
+            text4Cancel && createDialogButton({
+              className: "close-btn",
+              text: text4Cancel,
+              onClick: () => closeDialogWithAnimation(dialog, onCancel)
+            }),
+            text4Ok && createDialogButton({
+              className: "ensure-btn",
+              text: text4Ok,
+              onClick: () => closeDialogWithAnimation(dialog, onOk)
+            })
+          ])
+        })
+      ]
     });
-    document.body.appendChild(fragment);
-    initDialogStyle();
-    const closeDialogWithAnimation = (callback) => {
-      dialog.classList.add("closing");
-      setTimeout(() => {
-        dialog.close();
-        dialog.classList.remove("closing");
-        callback();
-      }, 300);
-    };
+    const mountTarget = getMountTarget();
+    if (mountTarget) {
+      mountTarget.appendChild(fragment);
+    }
     if (closeOnClickMask) {
-      dialog.addEventListener("click", (e) => {
-        if (e.target === dialog) {
-          closeDialogWithAnimation(onCancel);
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) {
+          closeDialogWithAnimation(dialog, onCancel);
         }
       });
     }
     return dialog;
   };
-  const initCommonStyle = () => {
-    const commonStyle = `
-    :root {
-      --fd-color-border: #d7d9dc;
-      --fd-color-text: #141e31;
-      --fd-color-white: #ffffff;
-      --fd-color-text-light-solid: #ffffff;
-      --fd-color-primary: #00b899;
-      --fd-color-primary-hover: #4dcdb8;
-    }
-  `;
-    _GM_addStyle(commonStyle);
-  };
-  const checkPrBeforeCreate = () => {
-    var _a;
-    const prCheckerStyle = `
-    .pr-checker-create-btn {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-      margin-right: 9px;
-    }
-
-    .pr-checker-create-btn:hover #submit-form {
-      --aui-btn-bg: var(--aui-button-primary-hover-bg-color);
-      --aui-btn-text: var(--aui-button-primary-active-text-color);
-    }
-
-    .pr-checker-mask-btn {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-    }
-    `;
-    _GM_addStyle(prCheckerStyle);
-    const MAX_FIND_COUNT = 50;
-    const USERNAME = ((_a = document.querySelector("[data-username]")) == null ? void 0 : _a.dataset.username) || "";
-    const CUSTOM_CHECK_ITEMS_KEY = `bitbucket.pr.checker.${USERNAME}`;
-    const initPrChecker = () => {
-      const addCustomCheckItems = (...checkItems) => {
-        const cachedItems = JSON.parse(window.localStorage.getItem(CUSTOM_CHECK_ITEMS_KEY)) || [];
-        const uniqItems = [...new Set(checkItems.map((item) => item.toString()))];
-        const customCheckItems = [.../* @__PURE__ */ new Set([...cachedItems, ...uniqItems])];
-        window.localStorage.setItem(CUSTOM_CHECK_ITEMS_KEY, JSON.stringify(customCheckItems));
-      };
-      const clearCustomCheckItems = () => {
-        window.localStorage.removeItem(CUSTOM_CHECK_ITEMS_KEY);
-      };
-      _unsafeWindow.PrChecker = {};
-      _unsafeWindow.PrChecker.add = addCustomCheckItems;
-      _unsafeWindow.PrChecker.clear = clearCustomCheckItems;
-    };
-    const getCheckItems = () => {
-      const customCheckItems = JSON.parse(window.localStorage.getItem(`bitbucket.pr.checker.${USERNAME}`)) || [];
-      return [
-        "copy的代码检查了吗？",
-        "移动端漏了吗？",
-        "CRM漏了吗？",
-        "KMS漏了吗？",
-        "任务号有没有关联错？",
-        "目标分支提对了吗？",
-        "国际化有没有处理好？",
-        ...customCheckItems
-      ];
-    };
-    const createCheckItems = (parent) => {
-      const fragment = document.createDocumentFragment();
-      getCheckItems().forEach((item) => {
-        createElement({ parent: fragment, tagName: "li", text: item });
-      });
-      parent.innerHTML = "";
-      parent.appendChild(fragment);
-    };
-    const findCreatePrBtn = () => {
-      let findCount = 0;
-      return new Promise((resolve, reject) => {
-        const interval = setInterval(() => {
-          const createPrBtn = document.getElementById("submit-form");
-          if (createPrBtn) {
-            clearInterval(interval);
-            const createBtnWrapper = createElement({
-              parent: null,
-              attributes: {
-                class: "pr-checker-create-btn"
-              }
-            });
-            createPrBtn.parentNode.insertBefore(createBtnWrapper, createPrBtn);
-            createPrBtn.parentNode.removeChild(createPrBtn);
-            createBtnWrapper.appendChild(createPrBtn);
-            resolve({ createBtnWrapper, createPrBtn });
-          } else if (findCount > MAX_FIND_COUNT) {
-            clearInterval(interval);
-            reject(new Error("Create PR button doesn't exist"));
-          }
-          findCount++;
-        }, 200);
-      });
-    };
-    findCreatePrBtn().then(({ createBtnWrapper, createPrBtn }) => {
-      initPrChecker();
-      createElement({
-        parent: createBtnWrapper,
-        attributes: { class: "pr-checker-mask-btn" },
-        events: [
-          {
-            name: "click",
-            handler: (e) => {
-              e.stopPropagation();
-              const dialog = createDialog({
-                id: "bitbucket-pr-checker",
-                closeOnClickMask: false,
-                title: "创建PR前请检查以下几项！",
-                text4Ok: "确认创建",
-                text4Cancel: "还需调整",
-                content: (dialog2) => {
-                  const checkItemsWrapper = createElement({
-                    parent: dialog2,
-                    tagName: "ol",
-                    attributes: { id: "pr-check-items" }
-                  });
-                  createCheckItems(checkItemsWrapper);
-                  return [checkItemsWrapper];
-                },
-                onOk: () => {
-                  createPrBtn.click();
-                },
-                onDialogExist: (existingDialog) => {
-                  return createCheckItems(existingDialog.querySelector("#pr-check-items"));
-                }
-              });
-              dialog.showModal();
-            }
-          }
-        ]
-      });
-    }).catch((err) => console.error(err));
-  };
-  const checkTargetBranch = () => {
-    const targetBranchInput = document.getElementById("targetBranch-field");
-    if (!targetBranchInput) {
+  const showDialog = (dialog) => {
+    if (dialog.open) {
       return;
     }
-    const ILLEGAL_TARGET_BRANCH = ["master", "main"];
-    const triggerTargetBranchWarning = (targetBranch, isImmediate = false) => {
-      const createPrBtn = document.getElementById("show-create-pr-button");
-      if (!createPrBtn) {
-        return;
+    if (typeof dialog.showModal === "function") {
+      dialog.showModal();
+      return;
+    }
+    dialog.setAttribute("open", "");
+  };
+  const renderCheckItems = (parent, storageKey) => {
+    if (!parent) {
+      return;
+    }
+    const fragment = document.createDocumentFragment();
+    getCheckItems(storageKey).forEach((item) => {
+      createElement({ parent: fragment, tagName: "li", text: item });
+    });
+    parent.innerHTML = "";
+    parent.appendChild(fragment);
+  };
+  const createCheckItemsContent = (parent, storageKey) => {
+    const checkItemsWrapper = createElement({
+      parent,
+      tagName: "ol",
+      attributes: { id: CHECK_ITEMS_ID }
+    });
+    renderCheckItems(checkItemsWrapper, storageKey);
+    return [checkItemsWrapper];
+  };
+  const wrapCreatePrButton = (createPrButton) => {
+    var _a;
+    const parent = createPrButton.parentNode;
+    if (!parent) {
+      return null;
+    }
+    if ((_a = parent.classList) == null ? void 0 : _a.contains(CREATE_BUTTON_WRAPPER_CLASS)) {
+      return parent;
+    }
+    const createButtonWrapper = createElement({
+      attributes: {
+        class: CREATE_BUTTON_WRAPPER_CLASS
       }
-      const warningWrapper = document.querySelector(".pr-create-warning");
-      const warningText = document.querySelector(".pr-create-warning-text");
-      const isCurrentTargetBranchIllegal = ILLEGAL_TARGET_BRANCH.some(
-        (illegalTargetBranch) => targetBranch.includes(illegalTargetBranch)
-      );
-      setTimeout(
-        () => {
-          if (isCurrentTargetBranchIllegal) {
-            const warningTip = `目标分支不能为 ${targetBranch}`;
-            createPrBtn.setAttribute("disabled", "");
-            createPrBtn.setAttribute("title", warningTip);
-            if (warningWrapper) {
-              warningWrapper.classList.remove("hidden");
-            }
-            if (warningText) {
-              warningText.innerText = warningTip;
-            }
+    });
+    parent.insertBefore(createButtonWrapper, createPrButton);
+    createButtonWrapper.appendChild(createPrButton);
+    return createButtonWrapper;
+  };
+  const openCheckDialog = ({ createPrButton, storageKey }) => {
+    const dialog = createDialog({
+      id: DIALOG_ID,
+      closeOnClickMask: false,
+      title: "创建PR前请检查以下几项！",
+      text4Ok: "确认创建",
+      text4Cancel: "还需调整",
+      content: (dialogContent) => createCheckItemsContent(dialogContent, storageKey),
+      onOk: () => {
+        createPrButton.click();
+      },
+      onDialogExist: (existingDialog) => {
+        renderCheckItems(existingDialog.querySelector(`#${CHECK_ITEMS_ID}`), storageKey);
+      }
+    });
+    showDialog(dialog);
+  };
+  const addMaskButton = ({ createButtonWrapper, createPrButton, storageKey }) => {
+    if (!createButtonWrapper || createButtonWrapper.querySelector(`.${MASK_BUTTON_CLASS}`)) {
+      return;
+    }
+    createElement({
+      parent: createButtonWrapper,
+      attributes: { class: MASK_BUTTON_CLASS },
+      events: [
+        {
+          name: "click",
+          handler: (event) => {
+            event.stopPropagation();
+            openCheckDialog({ createPrButton, storageKey });
           }
-        },
-        isImmediate ? 0 : 300
-      );
-    };
-    triggerTargetBranchWarning(targetBranchInput.value, true);
+        }
+      ]
+    });
+  };
+  const initPrCreateChecker = async (storageKey) => {
+    try {
+      const createPrButton = await waitForElement(CREATE_PR_BUTTON_SELECTOR, {
+        timeout: CREATE_BUTTON_WAIT_TIMEOUT,
+        interval: CREATE_BUTTON_WAIT_INTERVAL
+      });
+      const createButtonWrapper = wrapCreatePrButton(createPrButton);
+      addMaskButton({ createButtonWrapper, createPrButton, storageKey });
+      exposePrCheckerApi(storageKey);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const isIllegalTargetBranch = (targetBranch) => ILLEGAL_TARGET_BRANCHES.some((illegalTargetBranch) => targetBranch.includes(illegalTargetBranch));
+  const showTargetBranchWarning = (targetBranch) => {
+    const createPrButton = document.getElementById(CONTINUE_BUTTON_ID);
+    if (!createPrButton || !isIllegalTargetBranch(targetBranch)) {
+      return;
+    }
+    const warningTip = `目标分支不能为 ${targetBranch}`;
+    const warningWrapper = document.querySelector(".pr-create-warning");
+    const warningText = document.querySelector(".pr-create-warning-text");
+    createPrButton.setAttribute("disabled", "");
+    createPrButton.setAttribute("title", warningTip);
+    warningWrapper == null ? void 0 : warningWrapper.classList.remove("hidden");
+    if (warningText) {
+      warningText.innerText = warningTip;
+    }
+  };
+  const triggerTargetBranchWarning = (targetBranch, { immediate = false } = {}) => {
+    window.setTimeout(
+      () => {
+        showTargetBranchWarning(targetBranch);
+      },
+      immediate ? 0 : 300
+    );
+  };
+  const observeTargetBranch = (targetBranchInput) => {
+    if (typeof MutationObserver !== "function") {
+      return;
+    }
     const observer = new MutationObserver(() => {
       const targetBranch = targetBranchInput.value;
       if (targetBranch) {
@@ -474,8 +401,23 @@
       attributeFilter: ["value"]
     });
   };
-  initCommonStyle();
-  checkTargetBranch();
-  checkPrBeforeCreate();
+  const initTargetBranchChecker = () => {
+    const targetBranchInput = document.getElementById(TARGET_BRANCH_INPUT_ID);
+    if (!targetBranchInput) {
+      return;
+    }
+    triggerTargetBranchWarning(targetBranchInput.value, { immediate: true });
+    observeTargetBranch(targetBranchInput);
+  };
+  const init = () => {
+    if (!isTopWindow()) {
+      return;
+    }
+    addStyle(styles, { id: STYLE_ID });
+    const storageKey = getCustomCheckItemsStorageKey();
+    initTargetBranchChecker();
+    initPrCreateChecker(storageKey);
+  };
+  init();
 
 })();
