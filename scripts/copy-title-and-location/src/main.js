@@ -1,152 +1,159 @@
-import { GM_addStyle } from "$";
+import { addStyle, copyTextToClipboard, createElement } from "@tampermonkey-scripts/shared";
 
-/* eslint-disable */
-/**
- * 创建DOM元素
- * @param {string} eleName - 元素标签名
- * @param {string} text - 元素的文本内容
- * @param {Object} attrs - 元素的属性键值对
- * @returns {HTMLElement} 创建的DOM元素
- */
-function createEle(eleName, text, attrs) {
-  const ele = document.createElement(eleName);
-  ele.innerText = text;
-  for (const k in attrs) {
-    ele.setAttribute(k, attrs[k]);
-  }
-  return ele;
-}
+const BUTTON_ID = "copy-title-and-location";
+const STYLE_ID = `${BUTTON_ID}-style`;
+const BUTTON_TEXT = "复制标题和地址";
 
-// 添加提示框样式
-const btnStyle = `
-    #copy-title-and-location {
-      position: fixed;
-      top: 100px;
-      left: -95px;
-      opacity: 0.3;
-      z-index: 2147483647;
-      background-image: none;
-      cursor: pointer;
-      color: #fff;
-      background-color: #0084ff !important;
-      margin: 5px 0px;
-      width: auto;
-      border-radius: 3px;
-      border: #0084ff;
-      outline: none;
-      padding: 3px 6px;
-      height: 26px;
-      font-family: Arial, sans-serif;
-      font-size: 12px;
-      transition: left, 0.5s;
-    }
-
-    #copy-title-and-location:hover {
-      left: 0px;
-      opacity: 1;
-    }
-
-    #copy-title-and-location svg {
-      width: auto;
-      vertical-align: middle;
-      margin-left: 10px;
-      border-style: none;
-      text-align: center;
-      display: inline-block !important;
-      margin-bottom: 2px;
-    }
-  `;
-
-// 将按钮图标由原来的img改为了svg，以增强适应性，同时也将对svg的样式设置移到了上面的 btnStyle 中
-const iconSVG =
+const BUTTON_ICON_SVG =
   '<?xml version="1.0" encoding="UTF-8"?><svg width="16" height="16" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="48" fill="white" fill-opacity="0.01"/><path d="M8 6C8 4.89543 8.89543 4 10 4H30L40 14V42C40 43.1046 39.1046 44 38 44H10C8.89543 44 8 43.1046 8 42V6Z" fill="none" stroke="#333" stroke-width="4" stroke-linejoin="round"/><path d="M16 20H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 28H32" stroke="#333" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const btn = createEle("button", "", { id: "copy-title-and-location" });
-btn.innerHTML = "复制标题和地址" + iconSVG;
 
-const date = new Date();
-const timeStamp = `更新：${date
-  .toLocaleDateString()
-  .replace("/", "年")
-  .replace("/", "月")}日${date.toLocaleTimeString("chinese", {
-  hour12: false,
-})}`;
-
-/**
- * 复制文本到剪贴板
- * @param {string} text - 要复制的文本内容
- */
-const copyToClipboard = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch (err) {
-    console.log("尝试使用备用复制方法：" + err);
-    try {
-      // 创建临时textarea元素用于复制
-      const textarea = document.createElement("textarea");
-      textarea.style.cssText = "position:fixed;top:-999px;left:-999px;";
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-    } catch (err) {
-      console.error("复制失败：", err);
-    }
+const BUTTON_STYLE = `
+  #${BUTTON_ID} {
+    position: fixed;
+    top: 100px;
+    left: -95px;
+    opacity: 0.3;
+    z-index: 2147483647;
+    background-image: none;
+    cursor: pointer;
+    color: #fff;
+    background-color: #0084ff !important;
+    margin: 5px 0;
+    width: auto;
+    border-radius: 3px;
+    border: #0084ff;
+    outline: none;
+    padding: 3px 6px;
+    height: 26px;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    transition: left, 0.5s;
   }
-};
 
-/**
- * 获取当前页面的引用地址
- * @param {boolean} hasQuote - 是否添加引用符号(>)
- * @returns {string} 格式化后的引用地址
- */
-const getAddress = (hasQuote = true) => {
-  const titleInfo = document.title;
-  let address = `参考：[${titleInfo}](${location})`;
+  #${BUTTON_ID}:hover {
+    left: 0;
+    opacity: 1;
+  }
 
-  // 针对不同网站的特殊处理规则
-  const siteHandlers = {
-    "mp.weixin.qq.com": () => {
+  #${BUTTON_ID} svg {
+    width: auto;
+    vertical-align: middle;
+    margin-left: 10px;
+    border-style: none;
+    text-align: center;
+    display: inline-block !important;
+    margin-bottom: 2px;
+  }
+`;
+
+const SITE_REFERENCE_HANDLERS = [
+  {
+    matches: ({ hostname }) => hostname.includes("mp.weixin.qq.com"),
+    buildReference: ({ baseReference, href, title }) => {
       const officialAccount = document.getElementById("js_name");
       const publishDate = document.getElementById("publish_time");
-      if (officialAccount && publishDate) {
-        publishDate.click();
-        return `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${titleInfo}](${location})`;
+
+      if (!officialAccount || !publishDate) {
+        return baseReference;
       }
-      return address;
+
+      publishDate.click();
+      return `参考：[【微信公众号：${officialAccount.innerText}${publishDate.innerText}】${title}](${href})`;
     },
-    // 可在此处添加其他网站的特殊处理规则
-  };
+  },
+];
 
-  const domain = location.hostname;
-  for (const site in siteHandlers) {
-    if (domain.includes(site)) {
-      address = siteHandlers[site]();
-      break;
-    }
+const isTopWindow = () => {
+  try {
+    return window.self === window.top;
+  } catch {
+    return false;
   }
-
-  return hasQuote ? `\n> ${address}` : address;
 };
 
-// 注册按钮事件
-btn.addEventListener("click", async (e) => {
-  await copyToClipboard(timeStamp + getAddress());
-});
+const getMountTarget = () => document.body ?? document.documentElement;
 
-btn.addEventListener("contextmenu", async (e) => {
-  e.preventDefault();
-  await copyToClipboard(getAddress(false));
-});
+const createTimestamp = () => {
+  const date = new Date();
+  const dateText = date.toLocaleDateString().replace("/", "年").replace("/", "月");
+  const timeText = date.toLocaleTimeString("chinese", {
+    hour12: false,
+  });
 
-// document.body.appendChild(style); // 这种写法会导致脚本在<iframe>标签的html文档的body标签也被选中
-// self === top 是用来判断当前页面是否是在<iframe>标签内，如果为true则表示不<iframe>标签内
-if (window.self === window.top) {
-  if (document.querySelector("body")) {
-    document.body.appendChild(btn);
-    GM_addStyle(btnStyle);
-  } else {
-    document.documentElement.appendChild(btn);
-    GM_addStyle(btnStyle);
+  return `更新：${dateText}日${timeText}`;
+};
+
+const buildReference = ({ href, title }) => `参考：[${title}](${href})`;
+
+const getReference = () => {
+  const context = {
+    hostname: window.location.hostname,
+    href: window.location.href,
+    title: document.title,
+  };
+  const baseReference = buildReference(context);
+  const handler = SITE_REFERENCE_HANDLERS.find(({ matches }) => matches(context));
+
+  if (!handler) {
+    return baseReference;
   }
-}
+
+  return handler.buildReference({
+    ...context,
+    baseReference,
+  });
+};
+
+const getAddress = ({ hasQuote = true } = {}) => {
+  const reference = getReference();
+  return hasQuote ? `\n> ${reference}` : reference;
+};
+
+const copyText = async (text) => {
+  try {
+    await copyTextToClipboard(text);
+  } catch (error) {
+    console.error("复制失败：", error);
+  }
+};
+
+const createCopyButton = () =>
+  createElement({
+    tagName: "button",
+    html: `${BUTTON_TEXT}${BUTTON_ICON_SVG}`,
+    attributes: {
+      id: BUTTON_ID,
+      type: "button",
+    },
+    events: [
+      {
+        name: "click",
+        handler: async () => {
+          await copyText(`${createTimestamp()}${getAddress()}`);
+        },
+      },
+      {
+        name: "contextmenu",
+        handler: async (event) => {
+          event.preventDefault();
+          await copyText(getAddress({ hasQuote: false }));
+        },
+      },
+    ],
+  });
+
+const init = () => {
+  if (!isTopWindow() || document.getElementById(BUTTON_ID)) {
+    return;
+  }
+
+  const mountTarget = getMountTarget();
+  if (!mountTarget) {
+    return;
+  }
+
+  mountTarget.appendChild(createCopyButton());
+  addStyle(BUTTON_STYLE, { id: STYLE_ID });
+};
+
+init();

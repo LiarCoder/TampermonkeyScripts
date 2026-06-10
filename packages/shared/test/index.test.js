@@ -5,6 +5,7 @@ import * as shared from "../src/index.js";
 
 test("统一入口导出所有工具函数", () => {
   assert.equal(typeof shared.compact, "function");
+  assert.equal(typeof shared.copyTextToClipboard, "function");
   assert.equal(typeof shared.getCookie, "function");
   assert.equal(typeof shared.createElement, "function");
   assert.equal(typeof shared.waitForElement, "function");
