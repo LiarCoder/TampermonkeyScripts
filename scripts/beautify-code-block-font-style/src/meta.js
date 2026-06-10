@@ -2,12 +2,12 @@ import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
 
 import packageJson from "../package.json";
 
-const { author, description, scriptName, version } = packageJson;
+const { author, description, displayName, scriptName, version } = packageJson;
 
 const rawScriptUrl = buildRawScriptUrl(scriptName);
 
 export const userscript = {
-  name: "改变网页代码块的字体样式",
+  name: displayName,
   namespace: "http://tampermonkey.net/",
   version,
   description,

@@ -2,14 +2,16 @@ import { buildRawScriptUrl } from "@tampermonkey-scripts/shared";
 
 import packageJson from "../package.json";
 
-const rawScriptUrl = buildRawScriptUrl(packageJson.scriptName);
+const { author, description, displayName, scriptName, version } = packageJson;
+
+const rawScriptUrl = buildRawScriptUrl(scriptName);
 
 export const userscript = {
-  name: "复制标题和地址",
+  name: displayName,
   namespace: "http://tampermonkey.net/",
-  version: "0.7",
-  description: "一键复制标题和地址为Markdown格式并带上当前时间（myFirstScript）",
-  author: "LiarCoder",
+  version,
+  description,
+  author,
   updateURL: rawScriptUrl,
   downloadURL: rawScriptUrl,
   match: "*://*/*",
