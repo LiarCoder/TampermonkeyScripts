@@ -4,6 +4,7 @@ import {
   createElement,
   createSvgElement,
   isTopWindow,
+  readFileAsText,
   waitForElement,
 } from "@tampermonkey-scripts/shared";
 
@@ -110,19 +111,6 @@ const getArticleTitle = (content) => {
 
   return `${content.substring(0, 10)} `;
 };
-
-const readFileAsText = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.addEventListener("load", () => {
-      resolve(String(reader.result ?? ""));
-    });
-    reader.addEventListener("error", () => {
-      reject(reader.error ?? new Error("读取 Markdown 文件失败。"));
-    });
-    reader.readAsText(file);
-  });
 
 const updateTitleInput = (titleInput, content) => {
   titleInput.value = getArticleTitle(content);

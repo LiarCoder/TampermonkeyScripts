@@ -1,5 +1,11 @@
 import { unsafeWindow } from "$";
-import { compact, createElement, waitForElement } from "@tampermonkey-scripts/shared";
+import {
+  compact,
+  createElement,
+  getDocumentMountTarget,
+  safeParseArray,
+  waitForElement,
+} from "@tampermonkey-scripts/shared";
 
 const DIALOG_ID = "bitbucket-pr-checker";
 const DIALOG_BUTTONS_ID = "pr-checker-btns";
@@ -24,24 +30,9 @@ const DEFAULT_CHECK_ITEMS = [
 
 const noop = () => {};
 
-const getMountTarget = () => document.body ?? document.documentElement;
-
 const getUsername = () => document.querySelector("[data-username]")?.dataset.username ?? "";
 
 const getCustomCheckItemsStorageKey = () => `${CUSTOM_CHECK_ITEMS_STORAGE_PREFIX}.${getUsername()}`;
-
-const safeParseArray = (rawValue) => {
-  if (!rawValue) {
-    return [];
-  }
-
-  try {
-    const parsedValue = JSON.parse(rawValue);
-    return Array.isArray(parsedValue) ? parsedValue : [];
-  } catch {
-    return [];
-  }
-};
 
 const getCustomCheckItems = (storageKey) =>
   safeParseArray(window.localStorage.getItem(storageKey)).map((item) => String(item));
@@ -160,7 +151,7 @@ const createDialog = ({
     ],
   });
 
-  const mountTarget = getMountTarget();
+  const mountTarget = getDocumentMountTarget();
   if (mountTarget) {
     mountTarget.appendChild(fragment);
   }

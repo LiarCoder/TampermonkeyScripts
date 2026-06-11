@@ -1,3 +1,5 @@
+import { observeAttributeChange } from "@tampermonkey-scripts/shared";
+
 const CONTINUE_BUTTON_ID = "show-create-pr-button";
 const TARGET_BRANCH_INPUT_ID = "targetBranch-field";
 const SOURCE_BRANCH_INPUT_ID = "sourceBranch-field";
@@ -44,16 +46,8 @@ const triggerCurrentTargetBranchWarning = ({ immediate = false } = {}) => {
 };
 
 const observeInputValueChange = (input, onChange) => {
-  if (typeof MutationObserver !== "function") {
-    return;
-  }
-
-  const observer = new MutationObserver(() => {
+  observeAttributeChange(input, "value", () => {
     onChange(input.value);
-  });
-  observer.observe(input, {
-    attributes: true,
-    attributeFilter: ["value"],
   });
 };
 

@@ -1,4 +1,34 @@
 /**
+ * 安全解析 JSON 字符串；解析失败时返回兜底值。
+ *
+ * @param {string | null | undefined} rawValue JSON 字符串。
+ * @param {unknown} [fallback=null] 解析失败或空值时的兜底值。
+ * @returns {unknown} 解析结果或兜底值。
+ */
+export const safeParseJson = (rawValue, fallback = null) => {
+  if (rawValue === null || rawValue === undefined || rawValue === "") {
+    return fallback;
+  }
+
+  try {
+    return JSON.parse(rawValue);
+  } catch {
+    return fallback;
+  }
+};
+
+/**
+ * 安全解析 JSON 数组；解析结果不是数组时返回空数组。
+ *
+ * @param {string | null | undefined} rawValue JSON 字符串。
+ * @returns {Array<unknown>} 解析后的数组。
+ */
+export const safeParseArray = (rawValue) => {
+  const parsedValue = safeParseJson(rawValue, []);
+  return Array.isArray(parsedValue) ? parsedValue : [];
+};
+
+/**
  * 创建支持可选命名空间的 JSON 存储封装。
  *
  * @param {object} [options] 存储配置。
@@ -10,14 +40,7 @@ export const createJsonStorage = ({ namespace, storage = window.localStorage } =
   return {
     get(key, fallback = null) {
       const raw = storage.getItem(resolveKey(key));
-      if (raw === null) {
-        return fallback;
-      }
-      try {
-        return JSON.parse(raw);
-      } catch {
-        return fallback;
-      }
+      return safeParseJson(raw, fallback);
     },
     set(key, value) {
       storage.setItem(resolveKey(key), JSON.stringify(value));

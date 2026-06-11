@@ -10,3 +10,16 @@ export const compact = (items) => {
   }
   return items.filter(Boolean);
 };
+
+/**
+ * 数组去重，保留第一次出现的顺序。
+ *
+ * @param {unknown} items 可能是数组的值。
+ * @returns {Array<unknown>} 去重后的数组；非数组时返回空数组。
+ */
+export const unique = (items) => {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+  return [...new Set(items)];
+};

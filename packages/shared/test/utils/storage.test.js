@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { createJsonStorage, createTtlCache } from "../../src/utils/storage.js";
+import {
+  createJsonStorage,
+  createTtlCache,
+  safeParseArray,
+  safeParseJson,
+} from "../../src/utils/storage.js";
 
 const createMemoryStorage = () => {
   const values = new Map();
@@ -56,6 +61,18 @@ test("结构化存储会删除指定键", () => {
   jsonStorage.remove("enabled");
 
   assert.equal(storage.getItem("script.enabled"), null);
+});
+
+test("安全解析 JSON 会在失败或空值时返回兜底值", () => {
+  assert.deepEqual(safeParseJson('{"enabled":true}', {}), { enabled: true });
+  assert.deepEqual(safeParseJson("{", { enabled: false }), { enabled: false });
+  assert.deepEqual(safeParseJson(null, []), []);
+});
+
+test("安全解析数组只在结果为数组时返回解析值", () => {
+  assert.deepEqual(safeParseArray('["a","b"]'), ["a", "b"]);
+  assert.deepEqual(safeParseArray('{"a":1}'), []);
+  assert.deepEqual(safeParseArray("{"), []);
 });
 
 test("限时缓存会在有效期内返回缓存值", () => {

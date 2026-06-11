@@ -93,6 +93,48 @@ export const createSvgElement = (tagName, attributes = {}) => {
 };
 
 /**
+ * 获取适合挂载脚本 DOM 的页面容器。
+ *
+ * @param {Document} [documentRef] 目标文档，主要用于测试。
+ * @returns {HTMLElement | null} 页面 body 或 documentElement。
+ */
+export const getDocumentMountTarget = (documentRef = globalThis.document) =>
+  documentRef?.body ?? documentRef?.documentElement ?? null;
+
+/**
+ * 观察元素指定属性的变化；MutationObserver 不可用时返回空清理函数。
+ *
+ * @param {Element} element 要观察的元素。
+ * @param {string} attributeName 属性名。
+ * @param {Function} callback 属性变化后的回调。
+ * @param {object} [options] 运行时依赖，主要用于测试。
+ * @returns {Function} 停止观察的清理函数。
+ */
+export const observeAttributeChange = (
+  element,
+  attributeName,
+  callback,
+  { observerConstructor = globalThis.MutationObserver } = {}
+) => {
+  if (!element || !attributeName || typeof callback !== "function") {
+    return () => {};
+  }
+  if (typeof observerConstructor !== "function") {
+    return () => {};
+  }
+
+  const observer = new observerConstructor(() => {
+    callback(element.getAttribute(attributeName), element);
+  });
+  observer.observe(element, {
+    attributes: true,
+    attributeFilter: [attributeName],
+  });
+
+  return () => observer.disconnect();
+};
+
+/**
  * 轮询等待元素出现，直到命中元素或超时。
  *
  * @param {string} selector 要查询的 CSS 选择器。
