@@ -20,32 +20,103 @@
 (function () {
   'use strict';
 
-  window.onload = function() {
-    let jumpBtn = null;
-    let targetAddress = "";
-    let currentAddress = location.toString();
-    let buttonMap = /* @__PURE__ */ new Map();
-    let addressMap = /* @__PURE__ */ new Map();
-    buttonMap.set("://link.juejin.cn/", "#app > div > div > button");
-    buttonMap.set("://www.jianshu.com/go-wild", "._3OuyzjzFBDdQwRGk08HXHz_0");
-    buttonMap.set("://link.zhihu.com/", "a.button");
-    buttonMap.set("://jump.bdimg.com/safecheck", "div.warning_info.fl > a:nth-child(2)");
-    buttonMap.set("://link.csdn.net/", "a.loading-btn");
-    addressMap.set("://c.pc.qq.com/middlem.html", "#url");
-    for (let address of buttonMap.keys()) {
-      if (currentAddress.indexOf(address) >= 0) {
-        jumpBtn = document.querySelector(buttonMap.get(address));
-        jumpBtn.click();
-        return;
-      }
+  const CLICK_REDIRECT_RULES = [
+    // 匹配掘金的跳转拦截页面网址。
+    {
+      urlIncludes: "://link.juejin.cn/",
+      selector: "#app > div > div > button"
+    },
+    // 匹配简书的跳转拦截页面网址。
+    {
+      urlIncludes: "://www.jianshu.com/go-wild",
+      selector: "._3OuyzjzFBDdQwRGk08HXHz_0"
+    },
+    // 匹配知乎的跳转拦截页面网址。
+    {
+      urlIncludes: "://link.zhihu.com/",
+      selector: "a.button"
+    },
+    // 匹配百度贴吧的跳转拦截页面网址。
+    {
+      urlIncludes: "://jump.bdimg.com/safecheck",
+      selector: "div.warning_info.fl > a:nth-child(2)"
+    },
+    // 匹配 CSDN 的跳转拦截页面网址。
+    {
+      urlIncludes: "://link.csdn.net/",
+      selector: "a.loading-btn"
     }
-    for (let address of addressMap.keys()) {
-      if (currentAddress.indexOf(address) >= 0) {
-        targetAddress = document.querySelector(addressMap.get(address)).innerText;
-        location = targetAddress;
-        return;
-      }
+  ];
+  const TEXT_REDIRECT_RULES = [
+    // 匹配 PC 端 QQ 的跳转拦截页面网址。
+    {
+      urlIncludes: "://c.pc.qq.com/middlem.html",
+      selector: "#url"
+    }
+  ];
+  const QUERY_REDIRECT_RULES = [
+    // 匹配 Gitee 的跳转拦截页面网址。
+    {
+      urlIncludes: "://gitee.com/link",
+      parameterName: "target"
+    }
+  ];
+  const getCurrentAddress = () => window.location.toString();
+  const findMatchedRule = (rules, currentAddress) => rules.find(({ urlIncludes }) => currentAddress.includes(urlIncludes));
+  const redirectTo = (targetAddress) => {
+    if (!targetAddress) {
+      return false;
+    }
+    window.location.assign(targetAddress);
+    return true;
+  };
+  const clickRedirectButton = ({ selector }) => {
+    const jumpBtn = document.querySelector(selector);
+    if (!jumpBtn) {
+      return false;
+    }
+    jumpBtn.click();
+    return true;
+  };
+  const redirectByTextContent = ({ selector }) => {
+    var _a;
+    const targetElement = document.querySelector(selector);
+    const targetAddress = (_a = targetElement == null ? void 0 : targetElement.innerText) == null ? void 0 : _a.trim();
+    return redirectTo(targetAddress);
+  };
+  const getQueryParameter = (parameterName) => {
+    var _a;
+    try {
+      return ((_a = new URL(window.location.href).searchParams.get(parameterName)) == null ? void 0 : _a.trim()) ?? "";
+    } catch {
+      return "";
     }
   };
+  const redirectByQueryParameter = ({ parameterName }) => {
+    const targetAddress = getQueryParameter(parameterName);
+    return redirectTo(targetAddress);
+  };
+  const runMatchedRule = (rules, currentAddress, runner) => {
+    const matchedRule = findMatchedRule(rules, currentAddress);
+    if (!matchedRule) {
+      return false;
+    }
+    return runner(matchedRule);
+  };
+  const init = () => {
+    const currentAddress = getCurrentAddress();
+    if (runMatchedRule(CLICK_REDIRECT_RULES, currentAddress, clickRedirectButton)) {
+      return;
+    }
+    if (runMatchedRule(TEXT_REDIRECT_RULES, currentAddress, redirectByTextContent)) {
+      return;
+    }
+    runMatchedRule(QUERY_REDIRECT_RULES, currentAddress, redirectByQueryParameter);
+  };
+  if (document.readyState === "complete") {
+    init();
+  } else {
+    window.addEventListener("load", init, { once: true });
+  }
 
 })();
