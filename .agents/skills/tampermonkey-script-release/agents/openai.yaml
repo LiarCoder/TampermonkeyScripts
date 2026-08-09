@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tampermonkey 脚本发布"
+  short_description: "统一 Tampermonkey 脚本版本升级、构建与发布"
+  default_prompt: "使用 $tampermonkey-script-release 检查并完成指定 Tampermonkey 脚本的版本升级与发布准备。"
