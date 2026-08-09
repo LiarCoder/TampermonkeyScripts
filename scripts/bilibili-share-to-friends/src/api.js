@@ -579,7 +579,7 @@ export const sendVideoText = async ({ nav, csrf, video, receiver }) => {
   const timestamp = Math.round(Date.now() / 1000);
   const videoUrl = video.shareUrl || `https://www.bilibili.com/video/${video.bvid}`;
   const content = {
-    content: `分享视频：【UP主：${video.ownerName}】${video.title}\n${videoUrl}`,
+    content: `分享视频：【UP主：${video.ownerName}】\n视频标题：${video.title}\n查看链接：👉${videoUrl}`,
   };
   const form = createSendMessageForm({
     nav,

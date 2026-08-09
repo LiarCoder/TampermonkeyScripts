@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         B站视频分享给好友
 // @namespace    http://tampermonkey.net/
-// @version      0.4.8
+// @version      0.4.9
 // @author       LiarCoder
 // @description  在 Bilibili 视频播放页的原分享面板中新增“B站好友”入口，将当前视频以文本链接私信发送给最近聊天、关注或粉丝用户
 // @license      MIT
@@ -1219,8 +1219,9 @@
     const timestamp = Math.round(Date.now() / 1e3);
     const videoUrl = video.shareUrl || `https://www.bilibili.com/video/${video.bvid}`;
     const content = {
-      content: `分享视频：【UP主：${video.ownerName}】${video.title}
-${videoUrl}`
+      content: `分享视频：【UP主：${video.ownerName}】
+视频标题：${video.title}
+查看链接：👉${videoUrl}`
     };
     const form = createSendMessageForm({
       nav,

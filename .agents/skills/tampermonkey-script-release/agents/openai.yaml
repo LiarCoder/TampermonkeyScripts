@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tampermonkey 脚本发布"
+  short_description: "统一 Tampermonkey 脚本升级、提交、推送与 PR"
+  default_prompt: "使用 $tampermonkey-script-release 将指定 Tampermonkey 脚本升级到明确版本并完成验证、提交、推送和中文 PR；如只需本地修改，请明确说明。"
