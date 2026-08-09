@@ -1,19 +1,21 @@
 ---
 name: tampermonkey-script-release
-description: Standardize version upgrades and releases for completed Tampermonkey userscripts in this pnpm workspace, including SemVer recommendation, package and changelog edits, build artifact regeneration, validation, release commits, Chinese PRs, and auto-merge eligibility for release-only PRs. Use when a user asks to bump, package, release, publish, or prepare a completed script version.
+description: Standardize version upgrades and full releases for completed Tampermonkey userscripts in this pnpm workspace, including SemVer checks, package and changelog edits, build artifact regeneration, validation, release commits, pushing, Chinese PRs, and auto-merge eligibility. Use when Codex needs to bump or publish a completed script with an explicit target version; say “仅本地升级” to skip commit, push, and PR actions.
 ---
 
 # Tampermonkey 脚本版本发布
 
-把已经完成开发的 Tampermonkey 脚本变更，安全地升级版本、生成发布产物、提交发布 PR，并在满足条件时自动合并。只处理发布阶段，不代替功能实现或产品验收。
+把已经完成开发的 Tampermonkey 脚本变更，安全地升级版本、生成发布产物，并默认完成提交、推送和中文发布 PR；满足条件时自动合并。只处理发布阶段，不代替功能实现或产品验收。
 
 ## 硬性规则
 
 1. 明确的目标版本是修改文件的前置条件
    - 用户给出完整目标版本（例如 `0.4.9`）时，校验它是合法 SemVer 且高于当前版本，然后继续
+   - 用户明确调用本 skill 并给出完整目标版本时，默认视为授权执行完整发布流程：修改发布文件、构建验证、提交、推送和创建中文 PR
    - 用户没有给出完整目标版本时，只读取仓库并推荐一个版本号及理由，禁止修改 `package.json`、`CHANGELOG.md`、`dist`，禁止提交、推送、创建或合并 PR
    - “升一个 patch/minor”不算完整目标版本；先换算并推荐具体版本，等待确认
    - 目标版本等于或低于当前版本、格式非法或无法判断升级级别时，停止并说明原因
+   - 用户明确说“仅本地升级”“不要推送”或“不要创建 PR”时，切换为本地模式，完成发布文件、构建验证和本地提交后停止；未明确要求时不要自行切换为本地模式
 2. 不覆盖用户已有改动
    - 发布前检查 `git status --short` 和相对 base branch 的 diff
    - 发现无关改动、未完成的源代码改动或文件归属不清时，先停下并报告，不要清理、重置或覆盖
@@ -105,6 +107,8 @@ chore: bilibili-share-to-friends 发布 v0.4.9
 ```
 
 推送分支并创建中文 PR，描述完整列出版本变更和验证结果。若完整 PR diff 满足 release-only 条件，检查通过后开启 auto-merge；否则保留人工 review 流程。
+
+默认创建 draft PR，除非用户明确要求直接创建 ready-for-review PR。完成本地提交后不要在没有阻塞原因的情况下停在未推送状态；若 GitHub 认证、远程仓库或权限不可用，报告具体阻塞原因，不伪造推送或 PR 状态。
 
 使用当前仓库已配置的托管平台连接器或 CLI 完成 PR 操作。不要声称没有实际执行的推送、PR 或合并已经完成。
 
