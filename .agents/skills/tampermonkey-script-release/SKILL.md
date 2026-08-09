@@ -1,11 +1,11 @@
 ---
 name: tampermonkey-script-release
-description: Standardize version upgrades and full releases for completed Tampermonkey userscripts in this pnpm workspace, including SemVer checks, package and changelog edits, build artifact regeneration, validation, release commits, pushing, Chinese PRs, and auto-merge eligibility. Use when Codex needs to bump or publish a completed script with an explicit target version; say “仅本地升级” to skip commit, push, and PR actions.
+description: Standardize version upgrades and full releases for completed Tampermonkey userscripts in this pnpm workspace, including SemVer checks, package and changelog edits, build artifact regeneration, validation, release commits, pushing, Chinese PRs, post-release branch cleanup, and auto-merge eligibility. Use when Codex needs to bump or publish a completed script with an explicit target version; say “仅本地升级” to skip commit, push, PR, and branch cleanup actions.
 ---
 
 # Tampermonkey 脚本版本发布
 
-把已经完成开发的 Tampermonkey 脚本变更，安全地升级版本、生成发布产物，并默认完成提交、推送和中文发布 PR；满足条件时自动合并。只处理发布阶段，不代替功能实现或产品验收。
+把已经完成开发的 Tampermonkey 脚本变更，安全地升级版本、生成发布产物，并默认完成提交、推送和中文发布 PR；满足条件时自动合并，发布完成后自动调用 `git-clean-branches` 清理分支。只处理发布阶段，不代替功能实现或产品验收。
 
 ## 硬性规则
 
@@ -24,6 +24,11 @@ description: Standardize version upgrades and full releases for completed Tamper
    - release-only PR 在构建、lint、test 通过且无冲突、无未解决 review 后，默认开启 auto-merge
    - 只要包含 `src`、shared 工具、构建配置、依赖或其他脚本改动，就不按纯版本升级处理，不自动合并
    - 托管平台或权限不支持自动合并时，报告阻塞原因，不伪造已合并状态
+4. 发布完成后自动调用 `git-clean-branches`
+   - 将“发布完成”定义为 PR 已合并（或明确无需 PR）且发布后冒烟验证通过
+   - PR 仍处于 open、draft 或 blocked 状态时，不清理其工作分支，也不要声称发布已完成
+   - 仅本地模式不触发分支清理
+   - 严格遵循 `git-clean-branches` 的审计、年龄、祖先可达性、工作树和远程范围规则；证据不足时保留分支并报告，不强制删除
 
 ## 发布流程
 
@@ -122,3 +127,7 @@ chore: bilibili-share-to-friends 发布 v0.4.9
 - 若同步 Greasy Fork，则 Greasy Fork 版本和产物也一致
 
 当前仓库没有看到自动同步 Greasy Fork 的发布配置；需要时明确说明并手动同步。
+
+### 8. 自动清理分支
+
+发布完成后调用 `git-clean-branches` skill，审计并清理已经合并且满足安全条件的本地和个人远程分支。调用前确认 PR 合并状态和发布验证结果；调用时遵循该 skill 的完整流程，不绕过保护分支、当前分支、工作树分支、权威远程和不明确的年龄或可达性证据。清理完成后报告保留、删除和需要人工判断的分支。
